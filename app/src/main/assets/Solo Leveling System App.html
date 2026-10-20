@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04121f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The System">
+<title>Solo Leveling System — Application</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020a14;--panel:#04182b;--panel2:#062238;--cyan:#22d3ee;--cyan2:#38e1ff;--blue:#2563eb;--green:#4ade80;--red:#f87171;--gold:#fbbf24;--purple:#c084fc;--orange:#fb923c;--text:#e6f6ff;--muted:#8fb8cc}
+body{background:radial-gradient(900px 500px at 50% -10%,#0b3555 0%,var(--bg) 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:14px 12px 40px;max-width:560px;margin:0 auto;min-height:100vh}
+.window{background:linear-gradient(180deg,rgba(6,34,56,.96),rgba(3,17,31,.97));border:1.5px solid rgba(56,225,255,.55);box-shadow:0 0 22px rgba(34,211,238,.28),inset 0 0 32px rgba(34,211,238,.06);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:18px 16px;margin-bottom:14px}
+h1{font-size:15px;letter-spacing:6px;color:var(--cyan2);text-align:center;font-weight:800}
+.sub{text-align:center;color:var(--muted);font-size:12px;margin-top:5px;letter-spacing:1px}
+.player{display:flex;gap:14px;align-items:center;margin-top:16px}
+.avatar{width:72px;height:72px;flex:0 0 72px;border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:32px;background:radial-gradient(circle,#0e4a6e,#04182b);box-shadow:0 0 16px rgba(34,211,238,.5)}
+.pname{font-size:19px;font-weight:800}
+.ptitle{color:var(--gold);font-size:13px;margin-top:2px}
+.rank{margin-left:auto;text-align:center}
+.rank b{font-size:40px;color:var(--cyan2);text-shadow:0 0 14px var(--cyan);display:block;line-height:1}
+.rank span{font-size:10px;letter-spacing:3px;color:var(--muted)}
+.lvlrow{display:flex;justify-content:space-between;font-size:13px;margin:16px 0 6px;color:var(--muted)}
+.lvlrow b{color:var(--text)}
+.bar{height:14px;background:#02101d;border:1px solid rgba(56,225,255,.4);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan2));box-shadow:0 0 12px var(--cyan);transition:width .6s;width:0%}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.stat{background:rgba(2,16,29,.7);border:1px solid rgba(56,225,255,.22);padding:10px 12px;font-size:13px;letter-spacing:1px}
+.stat b{float:right;font-size:17px}
+.str{color:var(--orange)}.int{color:var(--cyan2)}.spi{color:var(--purple)}.dis{color:var(--gold)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{flex:1;min-width:100px;text-align:center;background:rgba(2,16,29,.7);border:1px solid rgba(56,225,255,.22);padding:8px 4px;font-size:12px;color:var(--muted)}
+.chip b{display:block;font-size:17px;color:var(--text)}
+</style>
+<style>
+.now{border-color:rgba(251,191,36,.65);box-shadow:0 0 22px rgba(251,191,36,.22)}
+.now h2,.sec-title{font-size:13px;letter-spacing:4px;color:var(--cyan2);margin-bottom:10px}
+.now h2{color:var(--gold)}
+.now-name{font-size:19px;font-weight:800;line-height:1.35}
+.now-desc{color:var(--muted);font-size:13.5px;margin-top:5px;line-height:1.55}
+.now-btns{display:flex;gap:9px;margin-top:13px}
+button{font:inherit;cursor:pointer;border:1px solid rgba(56,225,255,.5);background:#06283f;color:var(--text);padding:11px 13px;font-weight:700;font-size:14px}
+button:active{transform:scale(.98)}
+.done-btn{background:linear-gradient(90deg,#14532d,#166534);border-color:var(--green);flex:1}
+.miss-btn{background:#3f1d1d;border-color:var(--red);flex:1}
+.ghost{flex:1}
+.quest{display:flex;gap:12px;align-items:flex-start;padding:13px 2px;border-bottom:1px solid rgba(56,225,255,.14)}
+.quest:last-child{border-bottom:none}
+.qtime{font-family:ui-monospace,monospace;color:var(--muted);font-size:13px;min-width:46px;padding-top:2px}
+.qbody{flex:1;min-width:0}
+.qname{font-weight:750;font-size:15.5px;line-height:1.4}
+.qmeta{font-size:11.5px;letter-spacing:1.5px;margin-top:3px}
+.qxp{color:var(--cyan2);font-weight:800;font-size:14px;white-space:nowrap}
+.qbtns{display:flex;gap:6px;margin-top:8px}
+.qbtns button{padding:7px 11px;font-size:13px}
+.qbtns .d{border-color:var(--green);color:var(--green)}
+.qbtns .m{border-color:var(--red);color:var(--red)}
+.quest.is-done .qname{text-decoration:line-through;color:var(--muted)}
+.quest.is-missed{opacity:.55}.quest.is-missed .qname{text-decoration:line-through}
+.quest.is-active{background:rgba(251,191,36,.07);box-shadow:inset 3px 0 0 var(--gold);padding-left:8px}
+.badge{font-size:10px;letter-spacing:2px;color:#04121f;background:var(--gold);padding:2px 6px;font-weight:900;vertical-align:2px;margin-left:6px}
+.badge.done{background:var(--green)}.badge.miss{background:var(--red);color:#fff}
+.warn{border:1px solid rgba(56,225,255,.3);padding:11px 12px;color:var(--muted);font-size:12.5px;letter-spacing:1px;line-height:1.6;margin:4px 0 8px}
+.rem-item{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid rgba(56,225,255,.12);font-size:14px}
+.rem-item:last-child{border:none}.rem-item span{color:var(--muted);font-family:ui-monospace,monospace;font-size:13px}
+#banner{display:none;background:linear-gradient(90deg,#7c2d12,#92400e);border:1.5px solid var(--gold);color:#fff;padding:14px;margin-bottom:14px;font-size:15px;line-height:1.55;box-shadow:0 0 24px rgba(251,191,36,.4)}
+#banner.show{display:block}
+input,select{width:100%;background:#02101d;border:1px solid rgba(56,225,255,.35);color:var(--text);padding:11px;font:inherit;font-size:14px;margin-bottom:8px}
+.ach{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid rgba(56,225,255,.1);font-size:14px}
+.ach:last-child{border:none}.ach.locked{opacity:.42}
+.note{color:var(--muted);font-size:13px;line-height:1.65}
+.center{text-align:center}
+.small{font-size:12px;color:var(--muted);line-height:1.6}
+.del{border-color:var(--red);color:var(--red);padding:5px 9px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="banner" role="alert"></div>
+
+<section class="window">
+  <h1>⚔️ THE SYSTEM ⚔️</h1>
+  <p class="sub">SOLO LEVELING • DAILY QUEST APPLICATION</p>
+  <div class="player">
+    <div class="avatar">🗡️</div>
+    <div><div class="pname">Kader Negash</div><div class="ptitle" id="title">እኩል ጀማሪ — Weakest Hunter</div></div>
+    <div class="rank"><b id="rank">E</b><span>RANK</span></div>
+  </div>
+  <div class="lvlrow"><span>LEVEL <b id="level">1</b></span><span><b id="xpNow">0</b> / <span id="xpNext">100</span> XP</span></div>
+  <div class="bar"><i id="xpBar"></i></div>
+  <div class="stats">
+    <div class="stat str">🏋️ STRENGTH <b id="stStr">0</b></div>
+    <div class="stat int">🧠 INTELLIGENCE <b id="stInt">0</b></div>
+    <div class="stat spi">🌙 SPIRIT <b id="stSpi">0</b></div>
+    <div class="stat dis">🛡️ DISCIPLINE <b id="stDis">0</b></div>
+  </div>
+  <div class="meta">
+    <div class="chip">🔥 STREAK<b id="streak">0 ቀን</b></div>
+    <div class="chip">⭐ ጠቅላላ XP<b id="totalXp">0</b></div>
+    <div class="chip">🏆 TITLES<b id="titleCount">0 / 18</b></div>
+  </div>
+</section>
+
+<section class="window now">
+  <h2>⏰ አሁን — NOW</h2>
+  <div class="now-name" id="nowName">እየጫነ ነው…</div>
+  <p class="now-desc" id="nowDesc"></p>
+  <div class="now-btns" id="nowBtns"></div>
+  <p class="small" style="margin-top:10px" id="nextLine"></p>
+</section>
+
+<section class="window">
+  <div class="sec-title">🔔 ማስታወሻዎች — REMINDERS IN THE APP</div>
+  <p class="note">የ quest ሰዓት ሲደርስ — app-ው <b style="color:var(--gold)">ውስጡ ራሱ</b> ያስታውስሃል፦ banner ይወጣል፣ ድምፅ ይሰማል፣ ስልክህም notification ያሳያል (ፈቃድ ከሰጠህ)። Coding &amp; Hacking እና Video Editing reminders <b>አልተካተቱም</b> — ትኩረትህ Forex Trading + English ነው።</p>
+  <div class="now-btns">
+    <button class="ghost" id="notifBtn">🔔 Notification ፍቀድ</button>
+    <button class="ghost" id="testBtn">▶ Test አድርግ</button>
+  </div>
+  <p class="small" style="margin:10px 0 6px">የዛሬ ማስታወሻዎች፦</p>
+  <div id="remList"></div>
+  <p class="small" style="margin-top:10px">⚠️ ማስታወሻው ሙሉ በሙሉ እንዲሰራ app-ውን በ browserህ ውስጥ ክፍት አድርገህ ውጣ — ወይም ከታች ባለው መመሪያ ወደ Home Screen ጨምረው እንደ እውነተኛ app ተጠቅመው። app-ው ሙሉ በሙሉ ሲዘጋ reminder-ው አይሰማም፤ የ WhatsApp remindersህ ለብቻቸው እንደተለመደው ይቀጥላሉ።</p>
+</section>
+
+<section class="window">
+  <div class="sec-title">📜 DAILY QUEST</div>
+  <p style="color:var(--muted);font-size:13px" id="dayLine"></p>
+  <p style="margin:6px 0 4px;font-size:14px"><b id="doneCount">0</b> DONE • <b id="todayXp" style="color:var(--green)">+0 XP TODAY</b></p>
+  <div class="warn">WARNING: FAILURE TO COMPLETE THE DAILY QUEST WILL RESULT IN AN APPROPRIATE PENALTY.</div>
+  <div id="questList"></div>
+</section>
+
+<section class="window">
+  <div class="sec-title">⚒️ QUEST FORGE — የራስህን Quest ጨምር</div>
+  <input id="fName" placeholder="Quest ስም (ለምሳሌ፦ 100 Push-ups)">
+  <input id="fTime" type="time">
+  <select id="fStat">
+    <option value="STR">🏋️ STRENGTH</option>
+    <option value="INT">🧠 INTELLIGENCE</option>
+    <option value="SPI">🌙 SPIRIT</option>
+    <option value="DIS" selected>🛡️ DISCIPLINE</option>
+  </select>
+  <button class="done-btn" style="width:100%" id="addBtn">+ Quest ጨምር (+20 XP)</button>
+  <p class="small" style="margin-top:8px">የጨመርከው quest በየቀኑ ይታያል፤ መሰረዝ ከፈለግህ በ quest-ው አጠገብ ያለውን 🗑 ንካ።</p>
+</section>
+
+<section class="window">
+  <div class="sec-title">🏆 TITLES / ACHIEVEMENTS</div>
+  <div id="achList"></div>
+</section>
+
+<section class="window">
+  <div class="sec-title">📱 እንደ APP መጠቀም</div>
+  <p class="note">1️⃣ በ Chrome ውስጥ ይህን ገጽ ክፈት<br>2️⃣ የ Chrome ምናሌ (⋮) → <b>“Add to Home screen”</b> / “Install app”<br>3️⃣ ከዚያ በኋላ “The System” icon-ው በስልክህ ላይ እንደ እውነተኛ application ይታያል — progress-ህም በስልክህ ውስጥ ይቀመጣል ✅</p>
+  <div class="now-btns"><button class="ghost" id="resetBtn">↩️ የዛሬን ቀን ዳግም ጀምር</button></div>
+</section>
+
+<script>
+const DEFAULT_QUESTS=[
+{id:"fajr",time:"05:15",name:"ሱባሒ ሶላት — Fajr Prayer",xp:10,stat:"SPI",gain:1,desc:"የቀኑ የመጀመሪያ ሶላት"},
+{id:"sport",time:"06:00",name:"ስፖርት — Sport",xp:30,stat:"STR",gain:3,desc:"",dynamic:"sport"},
+{id:"analysis",time:"07:30",name:"ትሬዲንግ — Top-Down Analysis",xp:20,stat:"INT",gain:2,desc:"Daily → 4H → 30m • zone ምልክት አድርግ"},
+{id:"school",time:"08:00",name:"ትምህርት ቤት — School Classes",xp:20,stat:"INT",gain:2,desc:"9ኛ ክፍል ትምህርት"},
+{id:"zuhr",time:"12:30",name:"ዙህር ሶላት + ምሳ — Zuhr Prayer",xp:10,stat:"SPI",gain:1,desc:"ሶላት + ምሳ"},
+{id:"english",time:"14:30",name:"English Lesson — 40 ደቂቃ",xp:25,stat:"INT",gain:2,desc:"🎯 የትኩረት quest — English"},
+{id:"asr",time:"16:20",name:"አስር ሶላት — Asr Prayer",xp:10,stat:"SPI",gain:1,desc:"ሶላት"},
+{id:"quran",time:"16:25",name:"ቁርአን — Quran Reading",xp:20,stat:"SPI",gain:2,desc:"ከአስር በኋላ 20 ደቂቃ"},
+{id:"trading",time:"16:40",name:"📈 Trading — NY Session",xp:25,stat:"INT",gain:2,desc:"🎯 የትኩረት quest — NY session ተከፍቷል! Top-down analysis + setup ካለ engulfing + news check. Pause: መረጃ ብቻ — DO NOT TAKE"},
+{id:"maghrib",time:"18:00",name:"ሱቅ ዝጋ + መግሪብ — Maghrib",xp:10,stat:"SPI",gain:1,desc:"Freedom Shop ዝጋ (እሁድ፦ ሱቅ ዝግ ነው — መግሪብ ብቻ)",dynamic:"maghrib"},
+{id:"study",time:"18:45",name:"የት/ቤት ጥናት — School Study",xp:20,stat:"INT",gain:2,desc:"1 ሰዓት 30 ደቂቃ ጥናት"},
+{id:"isha",time:"20:15",name:"ኢሻ ሶላት + እራት — Isha Prayer",xp:10,stat:"SPI",gain:1,desc:"ሶላት + እራት"},
+{id:"homework",time:"21:00",name:"Homework + ክለሳ",xp:20,stat:"DIS",gain:2,desc:"1 ሰዓት 15 ደቂቃ"},
+{id:"sleep",time:"22:15",name:"እንቅልፍ — Sleep",xp:10,stat:"DIS",gain:1,desc:"በሰዓቱ ተኛ — ነገ ጠንካራ ትነሳለህ"}
+];
+</script>
+<script>
+const TITLES=[[1,"እኩል ጀማሪ — Weakest Hunter"],[2,"First Step"],[3,"Quest Hunter"],[5,"Wolf Slayer"],[7,"Discipline Keeper"],[10,"D-Rank Hunter"],[13,"Prayer Guardian"],[16,"Iron Body"],[20,"C-Rank Hunter"],[24,"Shadow Walker"],[28,"English Warrior"],[32,"Market Reader"],[36,"B-Rank Hunter"],[40,"Night Scholar"],[45,"A-Rank Hunter"],[50,"Dungeon Breaker"],[60,"S-Rank Hunter"],[75,"👑 Shadow Monarch"]];
+const KEY="soloLevelingAppV2";
+let S;
+function todayKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fresh(){return{totalXp:0,stats:{STR:0,INT:0,SPI:0,DIS:0},custom:[],done:{},day:todayKey(),todayXp:0,streak:0,lastDoneDay:"",reminded:{}}}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){S=fresh()}
+ if(S.day!==todayKey()){const y=new Date();y.setDate(y.getDate()-1);if(S.lastDoneDay!==todayKey()&&S.lastDoneDay!==todayKey(y))S.streak=0;S.day=todayKey();S.done={};S.todayXp=0;S.reminded={};save()}
+ // migration: remove paused quests if an older saved list ever stored them
+ S.custom=(S.custom||[]).filter(q=>!/coding|hacking|video|editing|lab/i.test(q.name));}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function quests(){return DEFAULT_QUESTS.concat(S.custom)}
+function levelOf(xp){let l=1,need=100,acc=0;while(xp>=acc+need){acc+=need;l++;need=Math.round(need*1.35)}return{level:l,into:xp-acc,need:need}}
+function rankOf(l){return l>=60?"S":l>=45?"A":l>=36?"B":l>=20?"C":l>=10?"D":"E"}
+function titleOf(l){let t=TITLES[0][1];TITLES.forEach(x=>{if(l>=x[0])t=x[1]});return t}
+function sportText(d){const w=d.getDay();if(w===1||w===2||w===5)return"ጂም — Gym Training 💪";if(w===4)return"ሩጫ — Morning Run 🏃";return"ዕረፍት / ቀላል እንቅስቃሴ — Rest Day 🌿"}
+function qName(q,d){if(q.dynamic==="sport")return sportText(d);return q.name}
+function qDesc(q,d){if(q.dynamic==="sport")return"ሰኞ / ማክሰኞ / አርብ፦ Gym • ሐሙስ፦ ሩጫ • ሌላ ቀን፦ ዕረፍት";if(q.dynamic==="maghrib"&&d.getDay()===0)return"እሁድ፦ ሱቅ ዝግ ነው — መግሪብ ሶላት ብቻ";return q.desc||""}
+function mins(t){const[a,b]=t.split(":").map(Number);return a*60+b}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){const d=new Date(),lv=levelOf(S.totalXp);
+ document.getElementById("level").textContent=lv.level;
+ document.getElementById("xpNow").textContent=lv.into;document.getElementById("xpNext").textContent=lv.need;
+ document.getElementById("xpBar").style.width=Math.min(100,lv.into/lv.need*100)+"%";
+ document.getElementById("rank").textContent=rankOf(lv.level);
+ document.getElementById("title").textContent=titleOf(lv.level);
+ document.getElementById("stStr").textContent=S.stats.STR;document.getElementById("stInt").textContent=S.stats.INT;
+ document.getElementById("stSpi").textContent=S.stats.SPI;document.getElementById("stDis").textContent=S.stats.DIS;
+ document.getElementById("streak").textContent=S.streak+" ቀን";document.getElementById("totalXp").textContent=S.totalXp;
+ const unlocked=TITLES.filter(x=>lv.level>=x[0]).length;document.getElementById("titleCount").textContent=unlocked+" / "+TITLES.length;
+ document.getElementById("dayLine").textContent=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+ const qs=quests();let doneN=0;
+ document.getElementById("questList").innerHTML=qs.map(q=>{const st=S.done[q.id]||"";if(st==="done")doneN++;
+  const active=isActive(q,d)&&!st;const statName={STR:"STRENGTH",INT:"INTELLIGENCE",SPI:"SPIRIT",DIS:"DISCIPLINE"}[q.stat];
+  const statCls={STR:"str",INT:"int",SPI:"spi",DIS:"dis"}[q.stat];
+  return '<div class="quest '+(st==="done"?"is-done":st==="missed"?"is-missed":"")+(active?" is-active":"")+'"><div class="qtime">'+q.time+'</div><div class="qbody"><div class="qname">'+esc(qName(q,d))+(active?'<span class="badge">ACTIVE</span>':"")+(st==="done"?'<span class="badge done">DONE ✓</span>':st==="missed"?'<span class="badge miss">NOT DONE ✗</span>':"")+'</div><div class="qmeta '+statCls+'">'+statName+' +'+q.gain+'</div>'+(qDesc(q,d)?'<div class="small">'+esc(qDesc(q,d))+'</div>':"")+(st?"":'<div class="qbtns"><button class="d" onclick="mark(\''+q.id+'\',\'done\')">✓ DONE</button><button class="m" onclick="mark(\''+q.id+'\',\'missed\')">✗ NOT DONE</button></div>')+(st?'<div class="qbtns"><button onclick="mark(\''+q.id+'\',\'\')">↩ Undo</button></div>':"")+(q.custom?'<div class="qbtns"><button class="del" onclick="delQuest(\''+q.id+'\')">🗑 ሰርዝ</button></div>':"")+'</div><div class="qxp">+'+q.xp+' XP</div></div>'}).join("");
+ document.getElementById("doneCount").textContent=doneN+" / "+qs.length;document.getElementById("todayXp").textContent="+"+S.todayXp+" XP TODAY";
+ document.getElementById("remList").innerHTML=qs.map(q=>'<div class="rem-item"><div>🔔 '+esc(qName(q,d))+'</div><span>'+q.time+'</span></div>').join("");
+ document.getElementById("achList").innerHTML=TITLES.map(x=>'<div class="ach '+(lv.level>=x[0]?"":"locked")+'"><span>'+(lv.level>=x[0]?"🏆":"🔒")+' '+esc(x[1])+'</span><span class="small">Level '+x[0]+'</span></div>').join("");
+ renderNow(d);}
+function isActive(q,d){const now=d.getHours()*60+d.getMinutes(),qs=quests().slice().sort((a,b)=>mins(a.time)-mins(b.time));const i=qs.findIndex(x=>x.id===q.id);const end=i<qs.length-1?mins(qs[i+1].time):mins(q.time)+90;return now>=mins(q.time)&&now<end}
+function currentQuest(d){const now=d.getHours()*60+d.getMinutes(),qs=quests().slice().sort((a,b)=>mins(a.time)-mins(b.time));let cur=null,next=null;qs.forEach(q=>{if(mins(q.time)<=now)cur=q;if(!next&&mins(q.time)>now)next=q});return{cur:cur||qs[0],next:next}}
+function renderNow(d){const{cur,next}=currentQuest(d);const st=S.done[cur.id]||"";
+ document.getElementById("nowName").textContent=qName(cur,d);
+ document.getElementById("nowDesc").textContent=(qDesc(cur,d)||"ይህ ሰዓት የደረሰው quest ነው።")+" • "+cur.time+" • +"+cur.xp+" XP";
+ document.getElementById("nowBtns").innerHTML=st?'<p class="note">✅ ይህ quest ተጠናቋል ('+(st==="done"?"DONE":"NOT DONE")+')</p>':'<button class="done-btn" onclick="mark(\''+cur.id+'\',\'done\')">✓ DONE — ሰርቻለሁ</button><button class="miss-btn" onclick="mark(\''+cur.id+'\',\'missed\')">✗ NOT DONE</button>';
+ document.getElementById("nextLine").textContent=next?("⏭️ ቀጣይ፦ "+qName(next,d)+" — "+next.time):"🌙 የዛሬ quests አልቀዋል — ነገ እንደገና!";}
+window.mark=function(id,st){const q=quests().find(x=>x.id===id);if(!q)return;const prev=S.done[id]||"";
+ if(prev==="done"&&st!=="done"){S.totalXp=Math.max(0,S.totalXp-q.xp);S.todayXp=Math.max(0,S.todayXp-q.xp);S.stats[q.stat]=Math.max(0,S.stats[q.stat]-q.gain)}
+ if(st==="done"&&prev!=="done"){S.totalXp+=q.xp;S.todayXp+=q.xp;S.stats[q.stat]+=q.gain;if(S.lastDoneDay!==todayKey()){const y=new Date();y.setDate(y.getDate()-1);S.streak=(S.lastDoneDay===todayKey(y))?S.streak+1:1;S.lastDoneDay=todayKey()}}
+ if(st)S.done[id]=st;else delete S.done[id];save();render()};
+window.delQuest=function(id){S.custom=S.custom.filter(q=>q.id!==id);delete S.done[id];save();render()};
+document.getElementById("addBtn").onclick=function(){const n=document.getElementById("fName").value.trim(),t=document.getElementById("fTime").value;if(!n||!t){alert("ስም እና ሰዓት አስገባ boss 🙏");return}S.custom.push({id:"c"+Date.now(),time:t,name:n,xp:20,stat:document.getElementById("fStat").value,gain:2,desc:"የራስህ quest",custom:true});document.getElementById("fName").value="";save();render()};
+document.getElementById("resetBtn").onclick=function(){if(confirm("የዛሬ check-ዎች ይጠፋሉ — እርግጠኛ ነህ?")){S.done={};S.todayXp=0;S.reminded={};save();render()}};
+</script>
+<script>
+// ---- In-app reminder engine ----
+let AC=null;
+function beep(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=880;g.gain.setValueAtTime(.18,AC.currentTime);o.start();o.stop(AC.currentTime+.35);setTimeout(()=>{const o2=AC.createOscillator(),g2=AC.createGain();o2.connect(g2);g2.connect(AC.destination);o2.frequency.value=1174;g2.gain.setValueAtTime(.18,AC.currentTime);o2.start();o2.stop(AC.currentTime+.4)},420)}catch(e){}}
+function fireReminder(q,d){const b=document.getElementById("banner");b.innerHTML="🔔 <b>SYSTEM NOTIFICATION</b><br>⏰ "+q.time+" — "+esc(qName(q,d))+"<br><span style='font-size:13.5px'>ሰዓቱ ደርሷል boss! ✓ DONE ወይም ✗ NOT DONE ምረጥ።</span>";b.classList.add("show");beep();if(navigator.vibrate)navigator.vibrate([200,100,200]);
+ if("Notification" in window&&Notification.permission==="granted"){try{new Notification("⚔️ The System — "+q.time,{body:qName(q,d)+" — ሰዓቱ ደርሷል boss!"})}catch(e){}}
+ setTimeout(()=>b.classList.remove("show"),60000);}
+function tick(){const d=new Date();if(S.day!==todayKey()){load()}const now=d.getHours()*60+d.getMinutes();
+ quests().forEach(q=>{if(mins(q.time)===now&&!S.reminded[q.id]&&!S.done[q.id]){S.reminded[q.id]=1;save();fireReminder(q,d)}});render()}
+document.getElementById("notifBtn").onclick=async function(){if(!("Notification" in window)){alert("ይህ browser notification አይደግፍም — ግን የ app ውስጥ banner + ድምፅ ይሰራል ✅");return}const p=await Notification.requestPermission();alert(p==="granted"?"✅ Notification ተፈቅዷል! የ quest ሰዓት ሲደርስ ስልክህ ያስታውስሃል።":"⚠️ አልተፈቀደም — ግን የ app ውስጥ banner + ድምፅ አሁንም ይሰራል።")};
+document.getElementById("testBtn").onclick=function(){const d=new Date();fireReminder(quests()[0],d);render()};
+load();render();setInterval(tick,20000);
+</script>
+</body>
+</html>
