@@ -27,6 +27,9 @@ import java.util.Calendar;
  * notification with the alarm ringtone, vibration and a full-screen intent
  * — it rings like a clock alarm. Times/titles must match BASE_QUESTS in
  * app/src/main/assets/index.html. BOOT_COMPLETED re-arms after a reboot.
+ * Saturday rule (boss, confirmed 2026-11-07): on Saturday only prayer
+ * (zuhr/asr/maghrib/isha) + sport reminders fire — all other quests are
+ * excused that day, their alarms move to Sunday.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
@@ -93,7 +96,22 @@ public class QuestReceiver extends BroadcastReceiver {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
-    /** Arm one alarm per quest for its next occurrence (today, else tomorrow). */
+    // Saturday: only prayer + gym reminders (his rule, confirmed 2026-11-07).
+    // All other quests are excused on Saturday — no alarm that day.
+    private static boolean isSaturdayAllowed(String id) {
+        return "sport".equals(id) || "zuhr".equals(id) || "asr".equals(id)
+                || "maghrib".equals(id) || "isha".equals(id);
+    }
+
+    private static boolean isAllowedOn(Calendar cal, String id) {
+        if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            return isSaturdayAllowed(id);
+        }
+        return true;
+    }
+
+    /** Arm one alarm per quest for its next occurrence (today, else the next
+     * allowed day — Saturday skips every quest except prayer + sport). */
     public static void scheduleAll(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
@@ -102,12 +120,17 @@ public class QuestReceiver extends BroadcastReceiver {
             int hour = Integer.parseInt(q[1].substring(0, 2));
             int minute = Integer.parseInt(q[1].substring(3, 5));
             Calendar cal = Calendar.getInstance();
+            while (!isAllowedOn(cal, q[0])) {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+            }
             cal.set(Calendar.HOUR_OF_DAY, hour);
             cal.set(Calendar.MINUTE, minute);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
             if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
-                cal.add(Calendar.DAY_OF_YEAR, 1);
+                do {
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                } while (!isAllowedOn(cal, q[0]));
             }
             Intent intent = new Intent(context, QuestReceiver.class);
             intent.setAction(ACTION_QUEST);
