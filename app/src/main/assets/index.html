@@ -350,7 +350,7 @@
         <div class="sys-head"><span class="dot"></span><h2 class="en">Notifications</h2><span class="tag">ማሳወቂያ</span></div>
         <div class="install-body">
           <p id="notifStatus">Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።</p>
-          <p id="alarmStatus" style="margin-top:6px">⏰ Alarm ሁኔታ እየተፈተሸ ነው…</p>
+          <p id="alarmStatus" style="margin-top:6px">⏰ Alarm: ✅ እንደ clock alarm ይሰራል — በሰዓቱ ድምጽ + vibration ይመጣል።</p>
           <div class="frow" style="margin-top:10px">
             <button class="btn" id="notifAllow">🔔 Notification ፍቀድ</button>
             <button class="btn ghost" id="notifTest">Test አድርግ</button>
@@ -755,14 +755,10 @@
       }catch(e){}
       if(!ast) return;
       try{
-        if(hasBridge() && window.AndroidBridge.exactAlarmsAllowed){
-          if(window.AndroidBridge.exactAlarmsAllowed()){
-            ast.textContent = "⏰ Alarm: ✅ ሰዓት ቆጣሪ ተፈቅዷል — quest reminder በሰዓቱ ይመጣል።";
-          } else {
-            ast.textContent = "⏰ Alarm: ❌ ሰዓት ቆጣሪ አልተፈቀደም — Settings → Apps → Solo Leveling → Alarms & reminders → ፍቀድ።";
-          }
-        } else if(hasBridge()){
-          ast.textContent = "⏰ Alarm: ሁኔታ ማረጋገጥ አልተቻለም — Alarm Test ንካ።";
+        // v2.3: setAlarmClock needs no exact-alarm permission — the reminder
+        // always rings like a clock alarm.
+        if(hasBridge()){
+          ast.textContent = "⏰ Alarm: ✅ እንደ clock alarm ይሰራል — በሰዓቱ ድምጽ + vibration ይመጣል።";
         } else {
           ast.textContent = "⏰ Alarm የሚሰራው በ app (APK) ውስጥ ብቻ ነው — website ላይ አይሰራም።";
         }

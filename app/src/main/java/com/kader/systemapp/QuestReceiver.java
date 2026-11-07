@@ -8,22 +8,33 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import java.util.Calendar;
 
 /**
  * Posts a quest reminder at each daily-plan time and (re)arms the alarms.
  * Wiring: AndroidManifest declares the receiver (+ BOOT_COMPLETED) and the
- * SCHEDULE_EXACT_ALARM / RECEIVE_BOOT_COMPLETED permissions; MainActivity
- * calls QuestReceiver.scheduleAll(this) in onCreate. Every delivered
- * reminder re-arms all alarms, so the chain survives even if the app is
- * not opened daily. Times/titles must match BASE_QUESTS in
- * app/src/main/assets/index.html. Alarms are lost on reboot until the
- * BOOT_COMPLETED receiver re-arms them.
+ * SCHEDULE_EXACT_ALARM / RECEIVE_BOOT_COMPLETED / USE_FULL_SCREEN_INTENT /
+ * VIBRATE permissions; MainActivity calls QuestReceiver.scheduleAll(this)
+ * in onCreate. Every delivered reminder re-arms all alarms, so the chain
+ * survives even if the app is not opened daily.
+ * Alarms use AlarmManager.setAlarmClock: the system treats them as real
+ * clock alarms (status-bar alarm icon, fires exactly even in Doze, needs
+ * NO exact-alarm permission), and the reminder posts as an alarm-category
+ * notification with the alarm ringtone, vibration and a full-screen intent
+ * — it rings like a clock alarm. Times/titles must match BASE_QUESTS in
+ * app/src/main/assets/index.html. BOOT_COMPLETED re-arms after a reboot.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
-    public static final String CHANNEL_ID = "solo_leveling";
+    // Alarm-style channel: HIGH importance + alarm sound + vibration, so a
+    // quest reminder rings like a clock alarm (and bypasses Do Not Disturb).
+    // v2.2 used "solo_leveling" (DEFAULT importance, silent in DND) — deleted.
+    public static final String CHANNEL_ID = "solo_leveling_alarm";
+    private static final String OLD_CHANNEL_ID = "solo_leveling";
     public static final String ACTION_QUEST = "com.kader.systemapp.QUEST_REMINDER";
 
     // {id, HH:MM, title} — same order/times as the web quests
@@ -76,12 +87,10 @@ public class QuestReceiver extends BroadcastReceiver {
         PendingIntent pi = PendingIntent.getBroadcast(context, 999, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         long when = System.currentTimeMillis() + 60_000;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && !am.canScheduleExactAlarms()) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
-        } else {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
-        }
+        PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
     /** Arm one alarm per quest for its next occurrence (today, else tomorrow). */
@@ -106,12 +115,13 @@ public class QuestReceiver extends BroadcastReceiver {
             intent.putExtra("quest_title", q[2]);
             PendingIntent pi = PendingIntent.getBroadcast(context, 100 + i, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                    && !am.canScheduleExactAlarms()) {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
-            } else {
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
-            }
+            // Real clock alarm: exact even in Doze, shows the alarm icon,
+            // needs no exact-alarm permission. Tapping the icon opens the app.
+            PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                    new Intent(context, MainActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            am.setAlarmClock(
+                    new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
         }
     }
 
@@ -134,8 +144,18 @@ public class QuestReceiver extends BroadcastReceiver {
                 .setContentText(title)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pending)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setSound(alarmSound())
+                .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setFullScreenIntent(pending, true)
                 .setAutoCancel(true);
         nm.notify(tag, 1, b.build());
+    }
+
+    private static Uri alarmSound() {
+        Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        return u != null ? u : RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     }
 
     public static void ensureChannel(Context context) {
@@ -143,9 +163,17 @@ public class QuestReceiver extends BroadcastReceiver {
         NotificationManager nm =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
+        // Drop the old silent v2.2 channel so only the alarm channel remains.
+        nm.deleteNotificationChannel(OLD_CHANNEL_ID);
         NotificationChannel ch = new NotificationChannel(
-                CHANNEL_ID, "Solo Leveling", NotificationManager.IMPORTANCE_DEFAULT);
-        ch.setDescription("Quest reminders from the System");
+                CHANNEL_ID, "Solo Leveling Alarms", NotificationManager.IMPORTANCE_HIGH);
+        ch.setDescription("Quest alarms — ring like a clock alarm");
+        ch.setSound(alarmSound(), new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build());
+        ch.enableVibration(true);
+        ch.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
         nm.createNotificationChannel(ch);
     }
 }

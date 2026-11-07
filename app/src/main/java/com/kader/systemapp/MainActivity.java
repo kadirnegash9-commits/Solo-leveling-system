@@ -7,6 +7,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
@@ -18,12 +21,20 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
     private WebView webView;
-    private static final String CHANNEL_ID = "solo_leveling";
+    private static final String CHANNEL_ID = "solo_leveling_alarm";
+    private static final String OLD_CHANNEL_ID = "solo_leveling";
     private static final int NOTIF_PERMISSION_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Alarm-style: show over the lock screen and turn the screen on,
+        // like a clock alarm, when a quest reminder fires.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        }
 
         createNotificationChannel();
 
@@ -48,15 +59,26 @@ public class MainActivity extends Activity {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager == null) return;
+            // Drop the old silent v2.2 channel so only the alarm channel remains.
+            manager.deleteNotificationChannel(OLD_CHANNEL_ID);
+            Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (alarmUri == null) {
+                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            }
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Solo Leveling",
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("Quest reminders from the System");
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
+                    "Solo Leveling Alarms",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Quest alarms — ring like a clock alarm");
+            channel.setSound(alarmUri, new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build());
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
+            manager.createNotificationChannel(channel);
         }
     }
 
@@ -78,6 +100,10 @@ public class MainActivity extends Activity {
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pending)
+                .setCategory(android.app.Notification.CATEGORY_ALARM)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+                .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
+                .setPriority(android.app.Notification.PRIORITY_HIGH)
                 .setAutoCancel(true);
         manager.notify(1, builder.build());
     }
