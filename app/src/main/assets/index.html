@@ -386,7 +386,9 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
   var BASE_QUESTS = [
-    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ Gym · ሐሙስ ጠዋት ሩጫ · እሁድ እረፍት", xp:30, cat:"str",   label:"ጥንካሬ"},
+    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ·ቅዳሜ Gym", xp:30, cat:"str",   label:"ጥንካሬ"},
+    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:30, cat:"str", label:"ጥንካሬ", saitama:true},
+    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:30, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:10, cat:"disc", label:"ሥርዓት"},
     {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:20, cat:"int", label:"አእምሮ", weekdaysOnly:true},
     {id:"zuhr",   time:"12:30", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:15, cat:"faith", label:"እምነት"},
@@ -555,7 +557,16 @@
       var keep = {sport:1, zuhr:1, asr:1, maghrib:1, isha:1};
       return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
     }
-    return quests.filter(function(q){ return !(q.weekdaysOnly && weekend); });
+    // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30
+    // exercises replace the 06:00 sport quest; Mon/Wed/Fri gym only.
+    // Saturday: no Saitama (handled by the Saturday rule above).
+    var saitamaDay = (day==="Sun"||day==="Tue"||day==="Thu");
+    return quests.filter(function(q){
+      if(q.weekdaysOnly && weekend) return false;
+      if(q.saitama) return saitamaDay;
+      if(q.id==="sport") return !saitamaDay;
+      return true;
+    });
   }
 
   function currentQuestId(){

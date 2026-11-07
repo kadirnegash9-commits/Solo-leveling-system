@@ -30,6 +30,9 @@ import java.util.Calendar;
  * Saturday rule (boss, confirmed 2026-11-07): on Saturday only prayer
  * (zuhr/asr/maghrib/isha) + sport reminders fire — all other quests are
  * excused that day, their alarms move to Sunday.
+ * Saitama rule (boss, confirmed 2026-11-07): Sun/Tue/Thu the 05:30 run
+ * + 06:30 exercises replace the 06:00 sport quest; Mon/Wed/Fri gym
+ * only; Saturday: no Saitama.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
@@ -54,7 +57,9 @@ public class QuestReceiver extends BroadcastReceiver {
             {"study", "18:45", "የቤት ጥናት"},
             {"isha", "20:15", "ኢሻ ጸሎት + እራት"},
             {"homework", "21:00", "Homework + ክለሳ"},
-            {"sleep", "22:15", "እንቅልፍ — በሰዓቱ ተኛ"}
+            {"sleep", "22:15", "እንቅልፍ — በሰዓቱ ተኛ"},
+            {"saitamaRun", "05:30", "Saitama ሩጫ — 10km"},
+            {"saitamaEx", "06:30", "Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats"}
     };
 
     @Override
@@ -103,9 +108,21 @@ public class QuestReceiver extends BroadcastReceiver {
                 || "maghrib".equals(id) || "isha".equals(id);
     }
 
+    // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30
+    // exercises replace the 06:00 sport quest; Mon/Wed/Fri gym only.
+    // Saturday: no Saitama (prayer + gym only, per the Saturday rule).
     private static boolean isAllowedOn(Calendar cal, String id) {
-        if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+        int dow = cal.get(Calendar.DAY_OF_WEEK);
+        if (dow == Calendar.SATURDAY) {
             return isSaturdayAllowed(id);
+        }
+        boolean saitamaDay = dow == Calendar.SUNDAY || dow == Calendar.TUESDAY
+                || dow == Calendar.THURSDAY;
+        if ("saitamaRun".equals(id) || "saitamaEx".equals(id)) {
+            return saitamaDay;
+        }
+        if ("sport".equals(id)) {
+            return !saitamaDay;
         }
         return true;
     }
