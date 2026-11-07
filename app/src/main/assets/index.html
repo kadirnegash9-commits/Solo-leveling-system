@@ -447,7 +447,7 @@
   };
   var quests = BASE_QUESTS.slice();
   var forgeCounter = 0;
-  var SAVE_KEY = "soloLevelingSaveV3";
+  var SAVE_KEY = "soloLevelingSaveV4"; // v2.7: fresh start at Level 1 (boss asked, 2026-11-07)
   function todayKey(){
     try{
       return new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Addis_Ababa",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -695,17 +695,11 @@
     var q=null;
     quests.forEach(function(x){ if(x.id===id) q=x; });
     if(!q) return;
+    // One tap only (boss, 2026-11-07): a quest marked done or missed is
+    // final for the day — no toggling, so XP/HP can't be farmed by
+    // tapping ✓/✗ back and forth (the old undo never reversed XP).
     var prev = state.questState[id];
-    if(prev===act) return; // already in that state
-
-    // undo previous effect first
-    if(prev==="done"){
-      state.doneCount--; state.dayXp-=q.xp;
-      state.catDone[q.cat]=Math.max(0,state.catDone[q.cat]-1);
-      state.statBonus[q.cat]=Math.max(0,state.statBonus[q.cat]-1);
-      state.streak=0;
-    }
-    if(prev==="missed"){ state.missedCount--; state.hp=Math.min(100,state.hp+10); }
+    if(prev) return;
 
     if(act==="done"){
       state.questState[id]="done";
