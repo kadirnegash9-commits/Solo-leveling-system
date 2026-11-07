@@ -597,7 +597,7 @@
         var merged = [];
         BASE_QUESTS.forEach(function(b){
           var q = byId[b.id];
-          if(q){ q.title = b.title; q.desc = b.desc; q.label = b.label; q.xp = b.xp; merged.push(q); }
+          if(q){ q.title = b.title; q.desc = b.desc; q.label = b.label; q.xp = b.xp; q.time = b.time; q.end = b.end; merged.push(q); }
           else { merged.push(JSON.parse(JSON.stringify(b))); }
         });
         quests.forEach(function(q){ if(q && q.id && q.id.indexOf("forge")===0) merged.push(q); });
