@@ -104,10 +104,10 @@ public class MainActivity extends Activity {
                                     new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
                                     NOTIF_PERMISSION_CODE);
                         } else {
-                            postNotification("⚔️ The System", "Notification ተፈቅዷል — Arise!");
+                            postNotification("⚔️ The System", "Notifications allowed — Arise!");
                         }
                     } else {
-                        postNotification("⚔️ The System", "Notification ተፈቅዷል — Arise!");
+                        postNotification("⚔️ The System", "Notifications allowed — Arise!");
                     }
                 }
             });
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    postNotification("⚔️ The System", "Test notification — questህን አትርሳ! Arise!");
+                    postNotification("⚔️ The System", "Test notification — don't forget your quests! Arise!");
                 }
             });
         }
@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
                                 QuestReceiver.alarmSound(MainActivity.this));
                         startActivityForResult(intent, RINGTONE_PICKER_CODE);
                     } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "Ringtone picker አልተከፈተም", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Ringtone picker did not open", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -201,9 +201,9 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIF_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                postNotification("⚔️ The System", "Notification ተፈቅዷል — Arise!");
+                postNotification("⚔️ The System", "Notifications allowed — Arise!");
             } else {
-                Toast.makeText(this, "Notification ተከልክሏል — Settings → Notifications", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Notifications denied — Settings → Notifications", Toast.LENGTH_LONG).show();
             }
         }
     }

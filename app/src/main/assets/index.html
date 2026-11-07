@@ -25,11 +25,11 @@
     --cyan-dim:#7dd7ff;
     --cyan-bright:#8fe9ff;
     --frame:rgba(56,200,255,.75);
-    --glow:rgba(56,200,255,.35);
+    --glow:rgba(56,200,255,.45);
     --glow-strong:rgba(126,231,255,.95);
-    --glow-top:rgba(56,200,255,.28);
-    --glow-mid:rgba(43,125,224,.22);
-    --grid:rgba(56,200,255,.10);
+    --glow-top:rgba(56,200,255,.38);
+    --glow-mid:rgba(43,125,224,.30);
+    --grid:rgba(56,200,255,.16);
     --aura:rgba(124,58,237,.22);
     --blue:#2b7de0;
     --gold:#f5b942;
@@ -46,16 +46,16 @@
      gold (60+). Applied via body[data-theme]. */
   body[data-theme="purple"]{
     --cyan:#c084fc; --cyan-dim:#d8b4fe; --cyan-bright:#e9d5ff;
-    --frame:rgba(192,132,252,.75); --glow:rgba(168,85,247,.40);
-    --glow-strong:rgba(233,213,255,.95); --glow-top:rgba(192,132,252,.28);
-    --glow-mid:rgba(147,51,234,.22); --grid:rgba(192,132,252,.10);
+    --frame:rgba(192,132,252,.75); --glow:rgba(168,85,247,.48);
+    --glow-strong:rgba(233,213,255,.95); --glow-top:rgba(192,132,252,.38);
+    --glow-mid:rgba(147,51,234,.30); --grid:rgba(192,132,252,.16);
     --aura:rgba(168,85,247,.28); --blue:#9333ea; --line-bright:#a855f7;
   }
   body[data-theme="gold"]{
     --cyan:#fbbf24; --cyan-dim:#fde68a; --cyan-bright:#fef3c7;
-    --frame:rgba(251,191,36,.75); --glow:rgba(245,158,11,.40);
-    --glow-strong:rgba(254,243,199,.95); --glow-top:rgba(251,191,36,.28);
-    --glow-mid:rgba(217,119,6,.22); --grid:rgba(251,191,36,.10);
+    --frame:rgba(251,191,36,.75); --glow:rgba(245,158,11,.48);
+    --glow-strong:rgba(254,243,199,.95); --glow-top:rgba(251,191,36,.38);
+    --glow-mid:rgba(217,119,6,.30); --grid:rgba(251,191,36,.16);
     --aura:rgba(245,158,11,.28); --blue:#d97706; --line-bright:#f59e0b;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -102,7 +102,7 @@
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
-      linear-gradient(180deg,rgba(6,14,30,.88),rgba(4,10,24,.92));
+      linear-gradient(180deg,rgba(27,86,180,.80),rgba(10,32,74,.88));
     background-size:
       26px 3px, 3px 26px,
       26px 3px, 3px 26px,
@@ -120,7 +120,7 @@
     border:2px solid var(--frame);
     border-radius:8px;
     position:relative;
-    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 34px rgba(56,200,255,.07);
+    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(56,200,255,.14);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;left:50%;width:10px;height:10px;
@@ -180,7 +180,7 @@
 
   /* stats grid */
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}
-  .stat{border:1px solid rgba(56,200,255,.13);background:rgba(8,17,32,.55);border-radius:10px;padding:11px 12px}
+  .stat{border:1px solid rgba(56,200,255,.22);background:rgba(10,24,48,.62);border-radius:10px;padding:11px 12px}
   .stat .sname{display:flex;justify-content:space-between;align-items:baseline}
   .stat .sname b{font-family:"Rajdhani";letter-spacing:.12em;font-size:14px}
   .stat .sname i{font-style:normal;font-family:"Rajdhani";font-weight:700;font-size:19px;color:var(--cyan)}
@@ -323,7 +323,7 @@
         <div class="syslabel en">Player · Status Window</div>
         <h1>ካደር ነጋሽ</h1>
         <div class="title" id="hunterTitle">Novice Hunter</div>
-        <div class="class">ክፍል፦ የዕለት ተዕለት ሥርዓት · Daily System Player</div>
+        <div class="class">CLASS: Daily System Player</div>
       </div>
       <div class="levelbox">
         <div class="lv" id="levelNum">1</div>
@@ -350,10 +350,10 @@
     </div>
 
     <div class="quickstats">
-      <div class="qs"><b id="qsDone">0</b><span>ዛሬ የተጠናቀቁ quests</span></div>
-      <div class="qs"><b id="qsStreak">0</b><span>ተከታታይ ስኬት 🔥 streak</span></div>
-      <div class="qs"><b id="qsAch">0 / 18</b><span>የተከፈቱ ሽልማቶች</span></div>
-      <div class="qs"><b id="qsTotalXp">0</b><span>ጠቅላላ XP</span></div>
+      <div class="qs"><b id="qsDone">0</b><span>Quests done today</span></div>
+      <div class="qs"><b id="qsStreak">0</b><span>Streak 🔥</span></div>
+      <div class="qs"><b id="qsAch">0 / 18</b><span>Titles unlocked</span></div>
+      <div class="qs"><b id="qsTotalXp">0</b><span>Total XP</span></div>
       <div class="qs"><b id="qsFatigue">0</b><span>Fatigue</span></div>
       <div class="qs"><b id="qsAbility">0</b><span>Ability Points</span></div>
     </div>
@@ -361,7 +361,7 @@
 
   <!-- ===== ABILITIES ===== -->
   <section class="sys" style="margin-top:16px" aria-label="Abilities">
-    <div class="sys-head"><span class="dot"></span><h2 class="en">Abilities</h2><span class="tag">ችሎታዎች</span></div>
+    <div class="sys-head"><span class="dot"></span><h2 class="en">Abilities</h2><span class="tag">Abilities</span></div>
     <div class="stats" id="statsGrid"></div>
   </section>
 
@@ -369,10 +369,10 @@
     <div>
       <!-- ===== NOW ===== -->
       <section class="sys" aria-label="Now">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Now</h2><span class="tag">አሁን ምን ሰዓት ላይ ነህ</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Now</h2><span class="tag">What time is it now</span></div>
         <div class="now-body">
           <div class="now-clock" id="nowClock">--:--</div>
-          <div class="now-act" id="nowAct">እየተጫነ ነው…</div>
+          <div class="now-act" id="nowAct">Loading…</div>
           <div class="now-sub" id="nowSub"></div>
           <div class="now-next" id="nowNext"></div>
         </div>
@@ -382,13 +382,13 @@
       <section class="sys" style="margin-top:16px" aria-label="Daily quests">
         <div class="sys-head"><span class="dot"></span><h2 class="en">Daily Quests</h2><span class="tag" id="questDate"></span></div>
         <div style="padding:14px 16px 4px">
-          <div class="warn-box" id="penaltyBox">⚠ <b>Penalty Zone፦</b> quest ካመለጠ HP ይቀንሳል። HP ወደ 0 ቢወርድ ቀጣዩ quest እጥፍ ጥረት ይጠይቃል — ዛሬውን አትጥል!</div>
+          <div class="warn-box" id="penaltyBox">⚠ <b>Penalty Zone:</b> a missed quest costs HP. If HP hits 0, the next quest takes double effort — don't drop today!</div>
         </div>
         <div class="quest-list" id="questList"></div>
         <div class="day-progress">
-          <span>የዛሬ እድገት፦ <b id="dayDone">0 / 0</b></span>
-          <span>የቀን XP፦ <b id="dayXp" style="color:var(--gold)">0</b></span>
-          <button class="btn ghost" id="resetDay" style="padding:7px 13px;font-size:12.5px">አዲስ ቀን ጀምር</button>
+          <span>Today's progress: <b id="dayDone">0 / 0</b></span>
+          <span>Day XP: <b id="dayXp" style="color:var(--gold)">0</b></span>
+          <button class="btn ghost" id="resetDay" style="padding:7px 13px;font-size:12.5px">Start a new day</button>
         </div>
       </section>
     </div>
@@ -396,7 +396,7 @@
     <div>
       <!-- ===== ACHIEVEMENTS ===== -->
       <section class="sys" aria-label="Achievements">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">ሽልማቶች · 18</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">Titles · 18</span></div>
         <div class="ach-grid" id="achGrid"></div>
       </section>
 
@@ -408,33 +408,33 @@
 
       <!-- ===== QUEST FORGE ===== -->
       <section class="sys" style="margin-top:16px" aria-label="Quest Forge">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Quest Forge</h2><span class="tag">የራስህን quest ፍጠር</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Quest Forge</h2><span class="tag">Forge your own quest</span></div>
         <div class="forge-body">
-          <p>ልዩ ሥራ አለህ? እዚህ ቀጥተኽ quest አድርገው — ዝርዝሩ ላይ ይጨመራል፣ XPም ታገኛለህ።</p>
+          <p>Got a special task? Write it here and forge a quest — it joins the list and earns XP.</p>
           <div class="frow">
-            <input type="text" id="forgeName" placeholder="ለምሳሌ፦ 20 ገጽ መጽሐፍ አንብብ" maxlength="60" />
+            <input type="text" id="forgeName" placeholder="Example: Read 20 pages" maxlength="60" />
             <select id="forgeXp" aria-label="XP">
               <option value="10">+10 XP</option>
               <option value="20" selected>+20 XP</option>
               <option value="30">+30 XP</option>
               <option value="50">+50 XP</option>
             </select>
-            <button class="btn" id="forgeBtn">ፈጥር +</button>
+            <button class="btn" id="forgeBtn">Forge +</button>
           </div>
         </div>
       </section>
 
       <!-- ===== NOTIFICATIONS (APK) ===== -->
       <section class="sys" style="margin-top:16px" aria-label="Notifications">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Notifications</h2><span class="tag">ማሳወቂያ</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Notifications</h2><span class="tag">Notifications</span></div>
         <div class="install-body">
-          <p id="notifStatus">Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።</p>
-          <p id="alarmStatus" style="margin-top:6px">⏰ Alarm: ✅ እንደ clock alarm ይሰራል — በሰዓቱ ድምጽ + vibration ይመጣል።</p>
-          <p id="alarmSoundRow" style="margin-top:6px">🔔 Alarm ድምጽ፦ <b id="alarmSoundName">Default alarm</b> <button class="btn ghost" id="alarmSoundBtn" style="margin-left:8px">ቀይር</button></p>
+          <p id="notifStatus">Allow here so quest reminders can reach you inside the app.</p>
+          <p id="alarmStatus" style="margin-top:6px">⏰ Alarm: ✅ Rings like a clock alarm — sound + vibration on time.</p>
+          <p id="alarmSoundRow" style="margin-top:6px">🔔 Alarm sound: <b id="alarmSoundName">Default alarm</b> <button class="btn ghost" id="alarmSoundBtn" style="margin-left:8px">Change</button></p>
           <div class="frow" style="margin-top:10px">
-            <button class="btn" id="notifAllow">🔔 Notification ፍቀድ</button>
-            <button class="btn ghost" id="notifTest">Test አድርግ</button>
-            <button class="btn ghost" id="alarmTest">⏰ Alarm Test (1 ደቂቃ)</button>
+            <button class="btn" id="notifAllow">🔔 Allow notifications</button>
+            <button class="btn ghost" id="notifTest">Test</button>
+            <button class="btn ghost" id="alarmTest">⏰ Alarm Test (1 min)</button>
           </div>
         </div>
       </section>
@@ -443,7 +443,7 @@
 
   <footer>
     <span class="en">The System · Arise</span><br>
-    በየቀኑ questህን ጨርስ — level መውጣት የሚጀምረው ዛሬ ነው።
+    Finish your daily quests — leveling up starts today.
   </footer>
 </div>
 
@@ -453,9 +453,9 @@
   <div class="lu-card">
     <div class="en" style="color:var(--cyan);letter-spacing:.35em;font-size:13px">System Notification</div>
     <div class="big">LEVEL UP!</div>
-    <p id="luText">Level 2 ደርሰሃል</p>
+    <p id="luText">You reached Level 2!</p>
     <div class="newrank" id="luRank"></div>
-    <button class="btn" id="luClose">ቀጥል · Arise</button>
+    <button class="btn" id="luClose">Continue · Arise</button>
   </div>
 </div>
 
@@ -466,55 +466,55 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
   var BASE_QUESTS = [
-    {id:"fajr",   time:"05:00", end:"05:30", title:"ፈጅር ጸሎት", desc:"የቀኑ የመጀመሪያ ጸሎት በሰዓቱ · ከሱብሒ በኋላ ሩጫ", xp:1, cat:"faith", label:"እምነት"},
-    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
-    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Daily Routine — Running 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
-    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
-    {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:1, cat:"disc", label:"ሥርዓት"},
-    {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:1, cat:"int", label:"አእምሮ", weekdaysOnly:true},
-    {id:"zuhr",   time:"12:35", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:1, cat:"faith", label:"እምነት"},
-    {id:"english",time:"14:30", end:"15:10", title:"English ትምህርት", desc:"40 ደቂቃ — ቃላት + grammar", xp:1, cat:"int", label:"አእምሮ"},
-    {id:"asr",    time:"15:35", end:"15:55", title:"አስር ጸሎት + ቁርኣን", desc:"20 ደቂቃ ቁርኣን ንባብ", xp:1, cat:"faith", label:"እምነት"},
-    {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting ልምምድ ✍", desc:"5 ደቂቃ የእጅ ጽሑፍ ልምምድ", xp:1, cat:"skill", label:"ክህሎት"},
-    {id:"trading",time:"17:45", end:"18:00", title:"Trading — ዝግጅት", desc:"Top-down analysis (Daily → H1 → M15) · ዜና ቼክ · confirmation ከሌለ trade የለም", xp:1, cat:"trade", label:"ትሬዲንግ"},
-    {id:"maghrib",time:"18:10", end:"18:45", title:"ሱቅ ዝጋ + መግሪብ ጸሎት", desc:"Freedom Shop ዝጋ (እሁድ ሱቅ ዝግ ነው — መግሪብ ብቻ)", xp:1, cat:"faith", label:"እምነት"},
-    {id:"study",  time:"18:45", end:"19:25", title:"የቤት ጥናት", desc:"1 ሰዓት 30 ደቂቃ — የትምህርት ቤት ጥናት (ኢሻ ሲደርስ እረፍት)", xp:1, cat:"int", label:"አእምሮ"},
-    {id:"isha",   time:"19:25", end:"20:15", title:"ኢሻ ጸሎት + እራት", desc:"የቀኑን የመጨረሻ ጸሎት በሰዓቱ", xp:1, cat:"faith", label:"እምነት"},
-    {id:"homework",time:"21:00", end:"22:15", title:"Homework + ክለሳ", desc:"1 ሰዓት 15 ደቂቃ — homework ጨርስ፣ የቀኑን ክለሳ አድርግ", xp:1, cat:"int", label:"አእምሮ"},
-    {id:"sleep",  time:"22:15", end:"23:59", title:"እንቅልፍ — በሰዓቱ ተኛ", desc:"ነገ ጠዋት ስፖርት አለ — ስልክ አጥፍተህ ተኛ", xp:1, cat:"disc", label:"ሥርዓት"}
+    {id:"fajr",   time:"05:00", end:"05:30", title:"Fajr Prayer", desc:"First prayer of the day, on time · run after Subhi", xp:1, cat:"faith", label:"Faith"},
+    {id:"sport",  time:"06:00", end:"07:00", title:"Sport — Gym / Run", desc:"Mon · Wed · Fri Gym", xp:5, cat:"str",   label:"Strength"},
+    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama Daily Routine — Running 10km", desc:"Sun · Tue · Thu · after Subhi prayer · 10km run", xp:5, cat:"str", label:"Strength", saitama:true},
+    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"Sun · Tue · Thu · after the run", xp:5, cat:"str", label:"Strength", saitama:true},
+    {id:"breakfast", time:"07:00", end:"08:00", title:"Breakfast + Get Ready for School", desc:"Eat breakfast, pack your bag", xp:1, cat:"disc", label:"Discipline"},
+    {id:"school", time:"08:00", end:"12:30", title:"School — Grade 9", desc:"Focus on lessons · no Sat/Sun", xp:1, cat:"int", label:"Mind", weekdaysOnly:true},
+    {id:"zuhr",   time:"12:35", end:"13:45", title:"Zuhr Prayer + Lunch", desc:"Prayer on time · lunch", xp:1, cat:"faith", label:"Faith"},
+    {id:"english",time:"14:30", end:"15:10", title:"English Lesson", desc:"40 minutes — words + grammar", xp:1, cat:"int", label:"Mind"},
+    {id:"asr",    time:"15:35", end:"15:55", title:"Asr Prayer + Quran", desc:"20 minutes of Quran reading", xp:1, cat:"faith", label:"Faith"},
+    {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting Practice ✍", desc:"5 minutes of handwriting practice", xp:1, cat:"skill", label:"Skill"},
+    {id:"trading",time:"17:45", end:"18:00", title:"Trading — Preparation", desc:"Top-down analysis (Daily → H1 → M15) · check news · no confirmation, no trade", xp:1, cat:"trade", label:"Trading"},
+    {id:"maghrib",time:"18:10", end:"18:45", title:"Close Shop + Maghrib Prayer", desc:"Close Freedom Shop (Sunday shop is closed — Maghrib only)", xp:1, cat:"faith", label:"Faith"},
+    {id:"study",  time:"18:45", end:"19:25", title:"Home Study", desc:"1 hour 30 minutes — school study (rest when Isha comes)", xp:1, cat:"int", label:"Mind"},
+    {id:"isha",   time:"19:25", end:"20:15", title:"Isha Prayer + Dinner", desc:"Last prayer of the day, on time", xp:1, cat:"faith", label:"Faith"},
+    {id:"homework",time:"21:00", end:"22:15", title:"Homework + Review", desc:"1 hour 15 minutes — finish homework, review the day", xp:1, cat:"int", label:"Mind"},
+    {id:"sleep",  time:"22:15", end:"23:59", title:"Sleep — Go to Bed on Time", desc:"Sport tomorrow morning — turn off the phone and sleep", xp:1, cat:"disc", label:"Discipline"}
   ];
 
   var STATS = [
-    {key:"str",   en:"STR", name:"ጥንካሬ", base:12},
-    {key:"int",   en:"INT", name:"አእምሮ", base:14},
-    {key:"faith", en:"FAITH", name:"እምነት", base:16},
-    {key:"trade", en:"TRADE", name:"ትሬዲንግ", base:10},
-    {key:"disc",  en:"DISC", name:"ሥርዓት", base:11},
-    {key:"skill", en:"SKILL", name:"ክህሎት", base:9},
-    {key:"vit",   en:"VIT", name:"ህይወት", base:10},
-    {key:"agi",   en:"AGI", name:"ፍጥነት", base:10},
-    {key:"per",   en:"PER", name:"ግንዛቤ", base:10}
+    {key:"str",   en:"STR", name:"Strength", base:12},
+    {key:"int",   en:"INT", name:"Mind", base:14},
+    {key:"faith", en:"FAITH", name:"Faith", base:16},
+    {key:"trade", en:"TRADE", name:"Trading", base:10},
+    {key:"disc",  en:"DISC", name:"Discipline", base:11},
+    {key:"skill", en:"SKILL", name:"Skill", base:9},
+    {key:"vit",   en:"VIT", name:"Vitality", base:10},
+    {key:"agi",   en:"AGI", name:"Agility", base:10},
+    {key:"per",   en:"PER", name:"Perception", base:10}
   ];
 
   var ACH = [
-    {id:"first",  name:"የመጀመሪያ እርምጃ", desc:"1 quest አጠናቅቅ", test:function(s){return s.doneCount>=1;}},
-    {id:"five",   name:"በፍጥነት", desc:"5 quests አጠናቅቅ", test:function(s){return s.doneCount>=5;}},
-    {id:"ten",    name:"አለቃ ሠራዊት", desc:"10 quests አጠናቅቅ", test:function(s){return s.doneCount>=10;}},
-    {id:"xp100",  name:"100 XP ክለብ", desc:"ጠቅላላ 100 XP ሰብስብ", test:function(s){return s.totalXp>=100;}},
-    {id:"xp300",  name:"300 XP ክለብ", desc:"ጠቅላላ 300 XP ሰብስብ", test:function(s){return s.totalXp>=300;}},
-    {id:"lv2",    name:"Level 2", desc:"Level 2 ድረስ", test:function(s){return s.level>=2;}},
-    {id:"lv3",    name:"Level 3", desc:"Level 3 ድረስ", test:function(s){return s.level>=3;}},
-    {id:"lv5",    name:"Level 5", desc:"Level 5 ድረስ", test:function(s){return s.level>=5;}},
-    {id:"gym",    name:"የብረት ሰው", desc:"የስፖርት quest አጠናቅቅ", test:function(s){return s.catDone.str>=1;}},
-    {id:"mind",   name:"ምሁር", desc:"3 የአእምሮ quests አጠናቅቅ", test:function(s){return s.catDone.int>=3;}},
-    {id:"faith",  name:"የእምነት ጠባቂ", desc:"3 የእምነት quests አጠናቅቅ", test:function(s){return s.catDone.faith>=3;}},
-    {id:"trader", name:"ገበያ አዳኝ", desc:"የ Trading ዝግጅት quest አጠናቅቅ", test:function(s){return s.catDone.trade>=1;}},
-    {id:"early",  name:"ንጋት ወፍ", desc:"የ 06:00 ስፖርት quest አጠናቅቅ", test:function(s){return !!s.questState.sport && s.questState.sport==="done";}},
-    {id:"forge",  name:"Quest ሰሪ", desc:"በ Forge የራስህን quest ፍጠር", test:function(s){return s.forged>=1;}},
-    {id:"streak3",name:"Streak ×3", desc:"3 ተከታታይ quests ሳታመልጥ አጠናቅቅ", test:function(s){return s.bestStreak>=3;}},
-    {id:"streak6",name:"Streak ×6", desc:"6 ተከታታይ quests ሳታመልጥ አጠናቅቅ", test:function(s){return s.bestStreak>=6;}},
-    {id:"perfect",name:"ፍጹም ቀን", desc:"የቀኑን quests ሁሉ አጠናቅቅ", test:function(s){return s.perfectDay;}},
-    {id:"srank",  name:"S-Rank አዳኝ", desc:"S Rank ድረስ (Level 10)", test:function(s){return s.level>=10;}}
+    {id:"first",  name:"First Step", desc:"Complete 1 quest", test:function(s){return s.doneCount>=1;}},
+    {id:"five",   name:"Quick Start", desc:"Complete 5 quests", test:function(s){return s.doneCount>=5;}},
+    {id:"ten",    name:"Army Commander", desc:"Complete 10 quests", test:function(s){return s.doneCount>=10;}},
+    {id:"xp100",  name:"100 XP Club", desc:"Collect 100 total XP", test:function(s){return s.totalXp>=100;}},
+    {id:"xp300",  name:"300 XP Club", desc:"Collect 300 total XP", test:function(s){return s.totalXp>=300;}},
+    {id:"lv2",    name:"Level 2", desc:"Reach Level 2", test:function(s){return s.level>=2;}},
+    {id:"lv3",    name:"Level 3", desc:"Reach Level 3", test:function(s){return s.level>=3;}},
+    {id:"lv5",    name:"Level 5", desc:"Reach Level 5", test:function(s){return s.level>=5;}},
+    {id:"gym",    name:"Iron Man", desc:"Complete a sport quest", test:function(s){return s.catDone.str>=1;}},
+    {id:"mind",   name:"Scholar", desc:"Complete 3 mind quests", test:function(s){return s.catDone.int>=3;}},
+    {id:"faith",  name:"Faith Guardian", desc:"Complete 3 faith quests", test:function(s){return s.catDone.faith>=3;}},
+    {id:"trader", name:"Market Hunter", desc:"Complete a Trading prep quest", test:function(s){return s.catDone.trade>=1;}},
+    {id:"early",  name:"Early Bird", desc:"Complete the 06:00 sport quest", test:function(s){return !!s.questState.sport && s.questState.sport==="done";}},
+    {id:"forge",  name:"Quest Forger", desc:"Forge your own quest in the Forge", test:function(s){return s.forged>=1;}},
+    {id:"streak3",name:"Streak ×3", desc:"Complete 3 quests in a row without missing", test:function(s){return s.bestStreak>=3;}},
+    {id:"streak6",name:"Streak ×6", desc:"Complete 6 quests in a row without missing", test:function(s){return s.bestStreak>=6;}},
+    {id:"perfect",name:"Perfect Day", desc:"Complete all of today's quests", test:function(s){return s.perfectDay;}},
+    {id:"srank",  name:"S-Rank Hunter", desc:"Reach S Rank (Level 10)", test:function(s){return s.level>=10;}}
   ];
   var ACH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2 1.5 3.5 4 3.5M17 6h3a1 1 0 0 1 1 1c0 2-1.5 3.5-4 3.5"/></svg>';
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
@@ -714,16 +714,16 @@
       var row = document.createElement("div");
       row.className = "quest" + (st==="done"?" done":st==="missed"?" missed":"") + (q.id===cur && !st ? " current":"");
       var note = "";
-      if(st==="done") note = '<span class="state-note good">ተጠናቋል · +'+q.xp+' XP</span>';
-      if(st==="missed") note = '<span class="state-note bad">አምልጧል · Penalty −10 HP</span>';
+      if(st==="done") note = '<span class="state-note good">Done · +'+q.xp+' XP</span>';
+      if(st==="missed") note = '<span class="state-note bad">Missed · Penalty −10 HP</span>';
       row.innerHTML =
         '<div class="qtime">'+q.time+'</div>'+
         '<div class="qmain"><div class="qtitle">'+q.title+'</div>'+
         '<div class="qdesc">'+q.desc+'</div>'+
         '<div class="qmeta"><span class="xpchip">+'+q.xp+' XP</span><span class="catchip">'+q.label+'</span>'+note+'</div></div>'+
         '<div class="qbtns">'+
-          '<button class="qbtn ok" data-act="done" data-id="'+q.id+'" aria-label="አጠናቅቅ — '+q.title+'">'+CHECK+'</button>'+
-          '<button class="qbtn no" data-act="missed" data-id="'+q.id+'" aria-label="አምልጧል — '+q.title+'">'+CROSS+'</button>'+
+          '<button class="qbtn ok" data-act="done" data-id="'+q.id+'" aria-label="Done — '+q.title+'">'+CHECK+'</button>'+
+          '<button class="qbtn no" data-act="missed" data-id="'+q.id+'" aria-label="Missed — '+q.title+'">'+CROSS+'</button>'+
         '</div>';
       wrap.appendChild(row);
     });
@@ -740,7 +740,7 @@
       var un = !!state.unlocked[a.id];
       var div=document.createElement("div");
       div.className = "ach"+(un?" unlocked":"");
-      div.innerHTML = '<div class="aicon">'+ACH_ICON+'</div><b>'+a.name+'</b><span>'+(un?"ተከፍቷል ✓":a.desc)+'</span>';
+      div.innerHTML = '<div class="aicon">'+ACH_ICON+'</div><b>'+a.name+'</b><span>'+(un?"Unlocked ✓":a.desc)+'</span>';
       g.appendChild(div);
     });
   }
@@ -759,18 +759,18 @@
       $("nowAct").textContent = cur.title;
       $("nowSub").textContent = cur.desc+" · "+cur.time+" – "+cur.end;
     } else if(nowMin < toMin(list[0].time)){
-      $("nowAct").textContent = "ቀኑ ገና አልጀመረም";
-      $("nowSub").textContent = "የመጀመሪያው quest "+list[0].time+" ይጀምራል — ዝግጁ ሁን።";
+      $("nowAct").textContent = "The day hasn't started yet";
+      $("nowSub").textContent = "The first quest starts at "+list[0].time+" — get ready.";
     } else {
-      $("nowAct").textContent = "እረፍት / ነጻ ጊዜ";
-      $("nowSub").textContent = "በፕላኑ ውስጥ ያልተያዘ ሰዓት ነው። ቀጣዩን quest ጠብቅ ወይም እረፍት ውሰድ።";
+      $("nowAct").textContent = "Rest / free time";
+      $("nowSub").textContent = "This hour is not in the plan. Wait for the next quest or take a rest.";
     }
     if(next){
       var diff = toMin(next.time)-nowMin;
       var hh = Math.floor(diff/60), mm = diff%60;
-      $("nowNext").innerHTML = "ቀጣይ፦ <b>"+next.title+"</b> · "+next.time+" · በ <span class='countdown'>"+(hh>0?hh+" ሰዓት ":"")+mm+" ደቂቃ</span>";
+      $("nowNext").innerHTML = "Next: <b>"+next.title+"</b> · "+next.time+" · in <span class='countdown'>"+(hh>0?hh+" hr ":"")+mm+" min</span>";
     } else {
-      $("nowNext").innerHTML = "ዛሬ ቀጣይ quest የለም — <b>22:15 እንቅልፍ</b> ቀኑን ይዘጋል።";
+      $("nowNext").innerHTML = "No more quests today — <b>22:15 Sleep</b> closes the day.";
     }
   }
 
@@ -791,7 +791,7 @@
     ACH.forEach(function(a){
       if(!state.unlocked[a.id] && a.test(state)){
         state.unlocked[a.id]=true;
-        setTimeout(function(){ toast("🏆 ሽልማት ተከፍቷል፦ "+a.name); }, 350);
+        setTimeout(function(){ toast("🏆 Title unlocked: "+a.name); }, 350);
       }
     });
   }
@@ -808,8 +808,8 @@
   }
   function showLevelUp(){
     var rk = rankFor(state.level);
-    $("luText").textContent = "Level "+state.level+" ደርሰሃል!";
-    $("luRank").textContent = "Rank፦ "+rk.r+" · "+rk.t;
+    $("luText").textContent = "You reached Level "+state.level+"!";
+    $("luRank").textContent = "Rank: "+rk.r+" · "+rk.t;
     $("levelup").classList.add("show");
   }
   $("luClose").addEventListener("click", function(){ $("levelup").classList.remove("show"); });
@@ -854,24 +854,24 @@
       state.totalXp = Math.max(0, state.totalXp-xpLoss);
       state.perfectDay=false;
       renderAll(); checkAch(); renderAll(); saveGame();
-      if(state.hp<=0){ toast("☠ Penalty Zone! HP 0 ደርሷል — ቀጣዩን quest አታምልጥ!", true); }
-      else toast("❌ Penalty፦ −10 HP · −"+xpLoss+" XP · ቀጣዩን አታምልጥ", true);
+      if(state.hp<=0){ toast("☠ Penalty Zone! HP hit 0 — don't miss the next quest!", true); }
+      else toast("❌ Penalty: −10 HP · −"+xpLoss+" XP · don't miss the next one", true);
     }
   });
 
   /* ---------- Forge ---------- */
   $("forgeBtn").addEventListener("click", function(){
     var name = $("forgeName").value.trim();
-    if(!name){ toast("⚠ የ quest ስም ጻፍ", true); return; }
+    if(!name){ toast("⚠ Write the quest name", true); return; }
     var xp = parseInt($("forgeXp").value,10)||1;
     forgeCounter++;
     var n = eatNow();
     quests.push({id:"forge"+forgeCounter+"_"+Date.now(), time:pad(n.h)+":"+pad(n.m), end:"23:59",
-      title:name, desc:"በ Quest Forge የተፈጠረ የራስህ quest", xp:xp, cat:"disc", label:"የራሴ"});
+      title:name, desc:"A quest you forged in the Quest Forge", xp:xp, cat:"disc", label:"Mine"});
     state.forged++;
     $("forgeName").value="";
     renderAll(); checkAch(); renderAll(); saveGame();
-    toast("⚒ አዲስ quest ተፈጥሯል፦ "+name);
+    toast("⚒ New quest forged: "+name);
   });
   $("forgeName").addEventListener("keydown", function(e){ if(e.key==="Enter") $("forgeBtn").click(); });
 
@@ -882,7 +882,7 @@
     state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
     quests = BASE_QUESTS.slice();
     saveGame(); renderAll();
-    toast("🌅 አዲስ ቀን ተጀምሯል — Arise!");
+    toast("🌅 A new day has begun — Arise!");
   });
 
 /* ---------- Notifications (Android app only) ---------- */
@@ -893,11 +893,11 @@
       if(!st) return;
       try{
         if(hasBridge() && window.AndroidBridge.notificationsEnabled && window.AndroidBridge.notificationsEnabled()){
-          st.textContent = "✅ Notification ተፈቅዷል — quest ማሳወቂያ ይደርስሃል።";
+          st.textContent = "✅ Notifications allowed — quest reminders will reach you.";
         } else if(hasBridge()){
-          st.textContent = "Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።";
+          st.textContent = "Allow here so quest reminders can reach you inside the app.";
         } else {
-          st.textContent = "Notification የሚሰራው በ app (APK) ውስጥ ብቻ ነው — website ላይ አይሰራም።";
+          st.textContent = "Notifications work only in the app (APK) — not on the website.";
         }
       }catch(e){}
       if(!ast) return;
@@ -905,9 +905,9 @@
         // v2.3: setAlarmClock needs no exact-alarm permission — the reminder
         // always rings like a clock alarm.
         if(hasBridge()){
-          ast.textContent = "⏰ Alarm: ✅ እንደ clock alarm ይሰራል — በሰዓቱ ድምጽ + vibration ይመጣል።";
+          ast.textContent = "⏰ Alarm: ✅ Rings like a clock alarm — sound + vibration on time.";
         } else {
-          ast.textContent = "⏰ Alarm የሚሰራው በ app (APK) ውስጥ ብቻ ነው — website ላይ አይሰራም።";
+          ast.textContent = "⏰ The alarm works only in the app (APK) — not on the website.";
         }
       }catch(e){}
     }
@@ -916,25 +916,25 @@
         if(hasBridge() && window.AndroidBridge.requestNotificationPermission){
           window.AndroidBridge.requestNotificationPermission();
           setTimeout(refreshNotifStatus, 800);
-          toast("🔔 Notification ፍቃድ ጠይቋል");
-        } else { toast("⚠ Notification በ app (APK) ውስጥ ብቻ ይሰራል", true); }
-      }catch(e){ toast("⚠ Notification አልተፈቀደም", true); }
+          toast("🔔 Notification permission requested");
+        } else { toast("⚠ Notifications work only in the app (APK)", true); }
+      }catch(e){ toast("⚠ Notifications not allowed", true); }
     });
     if(testBtn) testBtn.addEventListener("click", function(){
       try{
         if(hasBridge() && window.AndroidBridge.testNotification){
           window.AndroidBridge.testNotification();
-          toast("🔔 Test notification ተልኳል");
-        } else { toast("⚠ Notification በ app (APK) ውስጥ ብቻ ይሰራል", true); }
-      }catch(e){ toast("⚠ Test አልተላከም", true); }
+          toast("🔔 Test notification sent");
+        } else { toast("⚠ Notifications work only in the app (APK)", true); }
+      }catch(e){ toast("⚠ Test not sent", true); }
     });
     if(alarmBtn) alarmBtn.addEventListener("click", function(){
       try{
         if(hasBridge() && window.AndroidBridge.testAlarm){
           window.AndroidBridge.testAlarm();
-          toast("⏰ 1 ደቂቃ በኋላ alarm ይመጣል — ስልክህን ዝጋና ጠብቅ");
-        } else { toast("⚠ Alarm በ app (APK) ውስጥ ብቻ ይሰራል", true); }
-      }catch(e){ toast("⚠ Alarm test አልተጀመረም", true); }
+          toast("⏰ The alarm comes in 1 minute — lock your phone and wait");
+        } else { toast("⚠ The alarm works only in the app (APK)", true); }
+      }catch(e){ toast("⚠ Alarm test did not start", true); }
     });
     // Alarm sound picker (boss, 2026-11-07): shows the current sound
     // and opens the phone's ringtone list to change it.
@@ -949,14 +949,14 @@
     }
     window.onAlarmSoundPicked = function(name){
       var el = $("alarmSoundName"); if(el) el.textContent = name;
-      toast("🔔 Alarm sound: " + name + " — Alarm Test ነክተህ ስማ");
+      toast("🔔 Alarm sound: " + name + " — tap Alarm Test to hear it");
     };
     if(soundBtn) soundBtn.addEventListener("click", function(){
       try{
         if(hasBridge() && window.AndroidBridge.pickAlarmSound){
           window.AndroidBridge.pickAlarmSound();
-        } else { toast("⚠ Alarm sound በ app (APK) ውስጥ ብቻ ይሰራል", true); }
-      }catch(e){ toast("⚠ Ringtone picker አልተከፈተም", true); }
+        } else { toast("⚠ Alarm sound works only in the app (APK)", true); }
+      }catch(e){ toast("⚠ Ringtone picker did not open", true); }
     });
     refreshAlarmSound();
     refreshNotifStatus();

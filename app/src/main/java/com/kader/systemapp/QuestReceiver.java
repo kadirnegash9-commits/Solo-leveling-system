@@ -52,22 +52,22 @@ public class QuestReceiver extends BroadcastReceiver {
 
     // {id, HH:MM, title} — same order/times as the web quests
     public static final String[][] QUESTS = {
-            {"fajr", "05:00", "ፈጅር ጸሎት"},
-            {"sport", "06:00", "ስፖርት — Gym / ሩጫ"},
-            {"breakfast", "07:00", "ቁርስ + ለትምህርት ቤት መዘጋጀት"},
-            {"school", "08:00", "ትምህርት ቤት — 9ኛ ክፍል"},
-            {"zuhr", "12:35", "ዙህር ጸሎት + ምሳ"},
-            {"english", "14:30", "English ትምህርት"},
-            {"asr", "15:35", "አስር ጸሎት + ቁርኣን"},
-            {"hand", "16:40", "Handwriting ልምምድ ✍"},
-            {"trading", "17:45", "Trading — ዝግጅት"},
-            {"maghrib", "18:10", "ሱቅ ዝጋ + መግሪብ ጸሎት"},
-            {"study", "18:45", "የቤት ጥናት"},
-            {"isha", "19:25", "ኢሻ ጸሎት + እራት"},
-            {"homework", "21:00", "Homework + ክለሳ"},
-            {"sleep", "22:15", "እንቅልፍ — በሰዓቱ ተኛ"},
-            {"saitamaRun", "05:30", "Daily Routine — Running 10km"},
-            {"saitamaEx", "06:30", "Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
+            {"fajr", "05:00", "Fajr Prayer"},
+            {"sport", "06:00", "Sport — Gym / Run"},
+            {"breakfast", "07:00", "Breakfast + Get Ready for School"},
+            {"school", "08:00", "School — Grade 9"},
+            {"zuhr", "12:35", "Zuhr Prayer + Lunch"},
+            {"english", "14:30", "English Lesson"},
+            {"asr", "15:35", "Asr Prayer + Quran"},
+            {"hand", "16:40", "Handwriting Practice ✍"},
+            {"trading", "17:45", "Trading — Preparation"},
+            {"maghrib", "18:10", "Close Shop + Maghrib Prayer"},
+            {"study", "18:45", "Home Study"},
+            {"isha", "19:25", "Isha Prayer + Dinner"},
+            {"homework", "21:00", "Homework + Review"},
+            {"sleep", "22:15", "Sleep — Go to Bed on Time"},
+            {"saitamaRun", "05:30", "Saitama Daily Routine — Running 10km"},
+            {"saitamaEx", "06:30", "Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
     };
 
     @Override
@@ -173,7 +173,7 @@ public class QuestReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, QuestReceiver.class);
         intent.setAction(ACTION_QUEST);
         intent.putExtra("quest_id", "alarmtest");
-        intent.putExtra("quest_title", "⏰ Test alarm — 1 ደቂቃ ሞልቶአል! Arise!");
+        intent.putExtra("quest_title", "⏰ Test alarm — 1 minute is up! Arise!");
         PendingIntent pi = PendingIntent.getBroadcast(context, 999, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         long when = System.currentTimeMillis() + 60_000;
@@ -263,7 +263,7 @@ public class QuestReceiver extends BroadcastReceiver {
         } else {
             b = new Notification.Builder(context);
         }
-        b.setContentTitle("⚔️ Quest ጊዜው ደርሷል")
+        b.setContentTitle("⚔️ Quest time is here")
                 .setContentText(title)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pending)
