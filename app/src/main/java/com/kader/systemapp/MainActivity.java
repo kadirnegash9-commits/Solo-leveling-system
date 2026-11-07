@@ -40,6 +40,9 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new SystemBridge(), "AndroidBridge");
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("file:///android_asset/index.html");
+
+        // Arm the daily quest reminders (QuestReceiver)
+        QuestReceiver.scheduleAll(this);
     }
 
     private void createNotificationChannel() {

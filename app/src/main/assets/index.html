@@ -345,7 +345,7 @@
         </div>
       </section>
 
-            <!-- ===== NOTIFICATIONS (APK) ===== -->
+      <!-- ===== NOTIFICATIONS (APK) ===== -->
       <section class="sys" style="margin-top:16px" aria-label="Notifications">
         <div class="sys-head"><span class="dot"></span><h2 class="en">Notifications</h2><span class="tag">ማሳወቂያ</span></div>
         <div class="install-body">
@@ -432,7 +432,7 @@
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
   var CROSS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
-  /* ---------- State (saved on this phone) ---------- */
+  /* ---------- State (saved on this device) ---------- */
   var state = {
     level:1, xp:0, totalXp:0, hp:100,
     doneCount:0, missedCount:0, dayXp:0,
@@ -443,7 +443,7 @@
   };
   var quests = BASE_QUESTS.slice();
   var forgeCounter = 0;
-  var SAVE_KEY = "soloLevelingSaveV2";
+  var SAVE_KEY = "soloLevelingSaveV3";
   function todayKey(){
     try{
       return new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Addis_Ababa",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -736,7 +736,7 @@
     toast("🌅 አዲስ ቀን ተጀምሯል — Arise!");
   });
 
-  /* ---------- Notifications (Android app only) ---------- */
+/* ---------- Notifications (Android app only) ---------- */
   (function(){
     var allowBtn = $("notifAllow"), testBtn = $("notifTest"), st = $("notifStatus");
     function hasBridge(){ return (typeof window.AndroidBridge !== "undefined") && window.AndroidBridge; }
