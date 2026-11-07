@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -49,6 +48,12 @@ public class QuestReceiver extends BroadcastReceiver {
     // quest reminder rings like a clock alarm (and bypasses Do Not Disturb).
     // v2.2 used "solo_leveling" (DEFAULT importance, silent in DND) — deleted.
     public static final String CHANNEL_ID = "solo_leveling_alarm";
+    // v4.6: alarm notifications post on this channel, created with NO
+    // sound — the looping MediaPlayer is the only sound. (On Android 8+
+    // a notification's sound comes from its channel; Builder.setSound(null)
+    // falls back to the channel sound, so a silent channel is the only
+    // deterministic way to silence it.)
+    public static final String SILENT_CHANNEL_ID = "solo_leveling_alarm_silent";
     private static final String OLD_CHANNEL_ID = "solo_leveling";
     // Channel sound can't change after creation (Android restores the
     // deleted channel's old sound when recreated with the same ID), so
@@ -294,7 +299,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            b = new Notification.Builder(context, currentChannelId(context));
+            b = new Notification.Builder(context, SILENT_CHANNEL_ID);
         } else {
             b = new Notification.Builder(context);
         }
@@ -303,91 +308,69 @@ public class QuestReceiver extends BroadcastReceiver {
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(tapPending)
                 .setCategory(Notification.CATEGORY_ALARM)
-                .setSound(alarmSound(context))
                 .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setFullScreenIntent(fullScreen, true)
                 .setDeleteIntent(deletePending)
                 .setAutoCancel(true);
         nm.notify(tag, 1, b.build());
-        // Loop the alarm sound until he dismisses it (boss, 2026-11-07).
+        // v4.6: loop starts IMMEDIATELY — the notification above is
+        // silent, so the looping MediaPlayer is the only sound (boss,
+        // 2026-11-07: the 46s WAKEY sound must keep repeating until he
+        // dismisses the alarm, like a normal clock alarm).
         startAlarmLoop(context);
     }
 
     // Looping alarm sound (boss, 2026-11-07): Android plays a
-    // notification channel sound ONCE and never loops it, so the first
-    // play comes from the channel, then a looping MediaPlayer takes over
-    // and repeats the chosen sound until the alarm is dismissed (tap the
-    // notification, swipe it away, or ACCEPT/DECLINE a quest in the app).
-    // The loop starts after one play-through, so the sound never doubles.
+    // notification channel sound ONCE and never loops it, so the loop
+    // IS the sound — a looping MediaPlayer playing the chosen sound
+    // (WAKEY, ~46s) until the alarm is dismissed (tap the notification,
+    // swipe it away, or ACCEPT/DECLINE a quest in the app).
+    // v4.6: the loop starts IMMEDIATELY when the alarm fires. v4.5
+    // waited ~46s for the channel sound to finish first (delayed
+    // Handler callback) — on his phone the process was gone by then,
+    // so the sound played once and stopped. No delay now: the
+    // notification is silent (silent channel) and the player starts
+    // right away, so there is no doubling and no window to miss.
     private static MediaPlayer loopPlayer;
-    private static final Handler loopHandler = new Handler(Looper.getMainLooper());
-    private static Runnable loopStartRunnable;
 
     public static void startAlarmLoop(final Context context) {
         stopAlarmLoop();
         final Uri sound = alarmSound(context);
-        long delay = soundDurationMs(context, sound);
-        if (delay <= 0) delay = 45_000; // unknown length: WAKEY is ~46s
-        loopStartRunnable = new Runnable() {
-            @Override public void run() {
-                try {
-                    final MediaPlayer mp = new MediaPlayer();
-                    mp.setAudioAttributes(new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build());
-                    mp.setDataSource(context.getApplicationContext(), sound);
-                    mp.setLooping(true);
-                    mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override public void onPrepared(MediaPlayer p) {
-                            // Stopped before it was ready: do not start.
-                            if (loopPlayer != p) return;
-                            try { p.start(); } catch (Exception ignored) {}
-                        }
-                    });
-                    mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                        @Override public boolean onError(MediaPlayer p, int what, int extra) {
-                            try { p.release(); } catch (Exception ignored) {}
-                            if (loopPlayer == p) loopPlayer = null;
-                            return true;
-                        }
-                    });
-                    loopPlayer = mp;
-                    mp.prepareAsync();
-                } catch (Exception ignored) {}
-            }
-        };
-        loopHandler.postDelayed(loopStartRunnable, delay);
+        try {
+            final MediaPlayer mp = new MediaPlayer();
+            mp.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build());
+            mp.setDataSource(context.getApplicationContext(), sound);
+            mp.setLooping(true);
+            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override public void onPrepared(MediaPlayer p) {
+                    // Stopped before it was ready: do not start.
+                    if (loopPlayer != p) return;
+                    try { p.start(); } catch (Exception ignored) {}
+                }
+            });
+            mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override public boolean onError(MediaPlayer p, int what, int extra) {
+                    try { p.release(); } catch (Exception ignored) {}
+                    if (loopPlayer == p) loopPlayer = null;
+                    return true;
+                }
+            });
+            loopPlayer = mp;
+            mp.prepareAsync();
+        } catch (Exception ignored) {}
     }
 
     public static void stopAlarmLoop() {
-        if (loopStartRunnable != null) {
-            try { loopHandler.removeCallbacks(loopStartRunnable); } catch (Exception ignored) {}
-            loopStartRunnable = null;
-        }
         MediaPlayer mp = loopPlayer;
         loopPlayer = null;
         if (mp != null) {
             try { if (mp.isPlaying()) mp.stop(); } catch (Exception ignored) {}
             try { mp.release(); } catch (Exception ignored) {}
         }
-    }
-
-    // Length of the chosen sound in ms, so the loop starts when the
-    // channel's first play ends. 0 when it cannot be read.
-    private static long soundDurationMs(Context context, Uri sound) {
-        MediaMetadataRetriever r = null;
-        try {
-            r = new MediaMetadataRetriever();
-            r.setDataSource(context.getApplicationContext(), sound);
-            String d = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            if (d != null) return Long.parseLong(d);
-        } catch (Exception ignored) {
-        } finally {
-            try { if (r != null) r.release(); } catch (Exception ignored) {}
-        }
-        return 0;
     }
 
     // The user's chosen alarm sound (picked in the app's Notifications
@@ -473,5 +456,16 @@ public class QuestReceiver extends BroadcastReceiver {
         ch.enableVibration(true);
         ch.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
         nm.createNotificationChannel(ch);
+        // v4.6: silent channel for the alarm notifications themselves —
+        // the looping MediaPlayer is the only sound, so this channel has
+        // none. HIGH importance + vibration so it still shows and rings
+        // visibly like a clock alarm.
+        NotificationChannel silent = new NotificationChannel(
+                SILENT_CHANNEL_ID, "Solo Leveling Alarms", NotificationManager.IMPORTANCE_HIGH);
+        silent.setDescription("Quest alarms — sound loops from the app");
+        silent.setSound(null, null);
+        silent.enableVibration(true);
+        silent.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
+        nm.createNotificationChannel(silent);
     }
 }
