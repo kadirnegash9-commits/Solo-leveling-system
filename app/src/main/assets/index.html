@@ -386,21 +386,21 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
   var BASE_QUESTS = [
-    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ·ቅዳሜ Gym", xp:30, cat:"str",   label:"ጥንካሬ"},
-    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:30, cat:"str", label:"ጥንካሬ", saitama:true},
-    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:30, cat:"str", label:"ጥንካሬ", saitama:true},
-    {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:10, cat:"disc", label:"ሥርዓት"},
-    {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:20, cat:"int", label:"አእምሮ", weekdaysOnly:true},
-    {id:"zuhr",   time:"12:30", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:15, cat:"faith", label:"እምነት"},
-    {id:"english",time:"14:30", end:"15:10", title:"English ትምህርት", desc:"40 ደቂቃ — ቃላት + grammar", xp:25, cat:"int", label:"አእምሮ"},
-    {id:"asr",    time:"16:20", end:"16:40", title:"አስር ጸሎት + ቁርኣን", desc:"20 ደቂቃ ቁርኣን ንባብ", xp:20, cat:"faith", label:"እምነት"},
-    {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting ልምምድ ✍", desc:"5 ደቂቃ የእጅ ጽሑፍ ልምምድ", xp:10, cat:"skill", label:"ክህሎት"},
-    {id:"trading",time:"17:45", end:"18:00", title:"Trading — ዝግጅት", desc:"Top-down analysis (Daily → H1 → M15) · ዜና ቼክ · confirmation ከሌለ trade የለም", xp:25, cat:"trade", label:"ትሬዲንግ"},
-    {id:"maghrib",time:"18:00", end:"18:45", title:"ሱቅ ዝጋ + መግሪብ ጸሎት", desc:"Freedom Shop ዝጋ (እሁድ ሱቅ ዝግ ነው — መግሪብ ብቻ)", xp:15, cat:"faith", label:"እምነት"},
-    {id:"study",  time:"18:45", end:"20:15", title:"የቤት ጥናት", desc:"1 ሰዓት 30 ደቂቃ — የትምህርት ቤት ጥናት", xp:30, cat:"int", label:"አእምሮ"},
-    {id:"isha",   time:"20:15", end:"21:00", title:"ኢሻ ጸሎት + እራት", desc:"የቀኑን የመጨረሻ ጸሎት በሰዓቱ", xp:15, cat:"faith", label:"እምነት"},
-    {id:"homework",time:"21:00", end:"22:15", title:"Homework + ክለሳ", desc:"1 ሰዓት 15 ደቂቃ — homework ጨርስ፣ የቀኑን ክለሳ አድርግ", xp:25, cat:"int", label:"አእምሮ"},
-    {id:"sleep",  time:"22:15", end:"23:59", title:"እንቅልፍ — በሰዓቱ ተኛ", desc:"ነገ ጠዋት ስፖርት አለ — ስልክ አጥፍተህ ተኛ", xp:10, cat:"disc", label:"ሥርዓት"}
+    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ·ቅዳሜ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
+    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
+    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
+    {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:1, cat:"disc", label:"ሥርዓት"},
+    {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:1, cat:"int", label:"አእምሮ", weekdaysOnly:true},
+    {id:"zuhr",   time:"12:30", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"english",time:"14:30", end:"15:10", title:"English ትምህርት", desc:"40 ደቂቃ — ቃላት + grammar", xp:1, cat:"int", label:"አእምሮ"},
+    {id:"asr",    time:"16:20", end:"16:40", title:"አስር ጸሎት + ቁርኣን", desc:"20 ደቂቃ ቁርኣን ንባብ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting ልምምድ ✍", desc:"5 ደቂቃ የእጅ ጽሑፍ ልምምድ", xp:1, cat:"skill", label:"ክህሎት"},
+    {id:"trading",time:"17:45", end:"18:00", title:"Trading — ዝግጅት", desc:"Top-down analysis (Daily → H1 → M15) · ዜና ቼክ · confirmation ከሌለ trade የለም", xp:1, cat:"trade", label:"ትሬዲንግ"},
+    {id:"maghrib",time:"18:00", end:"18:45", title:"ሱቅ ዝጋ + መግሪብ ጸሎት", desc:"Freedom Shop ዝጋ (እሁድ ሱቅ ዝግ ነው — መግሪብ ብቻ)", xp:1, cat:"faith", label:"እምነት"},
+    {id:"study",  time:"18:45", end:"20:15", title:"የቤት ጥናት", desc:"1 ሰዓት 30 ደቂቃ — የትምህርት ቤት ጥናት", xp:1, cat:"int", label:"አእምሮ"},
+    {id:"isha",   time:"20:15", end:"21:00", title:"ኢሻ ጸሎት + እራት", desc:"የቀኑን የመጨረሻ ጸሎት በሰዓቱ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"homework",time:"21:00", end:"22:15", title:"Homework + ክለሳ", desc:"1 ሰዓት 15 ደቂቃ — homework ጨርስ፣ የቀኑን ክለሳ አድርግ", xp:1, cat:"int", label:"አእምሮ"},
+    {id:"sleep",  time:"22:15", end:"23:59", title:"እንቅልፍ — በሰዓቱ ተኛ", desc:"ነገ ጠዋት ስፖርት አለ — ስልክ አጥፍተህ ተኛ", xp:1, cat:"disc", label:"ሥርዓት"}
   ];
 
   var STATS = [
@@ -717,10 +717,14 @@
       state.missedCount++;
       state.streak=0;
       state.hp = Math.max(0, state.hp-10);
+      // Missed quest costs XP too (boss, 2026-11-07): run/gym -5, others -1.
+      var xpLoss = (id==="sport"||id==="saitamaRun"||id==="saitamaEx") ? 5 : 1;
+      state.xp = Math.max(0, state.xp-xpLoss);
+      state.totalXp = Math.max(0, state.totalXp-xpLoss);
       state.perfectDay=false;
       renderAll(); checkAch(); renderAll(); saveGame();
       if(state.hp<=0){ toast("☠ Penalty Zone! HP 0 ደርሷል — ቀጣዩን quest አታምልጥ!", true); }
-      else toast("❌ Penalty፦ −10 HP · ቀጣዩን አታምልጥ", true);
+      else toast("❌ Penalty፦ −10 HP · −"+xpLoss+" XP · ቀጣዩን አታምልጥ", true);
     }
   });
 
@@ -728,7 +732,7 @@
   $("forgeBtn").addEventListener("click", function(){
     var name = $("forgeName").value.trim();
     if(!name){ toast("⚠ የ quest ስም ጻፍ", true); return; }
-    var xp = parseInt($("forgeXp").value,10)||20;
+    var xp = parseInt($("forgeXp").value,10)||1;
     forgeCounter++;
     var n = eatNow();
     quests.push({id:"forge"+forgeCounter+"_"+Date.now(), time:pad(n.h)+":"+pad(n.m), end:"23:59",

@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shadow monarch: hooded hunter silhouette, glowing purple eyes.
+         Stylized vector (boss, 2026-11-07) — a real photo can't be pushed
+         through the GitHub snapshot route (UTF-8 files only). -->
+    <!-- cloak / shoulders -->
+    <path
+        android:fillColor="#0A0A16"
+        android:pathData="M10,108 C16,86 34,76 54,76 C74,76 92,86 98,108 Z"/>
+    <!-- hood -->
+    <path
+        android:fillColor="#0A0A16"
+        android:pathData="M54,12 C32,12 22,34 24,54 C25,68 34,78 54,78 C74,78 83,68 84,54 C86,34 76,12 54,12 Z"/>
+    <!-- face shadow -->
+    <path
+        android:fillColor="#241640"
+        android:pathData="M54,24 C40,24 33,38 34,52 C35,62 43,68 54,68 C65,68 73,62 74,52 C75,38 68,24 54,24 Z"/>
+    <!-- glowing eyes (angry, slanted) -->
+    <path
+        android:fillColor="#C084FC"
+        android:pathData="M40,48 L50,48 L47,54 L41,54 Z"/>
+    <path
+        android:fillColor="#C084FC"
+        android:pathData="M58,48 L68,48 L67,54 L61,54 Z"/>
+    <!-- purple rim light on the hood -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M54,12 C32,12 22,34 24,54 L29,54 C28,36 36,17 54,17 Z"/>
+</vector>
