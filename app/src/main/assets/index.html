@@ -390,7 +390,7 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
   var BASE_QUESTS = [
-    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ·ቅዳሜ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
+    {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
     {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:1, cat:"disc", label:"ሥርዓት"},
@@ -554,11 +554,11 @@
   function todayQuests(){
     var day = eatNow().day; // Mon Tue Wed Thu Fri Sat Sun
     var weekend = (day==="Sat"||day==="Sun");
-    // Saturday rule (boss, 2026-11-07): only prayer + gym — other quests
-    // are excused, so they don't even appear in the list. Forged (custom)
-    // quests always stay visible.
+    // Saturday rule (boss, 2026-11-07, updated 14:22): prayers ONLY —
+    // no sport/gym on Saturday ("ቅዳሜ ሩጫም ጂምም የለም"). Forged
+    // (custom) quests always stay visible.
     if(day==="Sat"){
-      var keep = {sport:1, zuhr:1, asr:1, maghrib:1, isha:1};
+      var keep = {zuhr:1, asr:1, maghrib:1, isha:1};
       return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
     }
     // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30

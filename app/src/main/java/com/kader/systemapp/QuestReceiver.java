@@ -27,9 +27,10 @@ import java.util.Calendar;
  * notification with the alarm ringtone, vibration and a full-screen intent
  * — it rings like a clock alarm. Times/titles must match BASE_QUESTS in
  * app/src/main/assets/index.html. BOOT_COMPLETED re-arms after a reboot.
- * Saturday rule (boss, confirmed 2026-11-07): on Saturday only prayer
- * (zuhr/asr/maghrib/isha) + sport reminders fire — all other quests are
- * excused that day, their alarms move to Sunday.
+ * Saturday rule (boss, confirmed 2026-11-07, updated 14:22): on
+ * Saturday only prayer (zuhr/asr/maghrib/isha) reminders fire — NO
+ * sport/gym, all other quests are excused that day, their alarms
+ * move to Sunday.
  * Saitama rule (boss, confirmed 2026-11-07): Sun/Tue/Thu the 05:30 run
  * + 06:30 exercises replace the 06:00 sport quest; Mon/Wed/Fri gym
  * only; Saturday: no Saitama.
@@ -101,10 +102,11 @@ public class QuestReceiver extends BroadcastReceiver {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
-    // Saturday: only prayer + gym reminders (his rule, confirmed 2026-11-07).
-    // All other quests are excused on Saturday — no alarm that day.
+    // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
+    // 14:22 — "ቅዳሜ ሩጫም ጂምም የለም"). All other quests are excused
+    // on Saturday — no alarm that day.
     private static boolean isSaturdayAllowed(String id) {
-        return "sport".equals(id) || "zuhr".equals(id) || "asr".equals(id)
+        return "zuhr".equals(id) || "asr".equals(id)
                 || "maghrib".equals(id) || "isha".equals(id);
     }
 
