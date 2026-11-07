@@ -66,8 +66,8 @@ public class QuestReceiver extends BroadcastReceiver {
             {"isha", "19:25", "ኢሻ ጸሎት + እራት"},
             {"homework", "21:00", "Homework + ክለሳ"},
             {"sleep", "22:15", "እንቅልፍ — በሰዓቱ ተኛ"},
-            {"saitamaRun", "05:30", "Saitama ሩጫ — 10km"},
-            {"saitamaEx", "06:30", "Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats"}
+            {"saitamaRun", "05:30", "Daily Routine — Running 10km"},
+            {"saitamaEx", "06:30", "Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
     };
 
     @Override

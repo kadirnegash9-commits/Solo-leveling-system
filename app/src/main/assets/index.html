@@ -23,6 +23,14 @@
     --line-bright:#2f6db3;
     --cyan:#38c8ff;
     --cyan-dim:#7dd7ff;
+    --cyan-bright:#8fe9ff;
+    --frame:rgba(56,200,255,.75);
+    --glow:rgba(56,200,255,.35);
+    --glow-strong:rgba(126,231,255,.95);
+    --glow-top:rgba(56,200,255,.28);
+    --glow-mid:rgba(43,125,224,.22);
+    --grid:rgba(56,200,255,.10);
+    --aura:rgba(124,58,237,.22);
     --blue:#2b7de0;
     --gold:#f5b942;
     --red:#ff4d5e;
@@ -33,15 +41,32 @@
     --radius:14px;
     color-scheme: dark;
   }
+  /* Level themes (boss, 2026-11-07): the app changes color as he
+     levels up — blue System (1-29), purple Shadow Monarch (30-59),
+     gold (60+). Applied via body[data-theme]. */
+  body[data-theme="purple"]{
+    --cyan:#c084fc; --cyan-dim:#d8b4fe; --cyan-bright:#e9d5ff;
+    --frame:rgba(192,132,252,.75); --glow:rgba(168,85,247,.40);
+    --glow-strong:rgba(233,213,255,.95); --glow-top:rgba(192,132,252,.28);
+    --glow-mid:rgba(147,51,234,.22); --grid:rgba(192,132,252,.10);
+    --aura:rgba(168,85,247,.28); --blue:#9333ea; --line-bright:#a855f7;
+  }
+  body[data-theme="gold"]{
+    --cyan:#fbbf24; --cyan-dim:#fde68a; --cyan-bright:#fef3c7;
+    --frame:rgba(251,191,36,.75); --glow:rgba(245,158,11,.40);
+    --glow-strong:rgba(254,243,199,.95); --glow-top:rgba(251,191,36,.28);
+    --glow-mid:rgba(217,119,6,.22); --grid:rgba(251,191,36,.10);
+    --aura:rgba(245,158,11,.28); --blue:#d97706; --line-bright:#f59e0b;
+  }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth}
   body{
     margin:0;
     background:
-      radial-gradient(1000px 520px at 50% -12%, rgba(56,200,255,.28), transparent 62%),
-      radial-gradient(900px 500px at 85% -10%, rgba(43,125,224,.22), transparent 60%),
-      radial-gradient(700px 420px at -10% 30%, rgba(56,200,255,.10), transparent 55%),
-      radial-gradient(800px 500px at 50% 115%, rgba(124,58,237,.22), transparent 60%),
+      radial-gradient(1000px 520px at 50% -12%, var(--glow-top), transparent 62%),
+      radial-gradient(900px 500px at 85% -10%, var(--glow-mid), transparent 60%),
+      radial-gradient(700px 420px at -10% 30%, var(--grid), transparent 55%),
+      radial-gradient(800px 500px at 50% 115%, var(--aura), transparent 60%),
       var(--bg);
     color:var(--text);
     font-family:"Noto Sans Ethiopic",system-ui,sans-serif;
@@ -55,7 +80,7 @@
      THROUGH them — that is why v2.9/v3.2 looked unchanged. */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(rgba(56,200,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.10) 1px,transparent 1px);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
     background-size:44px 44px;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
@@ -69,14 +94,14 @@
      glowing cyan headers. Pure CSS — no images. */
   .sys{
     background-image:
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
-      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(180deg,rgba(6,14,30,.88),rgba(4,10,24,.92));
     background-size:
       26px 3px, 3px 26px,
@@ -92,15 +117,15 @@
       center;
     background-repeat:no-repeat;
     background-origin:border-box;
-    border:2px solid rgba(56,200,255,.75);
+    border:2px solid var(--frame);
     border-radius:8px;
     position:relative;
-    box-shadow:0 0 42px rgba(56,200,255,.35), 0 18px 40px rgba(0,0,0,.5), inset 0 0 34px rgba(56,200,255,.07);
+    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 34px rgba(56,200,255,.07);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;left:50%;width:10px;height:10px;
-    background:#8fe9ff;transform:translateX(-50%) rotate(45deg);
-    box-shadow:0 0 14px rgba(126,231,255,.95);pointer-events:none;
+    background:var(--cyan-bright);transform:translateX(-50%) rotate(45deg);
+    box-shadow:0 0 14px var(--glow-strong);pointer-events:none;
   }
   .sys::before{top:-6px}
   .sys::after{bottom:-6px}
@@ -110,7 +135,7 @@
   }
   .sys-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan-dim);letter-spacing:.22em;text-shadow:0 0 14px rgba(56,200,255,.8)}
+  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan-dim);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong)}
   .sys-head .tag{margin-left:auto;font-size:11px;color:var(--muted)}
 
   /* ---------- Hero / Status ---------- */
@@ -146,7 +171,8 @@
   .bar.xp>i{background:linear-gradient(90deg,#1d6fd1,var(--cyan));box-shadow:0 0 12px rgba(56,200,255,.7)}
   .bar.hp>i{background:linear-gradient(90deg,#0d9d6c,var(--green));box-shadow:0 0 12px rgba(46,230,168,.55)}
   .bar.hp.low>i{background:linear-gradient(90deg,#c22633,var(--red));box-shadow:0 0 12px rgba(255,77,94,.6)}
-  .xp-color{color:var(--cyan)} .hp-color{color:var(--green)}
+  .bar.mp>i{background:linear-gradient(90deg,#1d6fd1,var(--cyan));box-shadow:0 0 12px var(--glow)}
+  .xp-color{color:var(--cyan)} .hp-color{color:var(--green)} .mp-color{color:var(--cyan-dim)}
   .quickstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
   .qs{background:rgba(8,17,32,.7);border:1px solid rgba(56,200,255,.14);border-radius:10px;padding:9px 6px;text-align:center}
   .qs b{display:block;font-family:"Rajdhani";font-size:21px;line-height:1.1}
@@ -213,6 +239,12 @@
 
   /* achievements */
   .ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px}
+  .theme-list{padding:12px 16px 16px;display:grid;gap:8px}
+  .theme-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:rgba(8,17,32,.5)}
+  .theme-row .tdot{width:12px;height:12px;border-radius:50%;flex:none}
+  .theme-row b{font-size:14px}
+  .theme-row span{margin-left:auto;font-size:12px;color:var(--muted)}
+  .theme-row.active{border-color:var(--cyan);box-shadow:0 0 14px var(--glow)}
   @media(max-width:520px){.ach-grid{grid-template-columns:repeat(2,1fr)} .quickstats{grid-template-columns:repeat(2,1fr)} .stats{grid-template-columns:repeat(2,1fr)}}
   .ach{border:1px solid rgba(56,200,255,.12);background:rgba(8,17,32,.55);border-radius:11px;padding:11px 10px;text-align:center;transition:all .3s}
   .ach .aicon{width:38px;height:38px;margin:0 auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0a1526;border:1px solid #22385c;color:#54708f}
@@ -269,7 +301,7 @@
     box-shadow:0 0 60px rgba(56,200,255,.5);animation:luin .45s cubic-bezier(.2,.9,.3,1.3);
   }
   @keyframes luin{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-  .lu-card .big{font-family:"Rajdhani";font-size:52px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 0 30px var(--cyan);line-height:1}
+  .lu-card .big{font-family:"Rajdhani";font-size:52px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 0 16px #fff, 0 0 44px var(--cyan), 0 0 90px var(--cyan);line-height:1}
   .lu-card p{color:var(--cyan-dim);margin:10px 0 4px;font-size:15px}
   .lu-card .newrank{color:var(--gold);font-weight:800;font-size:17px;margin-bottom:18px}
   @media (prefers-reduced-motion: reduce){
@@ -290,7 +322,7 @@
       <div class="who">
         <div class="syslabel en">Player · Status Window</div>
         <h1>ካደር ነጋሽ</h1>
-        <div class="title" id="hunterTitle">ጀማሪ አዳኝ · Novice Hunter</div>
+        <div class="title" id="hunterTitle">Novice Hunter</div>
         <div class="class">ክፍል፦ የዕለት ተዕለት ሥርዓት · Daily System Player</div>
       </div>
       <div class="levelbox">
@@ -310,6 +342,11 @@
         <div class="bar hp" id="hpBarWrap"><i id="hpBar"></i></div>
         <span class="bv" id="hpText">100 / 100</span>
       </div>
+      <div class="bar-row">
+        <span class="bl mp-color">MP</span>
+        <div class="bar mp"><i id="mpBar"></i></div>
+        <span class="bv" id="mpText">120 / 120</span>
+      </div>
     </div>
 
     <div class="quickstats">
@@ -317,6 +354,8 @@
       <div class="qs"><b id="qsStreak">0</b><span>ተከታታይ ስኬት 🔥 streak</span></div>
       <div class="qs"><b id="qsAch">0 / 18</b><span>የተከፈቱ ሽልማቶች</span></div>
       <div class="qs"><b id="qsTotalXp">0</b><span>ጠቅላላ XP</span></div>
+      <div class="qs"><b id="qsFatigue">0</b><span>Fatigue</span></div>
+      <div class="qs"><b id="qsAbility">0</b><span>Ability Points</span></div>
     </div>
   </section>
 
@@ -359,6 +398,12 @@
       <section class="sys" aria-label="Achievements">
         <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">ሽልማቶች · 18</span></div>
         <div class="ach-grid" id="achGrid"></div>
+      </section>
+
+      <!-- ===== LEVEL THEMES ===== -->
+      <section class="sys" style="margin-top:16px" aria-label="Level themes">
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Level Themes</h2><span class="tag">Tap to preview</span></div>
+        <div class="theme-list" id="themeList"></div>
       </section>
 
       <!-- ===== QUEST FORGE ===== -->
@@ -423,8 +468,8 @@
   var BASE_QUESTS = [
     {id:"fajr",   time:"05:00", end:"05:30", title:"ፈጅር ጸሎት", desc:"የቀኑ የመጀመሪያ ጸሎት በሰዓቱ · ከሱብሒ በኋላ ሩጫ", xp:1, cat:"faith", label:"እምነት"},
     {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
-    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
-    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
+    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Daily Routine — Running 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
+    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:1, cat:"disc", label:"ሥርዓት"},
     {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:1, cat:"int", label:"አእምሮ", weekdaysOnly:true},
     {id:"zuhr",   time:"12:35", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:1, cat:"faith", label:"እምነት"},
@@ -445,7 +490,10 @@
     {key:"faith", en:"FAITH", name:"እምነት", base:16},
     {key:"trade", en:"TRADE", name:"ትሬዲንግ", base:10},
     {key:"disc",  en:"DISC", name:"ሥርዓት", base:11},
-    {key:"skill", en:"SKILL", name:"ክህሎት", base:9}
+    {key:"skill", en:"SKILL", name:"ክህሎት", base:9},
+    {key:"vit",   en:"VIT", name:"ህይወት", base:10},
+    {key:"agi",   en:"AGI", name:"ፍጥነት", base:10},
+    {key:"per",   en:"PER", name:"ግንዛቤ", base:10}
   ];
 
   var ACH = [
@@ -478,7 +526,7 @@
     doneCount:0, missedCount:0, dayXp:0,
     streak:0, bestStreak:0, forged:0, perfectDay:false,
     questState:{}, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
-    statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
+    statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
     unlocked:{}
   };
   var quests = BASE_QUESTS.slice();
@@ -504,7 +552,7 @@
         state.level=data.state.level||1; state.xp=data.state.xp||0; state.totalXp=data.state.totalXp||0;
         state.hp=100; state.streak=0;
         state.bestStreak=data.state.bestStreak||0; state.forged=data.state.forged||0;
-        state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0};
+        state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0};
         state.unlocked=data.state.unlocked||{};
         quests = BASE_QUESTS.slice();
         var fc=0;
@@ -524,13 +572,46 @@
 
   function xpNeeded(level){ return level*100; }
   function rankFor(level){
-    if(level>=20) return {r:"NATIONAL", t:"National Level አዳኝ"};
-    if(level>=10) return {r:"S", t:"S-Rank አዳኝ"};
-    if(level>=7)  return {r:"A", t:"A-Rank አዳኝ"};
-    if(level>=5)  return {r:"B", t:"B-Rank አዳኝ"};
-    if(level>=3)  return {r:"C", t:"C-Rank አዳኝ"};
-    if(level>=2)  return {r:"D", t:"D-Rank አዳኝ"};
-    return {r:"E", t:"ጀማሪ አዳኝ · Novice Hunter"};
+    if(level>=60) return {r:"SS", t:"Shadow Monarch"};
+    if(level>=30) return {r:"S+", t:"Wolf Assassin"};
+    if(level>=20) return {r:"NATIONAL", t:"National Level Hunter"};
+    if(level>=10) return {r:"S", t:"S-Rank Hunter"};
+    if(level>=7)  return {r:"A", t:"A-Rank Hunter"};
+    if(level>=5)  return {r:"B", t:"B-Rank Hunter"};
+    if(level>=3)  return {r:"C", t:"C-Rank Hunter"};
+    if(level>=2)  return {r:"D", t:"D-Rank Hunter"};
+    return {r:"E", t:"Novice Hunter"};
+  }
+
+  /* ---------- Level themes (boss, 2026-11-07) ---------- */
+  // Lv 1-29 blue System, Lv 30-59 purple Shadow Monarch, Lv 60+ gold.
+  var THEMES = [
+    {id:"blue",   name:"Blue System",    range:"Lv 1–29",  color:"#38c8ff"},
+    {id:"purple", name:"Shadow Monarch", range:"Lv 30–59", color:"#c084fc"},
+    {id:"gold",   name:"Golden System",  range:"Lv 60+",   color:"#fbbf24"}
+  ];
+  var themePreview = null; // session only — reload returns to his real level theme
+  function themeForLevel(level){ if(level>=60) return "gold"; if(level>=30) return "purple"; return "blue"; }
+  function applyTheme(){
+    var t = themePreview || themeForLevel(state.level);
+    document.body.setAttribute("data-theme", t);
+    renderThemes();
+  }
+  function renderThemes(){
+    var el = $("themeList"); if(!el) return;
+    var cur = themePreview || themeForLevel(state.level);
+    el.innerHTML = "";
+    THEMES.forEach(function(th){
+      var row = document.createElement("div");
+      row.className = "theme-row" + (th.id===cur ? " active" : "");
+      row.innerHTML = '<span class="tdot" style="background:'+th.color+';box-shadow:0 0 10px '+th.color+'"></span><b>'+th.name+'</b><span>'+th.range+(th.id===cur ? " · Active" : "")+'</span>';
+      row.addEventListener("click", function(){
+        themePreview = (themePreview===th.id) ? null : th.id;
+        if(th.id===themeForLevel(state.level)) themePreview = null;
+        applyTheme();
+      });
+      el.appendChild(row);
+    });
   }
 
   /* ---------- Time helpers (Africa/Addis_Ababa) ---------- */
@@ -553,7 +634,7 @@
   function renderStats(){
     var g = $("statsGrid"); g.innerHTML="";
     STATS.forEach(function(st){
-      var val = st.base + state.statBonus[st.key];
+      var val = st.base + (state.statBonus[st.key]||0);
       var pct = Math.min(100, val); // stat shown out of 100 cap visual
       var div=document.createElement("div"); div.className="stat";
       div.innerHTML = '<div class="sname"><b>'+st.en+'</b><i>'+val+'</i></div>'+
@@ -580,6 +661,15 @@
     var un = Object.keys(state.unlocked).length;
     $("qsAch").textContent = un+" / "+ACH.length;
     $("penaltyBox").className = "warn-box" + (state.hp<=50 ? " show" : "");
+    // MP (boss, 2026-11-07): mana grows with INT — full unless a skill spends it.
+    var mpMax = 50 + 5*(14 + (state.statBonus.int||0));
+    $("mpBar").style.width = "100%";
+    $("mpText").textContent = mpMax+" / "+mpMax;
+    // Fatigue = quests missed today; Ability Points = +3 per level gained.
+    var fat = 0;
+    todayQuests().forEach(function(q){ if(state.questState[q.id]==="missed") fat++; });
+    $("qsFatigue").textContent = fat;
+    $("qsAbility").textContent = (state.level-1)*3;
     renderStats();
   }
 
@@ -684,7 +774,7 @@
     }
   }
 
-  function renderAll(){ renderStatus(); renderQuests(); renderAch(); renderNow(); }
+  function renderAll(){ renderStatus(); renderQuests(); renderAch(); renderNow(); applyTheme(); }
 
   /* ---------- Toast ---------- */
   var toastTimer=null;
@@ -742,6 +832,10 @@
       state.questState[id]="done";
       state.doneCount++; state.dayXp+=q.xp;
       state.catDone[q.cat]++; state.statBonus[q.cat]++;
+      // Anime stats (boss, 2026-11-07): body quests grow VIT + AGI,
+      // trading + study quests grow PER.
+      if(q.cat==="str"){ state.statBonus.vit=(state.statBonus.vit||0)+1; state.statBonus.agi=(state.statBonus.agi||0)+1; }
+      if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
       state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
       state.hp = Math.min(100, state.hp+2);
       var lv = gainXp(q.xp);
