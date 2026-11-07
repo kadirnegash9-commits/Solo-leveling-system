@@ -63,12 +63,15 @@
   .mono{font-family:"Share Tech Mono",monospace}
 
   /* ---------- System window frame ---------- */
+  /* Sung Jinwoo's System look (boss, 2026-11-07): the anime's bright
+     blue holographic windows — blue-tinted translucent panels,
+     bright cyan border + strong outer glow, white text on top. */
   .sys{
-    background:linear-gradient(180deg,rgba(14,26,48,.78),rgba(9,17,32,.85));
-    border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(23,78,166,.62),rgba(10,32,74,.72));
+    border:1.5px solid rgba(56,200,255,.55);
     border-radius:var(--radius);
     position:relative;
-    box-shadow:0 0 28px rgba(56,200,255,.16), 0 0 0 1px rgba(56,200,255,.10), 0 18px 40px rgba(0,0,0,.45), inset 0 0 34px rgba(43,125,224,.08);
+    box-shadow:0 0 36px rgba(56,200,255,.30), 0 0 0 1px rgba(56,200,255,.18), 0 18px 40px rgba(0,0,0,.45), inset 0 0 40px rgba(56,200,255,.10);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;width:16px;height:16px;border-color:var(--cyan);border-style:solid;opacity:.85;pointer-events:none;
@@ -398,14 +401,14 @@
     {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"breakfast", time:"07:00", end:"08:00", title:"ቁርስ + ለትምህርት ቤት መዘጋጀት", desc:"ቁርስ ብላ፣ ቦርሳ ዝግጁ አድርግ", xp:1, cat:"disc", label:"ሥርዓት"},
     {id:"school", time:"08:00", end:"12:30", title:"ትምህርት ቤት — 9ኛ ክፍል", desc:"ትኩረት ለትምህርት · ቅዳሜና እሁድ የለም", xp:1, cat:"int", label:"አእምሮ", weekdaysOnly:true},
-    {id:"zuhr",   time:"12:30", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"zuhr",   time:"12:35", end:"13:45", title:"ዙህር ጸሎት + ምሳ", desc:"ጸሎቱን በሰዓቱ · ምሳ", xp:1, cat:"faith", label:"እምነት"},
     {id:"english",time:"14:30", end:"15:10", title:"English ትምህርት", desc:"40 ደቂቃ — ቃላት + grammar", xp:1, cat:"int", label:"አእምሮ"},
-    {id:"asr",    time:"16:20", end:"16:40", title:"አስር ጸሎት + ቁርኣን", desc:"20 ደቂቃ ቁርኣን ንባብ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"asr",    time:"15:35", end:"15:55", title:"አስር ጸሎት + ቁርኣን", desc:"20 ደቂቃ ቁርኣን ንባብ", xp:1, cat:"faith", label:"እምነት"},
     {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting ልምምድ ✍", desc:"5 ደቂቃ የእጅ ጽሑፍ ልምምድ", xp:1, cat:"skill", label:"ክህሎት"},
     {id:"trading",time:"17:45", end:"18:00", title:"Trading — ዝግጅት", desc:"Top-down analysis (Daily → H1 → M15) · ዜና ቼክ · confirmation ከሌለ trade የለም", xp:1, cat:"trade", label:"ትሬዲንግ"},
-    {id:"maghrib",time:"18:00", end:"18:45", title:"ሱቅ ዝጋ + መግሪብ ጸሎት", desc:"Freedom Shop ዝጋ (እሁድ ሱቅ ዝግ ነው — መግሪብ ብቻ)", xp:1, cat:"faith", label:"እምነት"},
-    {id:"study",  time:"18:45", end:"20:15", title:"የቤት ጥናት", desc:"1 ሰዓት 30 ደቂቃ — የትምህርት ቤት ጥናት", xp:1, cat:"int", label:"አእምሮ"},
-    {id:"isha",   time:"20:15", end:"21:00", title:"ኢሻ ጸሎት + እራት", desc:"የቀኑን የመጨረሻ ጸሎት በሰዓቱ", xp:1, cat:"faith", label:"እምነት"},
+    {id:"maghrib",time:"18:10", end:"18:45", title:"ሱቅ ዝጋ + መግሪብ ጸሎት", desc:"Freedom Shop ዝጋ (እሁድ ሱቅ ዝግ ነው — መግሪብ ብቻ)", xp:1, cat:"faith", label:"እምነት"},
+    {id:"study",  time:"18:45", end:"19:25", title:"የቤት ጥናት", desc:"1 ሰዓት 30 ደቂቃ — የትምህርት ቤት ጥናት (ኢሻ ሲደርስ እረፍት)", xp:1, cat:"int", label:"አእምሮ"},
+    {id:"isha",   time:"19:25", end:"20:15", title:"ኢሻ ጸሎት + እራት", desc:"የቀኑን የመጨረሻ ጸሎት በሰዓቱ", xp:1, cat:"faith", label:"እምነት"},
     {id:"homework",time:"21:00", end:"22:15", title:"Homework + ክለሳ", desc:"1 ሰዓት 15 ደቂቃ — homework ጨርስ፣ የቀኑን ክለሳ አድርግ", xp:1, cat:"int", label:"አእምሮ"},
     {id:"sleep",  time:"22:15", end:"23:59", title:"እንቅልፍ — በሰዓቱ ተኛ", desc:"ነገ ጠዋት ስፖርት አለ — ስልክ አጥፍተህ ተኛ", xp:1, cat:"disc", label:"ሥርዓት"}
   ];
