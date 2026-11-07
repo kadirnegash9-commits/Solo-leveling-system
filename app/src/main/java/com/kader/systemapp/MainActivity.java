@@ -17,6 +17,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
@@ -24,6 +25,7 @@ public class MainActivity extends Activity {
     private static final String CHANNEL_ID = "solo_leveling_alarm";
     private static final String OLD_CHANNEL_ID = "solo_leveling";
     private static final int NOTIF_PERMISSION_CODE = 1001;
+    private static final int RINGTONE_PICKER_CODE = 1002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,29 +59,10 @@ public class MainActivity extends Activity {
         QuestReceiver.scheduleAll(this);
     }
 
+    // One place builds the alarm channel, so the user's chosen sound
+    // (saved in QuestReceiver) is always the one that gets used.
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager == null) return;
-            // Drop the old silent v2.2 channel so only the alarm channel remains.
-            manager.deleteNotificationChannel(OLD_CHANNEL_ID);
-            Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (alarmUri == null) {
-                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            }
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Solo Leveling Alarms",
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Quest alarms — ring like a clock alarm");
-            channel.setSound(alarmUri, new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build());
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000, 500, 1000});
-            manager.createNotificationChannel(channel);
-        }
+        QuestReceiver.ensureChannel(this);
     }
 
     private void postNotification(String title, String text) {
@@ -161,6 +144,55 @@ public class MainActivity extends Activity {
                     QuestReceiver.scheduleTestAlarm(MainActivity.this);
                 }
             });
+        }
+
+        // Alarm sound picker (boss, 2026-11-07): opens the phone's own
+        // ringtone list (alarm sounds) — no audio files in the app.
+        @JavascriptInterface
+        public void pickAlarmSound() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+                        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Alarm sound — Solo Leveling");
+                        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+                        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+                        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                                QuestReceiver.alarmSound(MainActivity.this));
+                        startActivityForResult(intent, RINGTONE_PICKER_CODE);
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Ringtone picker አልተከፈተም", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public String alarmSoundName() {
+            return QuestReceiver.alarmSoundName(MainActivity.this);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RINGTONE_PICKER_CODE && resultCode == RESULT_OK && data != null) {
+            Uri picked = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            if (picked != null) {
+                QuestReceiver.setAlarmSound(this, picked.toString());
+                final String name = QuestReceiver.alarmSoundName(this);
+                Toast.makeText(this, "Alarm sound: " + name, Toast.LENGTH_LONG).show();
+                if (webView != null) {
+                    final String js = "window.onAlarmSoundPicked && window.onAlarmSoundPicked("
+                            + JSONObject.quote(name) + ")";
+                    webView.post(new Runnable() {
+                        @Override
+                        public void run() { webView.evaluateJavascript(js, null); }
+                    });
+                }
+            }
         }
     }
 

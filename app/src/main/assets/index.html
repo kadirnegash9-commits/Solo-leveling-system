@@ -49,13 +49,12 @@
     padding-bottom:40px;
   }
   /* System grid — brighter (boss, 2026-11-07): the Solo Leveling
-     System's glowing blue hologram grid, now visible further down,
-     plus a purple shadow aura at the bottom */
+     System's glowing blue hologram grid, full height so the change
+     is unmistakable, plus a purple shadow aura at the bottom */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(rgba(56,200,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.06) 1px,transparent 1px);
+    background-image:linear-gradient(rgba(56,200,255,.085) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.085) 1px,transparent 1px);
     background-size:44px 44px;
-    mask-image:linear-gradient(to bottom,black,transparent 88%);
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
   .en{font-family:"Rajdhani",sans-serif;letter-spacing:.14em;text-transform:uppercase}
@@ -67,7 +66,7 @@
     border:1px solid var(--line);
     border-radius:var(--radius);
     position:relative;
-    box-shadow:0 0 0 1px rgba(56,200,255,.05), 0 18px 40px rgba(0,0,0,.45), inset 0 0 34px rgba(43,125,224,.06);
+    box-shadow:0 0 28px rgba(56,200,255,.16), 0 0 0 1px rgba(56,200,255,.10), 0 18px 40px rgba(0,0,0,.45), inset 0 0 34px rgba(43,125,224,.08);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;width:16px;height:16px;border-color:var(--cyan);border-style:solid;opacity:.85;pointer-events:none;
@@ -355,6 +354,7 @@
         <div class="install-body">
           <p id="notifStatus">Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።</p>
           <p id="alarmStatus" style="margin-top:6px">⏰ Alarm: ✅ እንደ clock alarm ይሰራል — በሰዓቱ ድምጽ + vibration ይመጣል።</p>
+          <p id="alarmSoundRow" style="margin-top:6px">🔔 Alarm ድምጽ፦ <b id="alarmSoundName">Default alarm</b> <button class="btn ghost" id="alarmSoundBtn" style="margin-left:8px">ቀይር</button></p>
           <div class="frow" style="margin-top:10px">
             <button class="btn" id="notifAllow">🔔 Notification ፍቀድ</button>
             <button class="btn ghost" id="notifTest">Test አድርግ</button>
@@ -809,6 +809,29 @@
         } else { toast("⚠ Alarm በ app (APK) ውስጥ ብቻ ይሰራል", true); }
       }catch(e){ toast("⚠ Alarm test አልተጀመረም", true); }
     });
+    // Alarm sound picker (boss, 2026-11-07): shows the current sound
+    // and opens the phone's ringtone list to change it.
+    var soundBtn = $("alarmSoundBtn");
+    function refreshAlarmSound(){
+      try{
+        if(hasBridge() && window.AndroidBridge.alarmSoundName){
+          var n = window.AndroidBridge.alarmSoundName();
+          var el = $("alarmSoundName"); if(el) el.textContent = n;
+        }
+      }catch(e){}
+    }
+    window.onAlarmSoundPicked = function(name){
+      var el = $("alarmSoundName"); if(el) el.textContent = name;
+      toast("🔔 Alarm sound: " + name + " — Alarm Test ነክተህ ስማ");
+    };
+    if(soundBtn) soundBtn.addEventListener("click", function(){
+      try{
+        if(hasBridge() && window.AndroidBridge.pickAlarmSound){
+          window.AndroidBridge.pickAlarmSound();
+        } else { toast("⚠ Alarm sound በ app (APK) ውስጥ ብቻ ይሰራል", true); }
+      }catch(e){ toast("⚠ Ringtone picker አልተከፈተም", true); }
+    });
+    refreshAlarmSound();
     refreshNotifStatus();
   })();
 

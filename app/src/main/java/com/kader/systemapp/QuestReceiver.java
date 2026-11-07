@@ -8,11 +8,17 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Posts a quest reminder at each daily-plan time and (re)arms the alarms.
@@ -82,6 +88,80 @@ public class QuestReceiver extends BroadcastReceiver {
         notifyQuest(context, id == null ? "quest" : id, title);
         // Keep the chain alive even if the app is not opened daily.
         scheduleAll(context);
+        // English quest: speak a motivational phrase out loud (boss,
+        // 2026-11-07). The Alarm Test button speaks too, so he can
+        // hear the voice today instead of waiting for 14:30.
+        if ("english".equals(id) || "alarmtest".equals(id)) {
+            speakMotivation(context, goAsync(), id);
+        }
+    }
+
+    // English motivation, spoken out loud by the phone (boss, 2026-11-07).
+    // One phrase per day, rotating. If the phone has no English voice
+    // data, this silently does nothing — the alarm still rings.
+    private static final String[] MOTIVATION = {
+            "Rise and shine! Time for your English lesson. Every word you learn makes you stronger. Arise!",
+            "Your English grows a little every single day. Open the app and learn. You can do it!",
+            "Small steps every day lead to big changes. English time, forty minutes. Let's go!",
+            "Discipline beats motivation. English time is now. You are becoming a hunter of words!",
+            "Soon you will speak English with your squad. Today's lesson starts now. Arise!"
+    };
+    private static final String MOTIVATION_TEST =
+            "This is a test. Your English alarm will speak like this. Arise!";
+
+    private static void speakMotivation(final Context context,
+                                        final PendingResult pending, String id) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final TextToSpeech[] ttsHolder = new TextToSpeech[1];
+        final boolean[] finished = new boolean[1];
+        final Runnable finish = new Runnable() {
+            @Override public void run() {
+                if (finished[0]) return;
+                finished[0] = true;
+                try {
+                    if (ttsHolder[0] != null) { ttsHolder[0].stop(); ttsHolder[0].shutdown(); }
+                } catch (Exception ignored) {}
+                try { pending.finish(); } catch (Exception ignored) {}
+            }
+        };
+        // Safety net: never hold the receiver more than 25 seconds.
+        handler.postDelayed(finish, 25_000);
+        final String phrase = "alarmtest".equals(id)
+                ? MOTIVATION_TEST
+                : MOTIVATION[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % MOTIVATION.length];
+        try {
+            ttsHolder[0] = new TextToSpeech(context.getApplicationContext(),
+                    new TextToSpeech.OnInitListener() {
+                @Override public void onInit(int status) {
+                    final TextToSpeech tts = ttsHolder[0];
+                    if (status != TextToSpeech.SUCCESS || tts == null) {
+                        handler.post(finish);
+                        return;
+                    }
+                    try {
+                        tts.setLanguage(Locale.ENGLISH);
+                        tts.setAudioAttributes(new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                                .build());
+                        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                            @Override public void onStart(String utteranceId) {}
+                            @Override public void onDone(String utteranceId) { handler.post(finish); }
+                            @Override public void onError(String utteranceId) { handler.post(finish); }
+                        });
+                        // Let the alarm ringtone start first, then speak.
+                        handler.postDelayed(new Runnable() {
+                            @Override public void run() {
+                                try {
+                                    if (finished[0]) return;
+                                    ttsHolder[0].speak(phrase, TextToSpeech.QUEUE_FLUSH, null, "solo-english");
+                                } catch (Exception e) { handler.post(finish); }
+                            }
+                        }, 2000);
+                    } catch (Exception e) { handler.post(finish); }
+                }
+            });
+        } catch (Exception e) { handler.post(finish); }
     }
 
     /** One-off test alarm, 60s from now, through the exact same code path
@@ -187,7 +267,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pending)
                 .setCategory(Notification.CATEGORY_ALARM)
-                .setSound(alarmSound())
+                .setSound(alarmSound(context))
                 .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setFullScreenIntent(pending, true)
@@ -195,9 +275,53 @@ public class QuestReceiver extends BroadcastReceiver {
         nm.notify(tag, 1, b.build());
     }
 
-    private static Uri alarmSound() {
+    // The user's chosen alarm sound (picked in the app's Notifications
+    // section via the system ringtone picker, boss 2026-11-07), or the
+    // system default alarm when nothing is chosen yet. Stored in
+    // SharedPreferences so the receiver (which runs without the UI)
+    // can read it when an alarm fires.
+    private static final String PREFS = "solo_leveling_prefs";
+    private static final String KEY_SOUND = "alarm_sound_uri";
+
+    public static Uri alarmSound(Context context) {
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            String saved = prefs.getString(KEY_SOUND, null);
+            if (saved != null && !saved.isEmpty()) {
+                Uri u = Uri.parse(saved);
+                if (u != null) return u;
+            }
+        } catch (Exception ignored) {}
         Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         return u != null ? u : RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    }
+
+    // Display name of the current alarm sound (shown in the app).
+    public static String alarmSoundName(Context context) {
+        try {
+            android.media.Ringtone r = RingtoneManager.getRingtone(context, alarmSound(context));
+            if (r != null) {
+                String t = r.getTitle(context);
+                if (t != null && !t.isEmpty()) return t;
+            }
+        } catch (Exception ignored) {}
+        return "Default alarm";
+    }
+
+    // Save the picked sound and rebuild the channel with it — a
+    // channel's sound can't change after creation, so delete +
+    // recreate is required.
+    public static void setAlarmSound(Context context, String uriString) {
+        try {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .edit().putString(KEY_SOUND, uriString == null ? "" : uriString).apply();
+        } catch (Exception ignored) {}
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager nm =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm != null) nm.deleteNotificationChannel(CHANNEL_ID);
+        }
+        ensureChannel(context);
     }
 
     public static void ensureChannel(Context context) {
@@ -210,7 +334,7 @@ public class QuestReceiver extends BroadcastReceiver {
         NotificationChannel ch = new NotificationChannel(
                 CHANNEL_ID, "Solo Leveling Alarms", NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription("Quest alarms — ring like a clock alarm");
-        ch.setSound(alarmSound(), new AudioAttributes.Builder()
+        ch.setSound(alarmSound(context), new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build());
