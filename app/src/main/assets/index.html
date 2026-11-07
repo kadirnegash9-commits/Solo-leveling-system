@@ -226,17 +226,21 @@
   .qmeta{display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap}
   .xpchip{font-family:"Rajdhani";font-weight:700;font-size:12.5px;color:var(--gold);border:1px solid rgba(245,185,66,.4);padding:1px 8px;border-radius:20px;letter-spacing:.06em}
   .catchip{font-size:11px;color:var(--muted);border:1px solid rgba(147,169,196,.3);padding:1px 8px;border-radius:20px}
-  .qbtns{display:flex;gap:7px;flex:none}
+  .qbtns{display:flex;flex-direction:column;gap:6px;flex:none}
   .qbtn{
-    width:40px;height:40px;border-radius:10px;border:1px solid var(--line);cursor:pointer;
-    background:#0a1526;color:var(--muted);display:flex;align-items:center;justify-content:center;
-    transition:all .2s;padding:0;
+    min-width:74px;height:30px;border-radius:0;border:1px solid var(--line);cursor:pointer;
+    background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;
+    transition:all .2s;padding:0 10px;
+    font-family:"Rajdhani";font-weight:700;font-size:12px;letter-spacing:.14em;
   }
-  .qbtn svg{width:19px;height:19px}
-  .qbtn.ok:hover{border-color:var(--green);color:var(--green);box-shadow:0 0 12px rgba(46,230,168,.3)}
-  .qbtn.no:hover{border-color:var(--red);color:var(--red);box-shadow:0 0 12px rgba(255,77,94,.3)}
-  .quest.done .qbtn.ok{background:rgba(46,230,168,.16);border-color:var(--green);color:var(--green)}
-  .quest.missed .qbtn.no{background:rgba(255,77,94,.14);border-color:var(--red);color:var(--red)}
+  .qbtn.ok{border-color:rgba(0,245,255,.55);color:var(--cyan);text-shadow:0 0 6px rgba(0,245,255,.8)}
+  .qbtn.ok:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,.35)}
+  .qbtn.no{border-color:rgba(255,77,94,.55);color:var(--red);text-shadow:0 0 6px rgba(255,77,94,.8)}
+  .qbtn.no:hover{border-color:var(--red);box-shadow:0 0 12px rgba(255,77,94,.35)}
+  .quest.done .qbtn.ok{background:rgba(0,245,255,.16);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,.4)}
+  .quest.done .qbtn.no{opacity:.45}
+  .quest.missed .qbtn.no{background:rgba(255,77,94,.14);border-color:var(--red);color:var(--red);box-shadow:0 0 12px rgba(255,77,94,.4)}
+  .quest.missed .qbtn.ok{opacity:.45}
   .quest.done .qtitle,.quest.missed .qtitle{text-decoration:line-through;text-decoration-thickness:1px}
   .state-note{font-size:12px;font-weight:700}
   .state-note.good{color:var(--green)} .state-note.bad{color:var(--red)}
@@ -756,8 +760,8 @@
         '<div class="qdesc">'+q.desc+'</div>'+
         '<div class="qmeta"><span class="xpchip">+'+q.xp+' XP</span><span class="catchip">'+q.label+'</span>'+note+'</div></div>'+
         '<div class="qbtns">'+
-          '<button class="qbtn ok" data-act="done" data-id="'+q.id+'" aria-label="Done — '+q.title+'">'+CHECK+'</button>'+
-          '<button class="qbtn no" data-act="missed" data-id="'+q.id+'" aria-label="Missed — '+q.title+'">'+CROSS+'</button>'+
+          '<button class="qbtn ok" data-act="done" data-id="'+q.id+'" aria-label="Accept — '+q.title+'">ACCEPT</button>'+
+          '<button class="qbtn no" data-act="missed" data-id="'+q.id+'" aria-label="Decline — '+q.title+'">DECLINE</button>'+
         '</div>';
       wrap.appendChild(row);
     });
