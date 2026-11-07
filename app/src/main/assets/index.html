@@ -17,25 +17,25 @@
   :root{
     --bg:#060a14;
     --bg2:#0a1120;
-    --panel:#0b1526;
-    --panel2:#0e1a30;
-    --line:#1d3a5f;
-    --line-bright:#2f6db3;
-    --cyan:#38c8ff;
-    --cyan-dim:#7dd7ff;
-    --cyan-bright:#8fe9ff;
-    --frame:rgba(56,200,255,.75);
-    --glow:rgba(56,200,255,.45);
-    --glow-strong:rgba(126,231,255,.95);
-    --glow-top:rgba(56,200,255,.38);
-    --glow-mid:rgba(43,125,224,.30);
-    --grid:rgba(56,200,255,.16);
+    --panel:#020916;
+    --panel2:#020916;
+    --line:#0e3a56;
+    --line-bright:#00e5ff;
+    --cyan:#00e5ff;
+    --cyan-dim:#7deeff;
+    --cyan-bright:#a5f3ff;
+    --frame:rgba(0,229,255,.8);
+    --glow:rgba(0,229,255,.4);
+    --glow-strong:rgba(0,229,255,.95);
+    --glow-top:rgba(0,229,255,.30);
+    --glow-mid:rgba(0,229,255,.22);
+    --grid:rgba(0,229,255,.10);
     --aura:rgba(124,58,237,.22);
-    --blue:#2b7de0;
+    --blue:#00b8d4;
     --gold:#f5b942;
     --red:#ff4d5e;
     --green:#2ee6a8;
-    --text:#e8f1fc;
+    --text:#ffffff;
     --muted:#93a9c4;
     --muted2:#63789193;
     --radius:14px;
@@ -80,8 +80,10 @@
      THROUGH them — that is why v2.9/v3.2 looked unchanged. */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:44px 44px;
+    background-image:
+      radial-gradient(rgba(0,229,255,.10) 1px,transparent 1.3px),
+      linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:18px 18px,44px 44px,44px 44px;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
   .en{font-family:"Rajdhani",sans-serif;letter-spacing:.14em;text-transform:uppercase}
@@ -102,7 +104,7 @@
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
-      linear-gradient(180deg,rgba(27,86,180,.80),rgba(10,32,74,.88));
+      linear-gradient(180deg,rgba(2,9,22,.82),rgba(2,9,22,.86));
     background-size:
       26px 3px, 3px 26px,
       26px 3px, 3px 26px,
@@ -117,10 +119,14 @@
       center;
     background-repeat:no-repeat;
     background-origin:border-box;
-    border:2px solid var(--frame);
-    border-radius:8px;
+    border:1px solid var(--frame);
+    outline:1px solid rgba(0,229,255,.35);
+    outline-offset:3px;
+    border-radius:0;
     position:relative;
-    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(56,200,255,.14);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(0,229,255,.10);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;left:50%;width:10px;height:10px;
@@ -131,11 +137,11 @@
   .sys::after{bottom:-6px}
   .sys-head{
     display:flex;align-items:center;gap:10px;
-    padding:12px 16px;border-bottom:1px solid rgba(56,200,255,.35);
+    padding:12px 16px;border-bottom:1px solid rgba(0,229,255,.35);
   }
   .sys-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan-dim);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong)}
+  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong)}
   .sys-head .tag{margin-left:auto;font-size:11px;color:var(--muted)}
 
   /* ---------- Hero / Status ---------- */
@@ -168,10 +174,10 @@
   .bar-row .bv{text-align:right;color:var(--muted);font-family:"Share Tech Mono";font-size:11px}
   .bar{height:12px;background:#081120;border:1px solid #1b3355;border-radius:4px;overflow:hidden}
   .bar>i{display:block;height:100%;width:0%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
-  .bar.xp>i{background:linear-gradient(90deg,#1d6fd1,var(--cyan));box-shadow:0 0 12px rgba(56,200,255,.7)}
+  .bar.xp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,229,255,.7)}
   .bar.hp>i{background:linear-gradient(90deg,#0d9d6c,var(--green));box-shadow:0 0 12px rgba(46,230,168,.55)}
   .bar.hp.low>i{background:linear-gradient(90deg,#c22633,var(--red));box-shadow:0 0 12px rgba(255,77,94,.6)}
-  .bar.mp>i{background:linear-gradient(90deg,#1d6fd1,var(--cyan));box-shadow:0 0 12px var(--glow)}
+  .bar.mp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px var(--glow)}
   .xp-color{color:var(--cyan)} .hp-color{color:var(--green)} .mp-color{color:var(--cyan-dim)}
   .quickstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
   .qs{background:rgba(8,17,32,.7);border:1px solid rgba(56,200,255,.14);border-radius:10px;padding:9px 6px;text-align:center}
@@ -304,6 +310,16 @@
   .lu-card .big{font-family:"Rajdhani";font-size:52px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 0 16px #fff, 0 0 44px var(--cyan), 0 0 90px var(--cyan);line-height:1}
   .lu-card p{color:var(--cyan-dim);margin:10px 0 4px;font-size:15px}
   .lu-card .newrank{color:var(--gold);font-weight:800;font-size:17px;margin-bottom:18px}
+  /* ---------- v3.8 Strict UI Theme spec (boss, 2026-11-07) ----------
+     Authentic Solo Leveling System HUD: sharp rectangles, double-line
+     neon borders, electric cyan #00e5ff, white values, glowing bars. */
+  .sys,.avatar,.rank-badge,.levelbox,.qs,.stat,.quest,.qtime,.xpchip,.catchip,.qbtn,.theme-row,.ach,.frow input[type=text],.frow select,.btn,.warn-box,#toast,.lu-card,.bar,.stat .sbar{border-radius:0}
+  .bar{box-shadow:0 0 8px rgba(0,229,255,.4);border-color:rgba(0,229,255,.45)}
+  .stat .sname i{color:#fff}
+  .bar-row .bv{color:#fff}
+  .btn{background:linear-gradient(180deg,#00b8d4,#008fa8);box-shadow:0 0 16px rgba(0,229,255,.35)}
+  #toast{background:rgba(2,9,22,.92)}
+  .lu-card{background:linear-gradient(180deg,rgba(2,9,22,.95),rgba(2,9,22,.95))}
   @media (prefers-reduced-motion: reduce){
     *{animation:none!important;transition:none!important}
   }
@@ -316,7 +332,7 @@
   <section class="sys hero" aria-label="Hunter status">
     <div class="hero-top">
       <div class="avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#38c8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
         <span class="rank-badge" id="rankBadge">E</span>
       </div>
       <div class="who">
@@ -564,7 +580,15 @@
       var s = data.state;
       var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","catDone","statBonus","unlocked"];
       keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
-      if(data.quests && data.quests.length){ quests = data.quests; }
+      if(data.quests && data.quests.length){
+        quests = data.quests;
+        // v3.8: re-apply the current English quest text to saved quests
+        // (v3.6 saves still hold Amharic titles) — keep done/missed state.
+        quests.forEach(function(q, i){
+          var b = BASE_QUESTS[i];
+          if(q && b && q.id === b.id){ q.title = b.title; q.desc = b.desc; q.label = b.label; }
+        });
+      }
       if(data.forgeCounter) forgeCounter = data.forgeCounter;
     }catch(e){}
   }
@@ -731,7 +755,7 @@
     $("dayDone").textContent = state.doneCount+" / "+total;
     $("dayXp").textContent = state.dayXp;
     var d = new Date();
-    $("questDate").textContent = d.toLocaleDateString("am-ET",{weekday:"long", month:"long", day:"numeric"});
+    $("questDate").textContent = d.toLocaleDateString("en-GB",{weekday:"long", month:"long", day:"numeric"});
   }
 
   function renderAch(){
