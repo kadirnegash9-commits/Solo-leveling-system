@@ -869,6 +869,9 @@
     var prev = state.questState[id];
     if(prev) return;
 
+    // Tapping ACCEPT or DECLINE dismisses the alarm — stop the looping sound.
+    try{ if(window.AndroidBridge && window.AndroidBridge.stopAlarmSound) window.AndroidBridge.stopAlarmSound(); }catch(e){}
+
     if(act==="done"){
       state.questState[id]="done";
       state.doneCount++; state.dayXp+=q.xp;

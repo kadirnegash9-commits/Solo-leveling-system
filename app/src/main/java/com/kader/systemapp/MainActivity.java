@@ -31,6 +31,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Tapping the alarm notification dismisses the alarm: stop the
+        // looping sound. A plain launch (launcher / full-screen auto-open)
+        // carries no extra, so the loop keeps ringing.
+        checkStopAlarm(getIntent());
+
         // Alarm-style: show over the lock screen and turn the screen on,
         // like a clock alarm, when a quest reminder fires.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -57,6 +62,23 @@ public class MainActivity extends Activity {
 
         // Arm the daily quest reminders (QuestReceiver)
         QuestReceiver.scheduleAll(this);
+    }
+
+    // The alarm notification is SINGLE_TOP: when the app is already open,
+    // a tap arrives here instead of onCreate.
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        checkStopAlarm(intent);
+    }
+
+    private void checkStopAlarm(Intent intent) {
+        try {
+            if (intent != null && intent.getBooleanExtra("stop_alarm_loop", false)) {
+                QuestReceiver.stopAlarmLoop();
+            }
+        } catch (Exception ignored) {}
     }
 
     // One place builds the alarm channel, so the user's chosen sound
@@ -144,6 +166,13 @@ public class MainActivity extends Activity {
                     QuestReceiver.scheduleTestAlarm(MainActivity.this);
                 }
             });
+        }
+
+        // Called by the web app when a quest is ACCEPTED or DECLINED —
+        // tapping a quest dismisses the alarm, so the looping sound stops.
+        @JavascriptInterface
+        public void stopAlarmSound() {
+            QuestReceiver.stopAlarmLoop();
         }
 
         // Alarm sound picker (boss, 2026-11-07): opens the phone's own

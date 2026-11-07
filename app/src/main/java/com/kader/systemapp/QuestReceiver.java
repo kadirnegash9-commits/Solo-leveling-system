@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -60,6 +62,8 @@ public class QuestReceiver extends BroadcastReceiver {
         return v <= 0 ? CHANNEL_ID : CHANNEL_ID + "_v" + v;
     }
     public static final String ACTION_QUEST = "com.kader.systemapp.QUEST_REMINDER";
+    // Sent when the alarm notification is swiped away — stop the loop.
+    public static final String ACTION_STOP_ALARM = "com.kader.systemapp.STOP_ALARM";
 
     // {id, HH:MM, title} — same order/times as the web quests
     public static final String[][] QUESTS = {
@@ -87,6 +91,12 @@ public class QuestReceiver extends BroadcastReceiver {
         // Phone restarted: re-arm all quest alarms, no notification.
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             scheduleAll(context);
+            return;
+        }
+        // Alarm notification swiped away: the alarm is dismissed — stop
+        // the looping sound. Nothing else to do (alarms stay armed).
+        if (ACTION_STOP_ALARM.equals(intent.getAction())) {
+            stopAlarmLoop();
             return;
         }
         String id = intent.getStringExtra("quest_id");
@@ -264,9 +274,23 @@ public class QuestReceiver extends BroadcastReceiver {
         NotificationManager nm =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
+        // Full-screen intent (auto-opens the app when the alarm fires):
+        // plain open, NO stop extra — the loop must keep ringing.
         Intent open = new Intent(context, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pending = PendingIntent.getActivity(context, 0, open,
+        PendingIntent fullScreen = PendingIntent.getActivity(context, 0, open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        // Tapping the notification dismisses the alarm: same screen, but
+        // with an extra so MainActivity stops the looping sound.
+        Intent tap = new Intent(context, MainActivity.class);
+        tap.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        tap.putExtra("stop_alarm_loop", true);
+        PendingIntent tapPending = PendingIntent.getActivity(context, 1, tap,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        // Swiping the notification away also dismisses the alarm.
+        Intent stop = new Intent(context, QuestReceiver.class);
+        stop.setAction(ACTION_STOP_ALARM);
+        PendingIntent deletePending = PendingIntent.getBroadcast(context, 2, stop,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -277,14 +301,93 @@ public class QuestReceiver extends BroadcastReceiver {
         b.setContentTitle("⚔️ Quest time is here")
                 .setContentText(title)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentIntent(pending)
+                .setContentIntent(tapPending)
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setSound(alarmSound(context))
                 .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
                 .setPriority(Notification.PRIORITY_HIGH)
-                .setFullScreenIntent(pending, true)
+                .setFullScreenIntent(fullScreen, true)
+                .setDeleteIntent(deletePending)
                 .setAutoCancel(true);
         nm.notify(tag, 1, b.build());
+        // Loop the alarm sound until he dismisses it (boss, 2026-11-07).
+        startAlarmLoop(context);
+    }
+
+    // Looping alarm sound (boss, 2026-11-07): Android plays a
+    // notification channel sound ONCE and never loops it, so the first
+    // play comes from the channel, then a looping MediaPlayer takes over
+    // and repeats the chosen sound until the alarm is dismissed (tap the
+    // notification, swipe it away, or ACCEPT/DECLINE a quest in the app).
+    // The loop starts after one play-through, so the sound never doubles.
+    private static MediaPlayer loopPlayer;
+    private static final Handler loopHandler = new Handler(Looper.getMainLooper());
+    private static Runnable loopStartRunnable;
+
+    public static void startAlarmLoop(final Context context) {
+        stopAlarmLoop();
+        final Uri sound = alarmSound(context);
+        long delay = soundDurationMs(context, sound);
+        if (delay <= 0) delay = 45_000; // unknown length: WAKEY is ~46s
+        loopStartRunnable = new Runnable() {
+            @Override public void run() {
+                try {
+                    final MediaPlayer mp = new MediaPlayer();
+                    mp.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build());
+                    mp.setDataSource(context.getApplicationContext(), sound);
+                    mp.setLooping(true);
+                    mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override public void onPrepared(MediaPlayer p) {
+                            // Stopped before it was ready: do not start.
+                            if (loopPlayer != p) return;
+                            try { p.start(); } catch (Exception ignored) {}
+                        }
+                    });
+                    mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                        @Override public boolean onError(MediaPlayer p, int what, int extra) {
+                            try { p.release(); } catch (Exception ignored) {}
+                            if (loopPlayer == p) loopPlayer = null;
+                            return true;
+                        }
+                    });
+                    loopPlayer = mp;
+                    mp.prepareAsync();
+                } catch (Exception ignored) {}
+            }
+        };
+        loopHandler.postDelayed(loopStartRunnable, delay);
+    }
+
+    public static void stopAlarmLoop() {
+        if (loopStartRunnable != null) {
+            try { loopHandler.removeCallbacks(loopStartRunnable); } catch (Exception ignored) {}
+            loopStartRunnable = null;
+        }
+        MediaPlayer mp = loopPlayer;
+        loopPlayer = null;
+        if (mp != null) {
+            try { if (mp.isPlaying()) mp.stop(); } catch (Exception ignored) {}
+            try { mp.release(); } catch (Exception ignored) {}
+        }
+    }
+
+    // Length of the chosen sound in ms, so the loop starts when the
+    // channel's first play ends. 0 when it cannot be read.
+    private static long soundDurationMs(Context context, Uri sound) {
+        MediaMetadataRetriever r = null;
+        try {
+            r = new MediaMetadataRetriever();
+            r.setDataSource(context.getApplicationContext(), sound);
+            String d = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            if (d != null) return Long.parseLong(d);
+        } catch (Exception ignored) {
+        } finally {
+            try { if (r != null) r.release(); } catch (Exception ignored) {}
+        }
+        return 0;
     }
 
     // The user's chosen alarm sound (picked in the app's Notifications
