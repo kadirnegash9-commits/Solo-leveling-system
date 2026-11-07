@@ -38,10 +38,10 @@
   body{
     margin:0;
     background:
-      radial-gradient(1000px 520px at 50% -12%, rgba(56,200,255,.20), transparent 62%),
-      radial-gradient(900px 500px at 85% -10%, rgba(43,125,224,.16), transparent 60%),
-      radial-gradient(700px 420px at -10% 30%, rgba(56,200,255,.07), transparent 55%),
-      radial-gradient(800px 500px at 50% 115%, rgba(124,58,237,.14), transparent 60%),
+      radial-gradient(1000px 520px at 50% -12%, rgba(56,200,255,.28), transparent 62%),
+      radial-gradient(900px 500px at 85% -10%, rgba(43,125,224,.22), transparent 60%),
+      radial-gradient(700px 420px at -10% 30%, rgba(56,200,255,.10), transparent 55%),
+      radial-gradient(800px 500px at 50% 115%, rgba(124,58,237,.22), transparent 60%),
       var(--bg);
     color:var(--text);
     font-family:"Noto Sans Ethiopic",system-ui,sans-serif;
@@ -50,10 +50,12 @@
   }
   /* System grid — brighter (boss, 2026-11-07): the Solo Leveling
      System's glowing blue hologram grid, full height so the change
-     is unmistakable, plus a purple shadow aura at the bottom */
+     is unmistakable, plus a purple shadow aura at the bottom.
+     The panels are translucent now, so the grid + glow shine
+     THROUGH them — that is why v2.9/v3.2 looked unchanged. */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(rgba(56,200,255,.085) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.085) 1px,transparent 1px);
+    background-image:linear-gradient(rgba(56,200,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.10) 1px,transparent 1px);
     background-size:44px 44px;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
@@ -62,7 +64,7 @@
 
   /* ---------- System window frame ---------- */
   .sys{
-    background:linear-gradient(180deg,rgba(14,26,48,.92),rgba(9,17,32,.96));
+    background:linear-gradient(180deg,rgba(14,26,48,.78),rgba(9,17,32,.85));
     border:1px solid var(--line);
     border-radius:var(--radius);
     position:relative;
@@ -390,6 +392,7 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
   var BASE_QUESTS = [
+    {id:"fajr",   time:"05:00", end:"05:30", title:"ፈጅር ጸሎት", desc:"የቀኑ የመጀመሪያ ጸሎት በሰዓቱ · ከሱብሒ በኋላ ሩጫ", xp:1, cat:"faith", label:"እምነት"},
     {id:"sport",  time:"06:00", end:"07:00", title:"ስፖርት — Gym / ሩጫ", desc:"ሰኞ·እሮብ·ዓርብ Gym", xp:5, cat:"str",   label:"ጥንካሬ"},
     {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama ሩጫ — 10km", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሱብሒ ጸሎት በኋላ · 10km ሩጫ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
     {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"እሁድ·ማክሰኞ·ሐሙስ · ከሩጫ በኋላ", xp:5, cat:"str", label:"ጥንካሬ", saitama:true},
@@ -554,11 +557,12 @@
   function todayQuests(){
     var day = eatNow().day; // Mon Tue Wed Thu Fri Sat Sun
     var weekend = (day==="Sat"||day==="Sun");
-    // Saturday rule (boss, 2026-11-07, updated 14:22): prayers ONLY —
-    // no sport/gym on Saturday ("ቅዳሜ ሩጫም ጂምም የለም"). Forged
-    // (custom) quests always stay visible.
+    // Saturday rule (boss, 2026-11-07, updated 14:22, Fajr added
+    // 14:36): prayers ONLY — Fajr + Zuhr + Asr + Maghrib + Isha
+    // (5 quests), no sport/gym on Saturday ("ቅዳሜ ሩጫም ጂምም የለም").
+    // Forged (custom) quests always stay visible.
     if(day==="Sat"){
-      var keep = {zuhr:1, asr:1, maghrib:1, isha:1};
+      var keep = {fajr:1, zuhr:1, asr:1, maghrib:1, isha:1};
       return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
     }
     // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30

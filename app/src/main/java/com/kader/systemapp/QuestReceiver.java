@@ -33,10 +33,10 @@ import java.util.Locale;
  * notification with the alarm ringtone, vibration and a full-screen intent
  * — it rings like a clock alarm. Times/titles must match BASE_QUESTS in
  * app/src/main/assets/index.html. BOOT_COMPLETED re-arms after a reboot.
- * Saturday rule (boss, confirmed 2026-11-07, updated 14:22): on
- * Saturday only prayer (zuhr/asr/maghrib/isha) reminders fire — NO
- * sport/gym, all other quests are excused that day, their alarms
- * move to Sunday.
+ * Saturday rule (boss, confirmed 2026-11-07, updated 14:22, Fajr
+ * added 14:36): on Saturday only prayer (fajr/zuhr/asr/maghrib/
+ * isha) reminders fire — NO sport/gym, all other quests are
+ * excused that day, their alarms move to Sunday.
  * Saitama rule (boss, confirmed 2026-11-07): Sun/Tue/Thu the 05:30 run
  * + 06:30 exercises replace the 06:00 sport quest; Mon/Wed/Fri gym
  * only; Saturday: no Saitama.
@@ -52,6 +52,7 @@ public class QuestReceiver extends BroadcastReceiver {
 
     // {id, HH:MM, title} — same order/times as the web quests
     public static final String[][] QUESTS = {
+            {"fajr", "05:00", "ፈጅር ጸሎት"},
             {"sport", "06:00", "ስፖርት — Gym / ሩጫ"},
             {"breakfast", "07:00", "ቁርስ + ለትምህርት ቤት መዘጋጀት"},
             {"school", "08:00", "ትምህርት ቤት — 9ኛ ክፍል"},
@@ -183,10 +184,10 @@ public class QuestReceiver extends BroadcastReceiver {
     }
 
     // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
-    // 14:22 — "ቅዳሜ ሩጫም ጂምም የለም"). All other quests are excused
-    // on Saturday — no alarm that day.
+    // 14:22 — "ቅዳሜ ሩጫም ጂምም የለም"; Fajr added 14:36). All other
+    // quests are excused on Saturday — no alarm that day.
     private static boolean isSaturdayAllowed(String id) {
-        return "zuhr".equals(id) || "asr".equals(id)
+        return "fajr".equals(id) || "zuhr".equals(id) || "asr".equals(id)
                 || "maghrib".equals(id) || "isha".equals(id);
     }
 
