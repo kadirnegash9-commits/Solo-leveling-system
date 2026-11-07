@@ -548,6 +548,13 @@
   function todayQuests(){
     var day = eatNow().day; // Mon Tue Wed Thu Fri Sat Sun
     var weekend = (day==="Sat"||day==="Sun");
+    // Saturday rule (boss, 2026-11-07): only prayer + gym — other quests
+    // are excused, so they don't even appear in the list. Forged (custom)
+    // quests always stay visible.
+    if(day==="Sat"){
+      var keep = {sport:1, zuhr:1, asr:1, maghrib:1, isha:1};
+      return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
+    }
     return quests.filter(function(q){ return !(q.weekdaysOnly && weekend); });
   }
 
