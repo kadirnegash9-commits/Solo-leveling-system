@@ -184,7 +184,7 @@ public class QuestReceiver extends BroadcastReceiver {
     }
 
     // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
-    // 14:22 — "ቅዳሜ ሩጫም ጂምም የለም"; Fajr added 14:36). All other
+    // 14:22 — "no running, no gym on Saturday"; Fajr added 14:36). All other
     // quests are excused on Saturday — no alarm that day.
     private static boolean isSaturdayAllowed(String id) {
         return "fajr".equals(id) || "zuhr".equals(id) || "asr".equals(id)

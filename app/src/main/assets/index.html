@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="am">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -12,7 +12,7 @@
 <title>Solo Leveling System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#060a14;
@@ -20,16 +20,16 @@
     --panel:#020916;
     --panel2:#020916;
     --line:#0e3a56;
-    --line-bright:#00e5ff;
-    --cyan:#00e5ff;
+    --line-bright:#00f5ff;
+    --cyan:#00f5ff;
     --cyan-dim:#7deeff;
     --cyan-bright:#a5f3ff;
-    --frame:rgba(0,229,255,.8);
-    --glow:rgba(0,229,255,.4);
-    --glow-strong:rgba(0,229,255,.95);
-    --glow-top:rgba(0,229,255,.30);
-    --glow-mid:rgba(0,229,255,.22);
-    --grid:rgba(0,229,255,.10);
+    --frame:rgba(0,245,255,.8);
+    --glow:rgba(0,245,255,.4);
+    --glow-strong:rgba(0,245,255,.95);
+    --glow-top:rgba(0,245,255,.30);
+    --glow-mid:rgba(0,245,255,.22);
+    --grid:rgba(0,245,255,.10);
     --aura:rgba(124,58,237,.22);
     --blue:#00b8d4;
     --gold:#f5b942;
@@ -69,7 +69,7 @@
       radial-gradient(800px 500px at 50% 115%, var(--aura), transparent 60%),
       var(--bg);
     color:var(--text);
-    font-family:"Noto Sans Ethiopic",system-ui,sans-serif;
+    font-family:"Rajdhani",system-ui,sans-serif;
     min-height:100vh;
     padding-bottom:40px;
   }
@@ -81,7 +81,7 @@
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background-image:
-      radial-gradient(rgba(0,229,255,.10) 1px,transparent 1.3px),
+      radial-gradient(rgba(0,245,255,.10) 1px,transparent 1.3px),
       linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
     background-size:18px 18px,44px 44px,44px 44px;
   }
@@ -104,7 +104,7 @@
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
-      linear-gradient(180deg,rgba(2,9,22,.82),rgba(2,9,22,.86));
+      linear-gradient(180deg,rgba(6,16,32,0.5),rgba(6,16,32,0.5));
     background-size:
       26px 3px, 3px 26px,
       26px 3px, 3px 26px,
@@ -120,13 +120,13 @@
     background-repeat:no-repeat;
     background-origin:border-box;
     border:1px solid var(--frame);
-    outline:1px solid rgba(0,229,255,.35);
+    outline:1px solid rgba(0,245,255,.35);
     outline-offset:3px;
     border-radius:0;
     position:relative;
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
-    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(0,229,255,.10);
+    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(0,245,255,.10);
   }
   .sys::before,.sys::after{
     content:"";position:absolute;left:50%;width:10px;height:10px;
@@ -137,11 +137,11 @@
   .sys::after{bottom:-6px}
   .sys-head{
     display:flex;align-items:center;gap:10px;
-    padding:12px 16px;border-bottom:1px solid rgba(0,229,255,.35);
+    padding:12px 16px;border-bottom:1px solid rgba(0,245,255,.35);
   }
   .sys-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong)}
+  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong);border:1px solid var(--cyan);padding:4px 12px;box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15)}
   .sys-head .tag{margin-left:auto;font-size:11px;color:var(--muted)}
 
   /* ---------- Hero / Status ---------- */
@@ -152,7 +152,7 @@
     background:linear-gradient(160deg,#12325e,#0a1830);
     border:1px solid var(--line-bright);
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 24px rgba(56,200,255,.22), inset 0 0 18px rgba(56,200,255,.12);
+    box-shadow:0 0 24px rgba(0,245,255,.22), inset 0 0 18px rgba(0,245,255,.12);
   }
   .avatar svg{width:46px;height:46px}
   .rank-badge{
@@ -165,32 +165,32 @@
   .who h1{margin:2px 0 2px;font-size:30px;line-height:1.15;font-weight:800}
   .who .title{color:var(--gold);font-size:14px;font-weight:600}
   .who .class{color:var(--muted);font-size:13px;margin-top:2px}
-  .levelbox{text-align:center;background:rgba(56,200,255,.06);border:1px solid rgba(56,200,255,.25);border-radius:12px;padding:10px 18px}
-  .levelbox .lv{font-family:"Rajdhani";font-size:40px;font-weight:700;line-height:1;color:#fff;text-shadow:0 0 18px rgba(56,200,255,.7)}
+  .levelbox{text-align:center;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.25);border-radius:12px;padding:10px 18px}
+  .levelbox .lv{font-family:"Rajdhani";font-size:40px;font-weight:700;line-height:1;color:#fff;text-shadow:0 0 18px rgba(0,245,255,.7)}
   .levelbox .lvlabel{font-size:10px;letter-spacing:.3em;color:var(--cyan)}
   .bars{margin-top:18px;display:grid;gap:12px}
   .bar-row{display:grid;grid-template-columns:44px 1fr 86px;gap:10px;align-items:center;font-size:12px}
   .bar-row .bl{font-family:"Rajdhani";font-weight:700;letter-spacing:.15em}
   .bar-row .bv{text-align:right;color:var(--muted);font-family:"Share Tech Mono";font-size:11px}
-  .bar{height:12px;background:#081120;border:1px solid #1b3355;border-radius:4px;overflow:hidden}
+  .bar{height:8px;background:transparent;border:1px solid rgba(0,245,255,.45);border-radius:0;overflow:hidden}
   .bar>i{display:block;height:100%;width:0%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
-  .bar.xp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,229,255,.7)}
+  .bar.xp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,245,255,.7)}
   .bar.hp>i{background:linear-gradient(90deg,#0d9d6c,var(--green));box-shadow:0 0 12px rgba(46,230,168,.55)}
   .bar.hp.low>i{background:linear-gradient(90deg,#c22633,var(--red));box-shadow:0 0 12px rgba(255,77,94,.6)}
   .bar.mp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px var(--glow)}
   .xp-color{color:var(--cyan)} .hp-color{color:var(--green)} .mp-color{color:var(--cyan-dim)}
   .quickstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
-  .qs{background:rgba(8,17,32,.7);border:1px solid rgba(56,200,255,.14);border-radius:10px;padding:9px 6px;text-align:center}
+  .qs{background:rgba(8,17,32,.7);border:1px solid rgba(0,245,255,.14);border-radius:10px;padding:9px 6px;text-align:center}
   .qs b{display:block;font-family:"Rajdhani";font-size:21px;line-height:1.1}
   .qs span{font-size:10.5px;color:var(--muted)}
 
   /* stats grid */
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}
-  .stat{border:1px solid rgba(56,200,255,.22);background:rgba(10,24,48,.62);border-radius:10px;padding:11px 12px}
+  .stat{border:1px solid rgba(0,245,255,.22);background:rgba(10,24,48,.62);border-radius:10px;padding:11px 12px}
   .stat .sname{display:flex;justify-content:space-between;align-items:baseline}
   .stat .sname b{font-family:"Rajdhani";letter-spacing:.12em;font-size:14px}
   .stat .sname i{font-style:normal;font-family:"Rajdhani";font-weight:700;font-size:19px;color:var(--cyan)}
-  .stat .sbar{height:5px;background:#0a1526;border-radius:3px;margin-top:8px;overflow:hidden}
+  .stat .sbar{height:4px;background:transparent;border-radius:0;margin-top:8px;overflow:hidden}
   .stat .sbar>i{display:block;height:100%;background:var(--blue);transition:width .7s}
   .stat small{color:var(--muted);font-size:11px}
 
@@ -202,7 +202,7 @@
   .now-clock{font-family:"Share Tech Mono";font-size:15px;color:var(--cyan-dim)}
   .now-act{font-size:21px;font-weight:800;margin:6px 0 2px;line-height:1.35}
   .now-sub{color:var(--muted);font-size:13.5px;line-height:1.55}
-  .now-next{margin-top:13px;border-top:1px dashed rgba(56,200,255,.22);padding-top:11px;font-size:13.5px;color:var(--muted)}
+  .now-next{margin-top:13px;border-top:1px dashed rgba(0,245,255,.22);padding-top:11px;font-size:13.5px;color:var(--muted)}
   .now-next b{color:var(--text)}
   .countdown{color:var(--gold);font-family:"Share Tech Mono"}
 
@@ -214,11 +214,11 @@
     transition:background .25s,border-color .25s;
   }
   .quest + .quest{margin-top:4px}
-  .quest:hover{background:rgba(56,200,255,.04)}
+  .quest:hover{background:rgba(0,245,255,.04)}
   .quest.current{border-color:rgba(245,185,66,.45);background:rgba(245,185,66,.05)}
   .quest.done{opacity:.62}
   .quest.missed{opacity:.55}
-  .qtime{font-family:"Share Tech Mono";font-size:12.5px;color:var(--cyan-dim);background:rgba(56,200,255,.08);border:1px solid rgba(56,200,255,.2);border-radius:7px;padding:4px 7px;flex:none;margin-top:2px;min-width:52px;text-align:center}
+  .qtime{font-family:"Share Tech Mono";font-size:12.5px;color:var(--cyan-dim);background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.2);border-radius:7px;padding:4px 7px;flex:none;margin-top:2px;min-width:52px;text-align:center}
   .quest.current .qtime{color:#0a1120;background:var(--gold);border-color:var(--gold);font-weight:700}
   .qmain{flex:1;min-width:0}
   .qtitle{font-weight:700;font-size:15.5px;line-height:1.4}
@@ -240,7 +240,7 @@
   .quest.done .qtitle,.quest.missed .qtitle{text-decoration:line-through;text-decoration-thickness:1px}
   .state-note{font-size:12px;font-weight:700}
   .state-note.good{color:var(--green)} .state-note.bad{color:var(--red)}
-  .day-progress{padding:13px 16px;border-top:1px solid rgba(56,200,255,.15);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .day-progress{padding:13px 16px;border-top:1px solid rgba(0,245,255,.15);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
   .day-progress b{color:var(--text)}
 
   /* achievements */
@@ -252,7 +252,7 @@
   .theme-row span{margin-left:auto;font-size:12px;color:var(--muted)}
   .theme-row.active{border-color:var(--cyan);box-shadow:0 0 14px var(--glow)}
   @media(max-width:520px){.ach-grid{grid-template-columns:repeat(2,1fr)} .quickstats{grid-template-columns:repeat(2,1fr)} .stats{grid-template-columns:repeat(2,1fr)}}
-  .ach{border:1px solid rgba(56,200,255,.12);background:rgba(8,17,32,.55);border-radius:11px;padding:11px 10px;text-align:center;transition:all .3s}
+  .ach{border:1px solid rgba(0,245,255,.12);background:rgba(8,17,32,.55);border-radius:11px;padding:11px 10px;text-align:center;transition:all .3s}
   .ach .aicon{width:38px;height:38px;margin:0 auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0a1526;border:1px solid #22385c;color:#54708f}
   .ach .aicon svg{width:19px;height:19px}
   .ach b{display:block;font-size:12.5px;line-height:1.35}
@@ -270,13 +270,13 @@
   .btn{
     background:linear-gradient(180deg,#1d6fd1,#155aab);border:1px solid var(--cyan);color:#fff;
     font-family:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:10px;cursor:pointer;
-    box-shadow:0 0 16px rgba(56,200,255,.25);transition:transform .15s, box-shadow .15s;
+    box-shadow:0 0 16px rgba(0,245,255,.25);transition:transform .15s, box-shadow .15s;
   }
-  .btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(56,200,255,.45)}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(0,245,255,.45)}
   .btn.ghost{background:transparent;border-color:var(--line);color:var(--muted);box-shadow:none}
   .steps{list-style:none;margin:0;padding:0;display:grid;gap:11px}
   .steps li{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.55}
-  .steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(56,200,255,.12);border:1px solid var(--cyan);color:var(--cyan);font-family:"Rajdhani";font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(0,245,255,.12);border:1px solid var(--cyan);color:var(--cyan);font-family:"Rajdhani";font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
   .steps b{color:var(--text)}
   kbd{background:#0a1526;border:1px solid var(--line-bright);border-bottom-width:2px;border-radius:6px;padding:1px 7px;font-family:inherit;font-size:12.5px;color:var(--cyan-dim)}
 
@@ -292,7 +292,7 @@
     position:fixed;left:50%;bottom:22px;transform:translate(-50%,90px);z-index:60;
     background:#0b1a30;border:1px solid var(--cyan);color:var(--text);
     padding:12px 20px;border-radius:12px;font-weight:700;font-size:14.5px;
-    box-shadow:0 0 30px rgba(56,200,255,.4);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:92vw;text-align:center;
+    box-shadow:0 0 30px rgba(0,245,255,.4);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:92vw;text-align:center;
   }
   #toast.show{transform:translate(-50%,0)}
   #toast.bad{border-color:var(--red);box-shadow:0 0 30px rgba(255,77,94,.4)}
@@ -304,7 +304,7 @@
   .lu-card{
     max-width:400px;width:100%;text-align:center;padding:34px 24px;
     background:linear-gradient(180deg,#0e2142,#081426);border:1px solid var(--cyan);border-radius:18px;
-    box-shadow:0 0 60px rgba(56,200,255,.5);animation:luin .45s cubic-bezier(.2,.9,.3,1.3);
+    box-shadow:0 0 60px rgba(0,245,255,.5);animation:luin .45s cubic-bezier(.2,.9,.3,1.3);
   }
   @keyframes luin{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   .lu-card .big{font-family:"Rajdhani";font-size:52px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 0 16px #fff, 0 0 44px var(--cyan), 0 0 90px var(--cyan);line-height:1}
@@ -312,12 +312,13 @@
   .lu-card .newrank{color:var(--gold);font-weight:800;font-size:17px;margin-bottom:18px}
   /* ---------- v3.8 Strict UI Theme spec (boss, 2026-11-07) ----------
      Authentic Solo Leveling System HUD: sharp rectangles, double-line
-     neon borders, electric cyan #00e5ff, white values, glowing bars. */
+     neon borders, electric cyan #00f5ff, white values, glowing bars. */
+  .avatar svg,.qbtn svg,.ach .aicon svg{filter:drop-shadow(0 0 4px #00f5ff)}
   .sys,.avatar,.rank-badge,.levelbox,.qs,.stat,.quest,.qtime,.xpchip,.catchip,.qbtn,.theme-row,.ach,.frow input[type=text],.frow select,.btn,.warn-box,#toast,.lu-card,.bar,.stat .sbar{border-radius:0}
-  .bar{box-shadow:0 0 8px rgba(0,229,255,.4);border-color:rgba(0,229,255,.45)}
+  .bar{box-shadow:0 0 8px rgba(0,245,255,.4);border-color:rgba(0,245,255,.45)}
   .stat .sname i{color:#fff}
   .bar-row .bv{color:#fff}
-  .btn{background:linear-gradient(180deg,#00b8d4,#008fa8);box-shadow:0 0 16px rgba(0,229,255,.35)}
+  .btn{background:linear-gradient(180deg,#00b8d4,#008fa8);box-shadow:0 0 16px rgba(0,245,255,.35)}
   #toast{background:rgba(2,9,22,.92)}
   .lu-card{background:linear-gradient(180deg,rgba(2,9,22,.95),rgba(2,9,22,.95))}
   @media (prefers-reduced-motion: reduce){
@@ -332,12 +333,12 @@
   <section class="sys hero" aria-label="Hunter status">
     <div class="hero-top">
       <div class="avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
         <span class="rank-badge" id="rankBadge">E</span>
       </div>
       <div class="who">
         <div class="syslabel en">Player · Status Window</div>
-        <h1>ካደር ነጋሽ</h1>
+        <h1>KADIR NEGASH</h1>
         <div class="title" id="hunterTitle">Novice Hunter</div>
         <div class="class">CLASS: Daily System Player</div>
       </div>
@@ -480,7 +481,7 @@
   "use strict";
 
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
-  // cat: str=ጥንካሬ, int=አእምሮ, faith=እምነት, trade=ትሬዲንግ, disc=ሥርዓት, skill=ክህሎት
+  // cat: str=strength, int=mind, faith=faith, trade=trading, disc=discipline, skill=skill
   var BASE_QUESTS = [
     {id:"fajr",   time:"05:00", end:"05:30", title:"Fajr Prayer", desc:"First prayer of the day, on time · run after Subhi", xp:1, cat:"faith", label:"Faith"},
     {id:"sport",  time:"06:00", end:"07:00", title:"Sport — Gym / Run", desc:"Mon · Wed · Fri Gym", xp:5, cat:"str",   label:"Strength"},
@@ -582,12 +583,21 @@
       keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
       if(data.quests && data.quests.length){
         quests = data.quests;
-        // v3.8: re-apply the current English quest text to saved quests
-        // (v3.6 saves still hold Amharic titles) — keep done/missed state.
-        quests.forEach(function(q, i){
-          var b = BASE_QUESTS[i];
-          if(q && b && q.id === b.id){ q.title = b.title; q.desc = b.desc; q.label = b.label; }
+        // v3.9: sync saved quests with BASE_QUESTS BY ID (not by position —
+        // Saturday's list is only the 5 prayers, so positions don't line up).
+        // Re-applies the current English text AND adds any quests missing
+        // from the save (e.g. Fajr, added after the save was written).
+        // Done/missed state and progress are kept.
+        var byId = {};
+        quests.forEach(function(q){ if(q && q.id) byId[q.id] = q; });
+        var merged = [];
+        BASE_QUESTS.forEach(function(b){
+          var q = byId[b.id];
+          if(q){ q.title = b.title; q.desc = b.desc; q.label = b.label; merged.push(q); }
+          else { merged.push(JSON.parse(JSON.stringify(b))); }
         });
+        quests.forEach(function(q){ if(q && q.id && q.id.indexOf("forge")===0) merged.push(q); });
+        quests = merged;
       }
       if(data.forgeCounter) forgeCounter = data.forgeCounter;
     }catch(e){}
@@ -610,7 +620,7 @@
   /* ---------- Level themes (boss, 2026-11-07) ---------- */
   // Lv 1-29 blue System, Lv 30-59 purple Shadow Monarch, Lv 60+ gold.
   var THEMES = [
-    {id:"blue",   name:"Blue System",    range:"Lv 1–29",  color:"#38c8ff"},
+    {id:"blue",   name:"Blue System",    range:"Lv 1–29",  color:"#00f5ff"},
     {id:"purple", name:"Shadow Monarch", range:"Lv 30–59", color:"#c084fc"},
     {id:"gold",   name:"Golden System",  range:"Lv 60+",   color:"#fbbf24"}
   ];
@@ -702,7 +712,7 @@
     var weekend = (day==="Sat"||day==="Sun");
     // Saturday rule (boss, 2026-11-07, updated 14:22, Fajr added
     // 14:36): prayers ONLY — Fajr + Zuhr + Asr + Maghrib + Isha
-    // (5 quests), no sport/gym on Saturday ("ቅዳሜ ሩጫም ጂምም የለም").
+    // (5 quests), no sport/gym on Saturday ("no running, no gym on Saturday").
     // Forged (custom) quests always stay visible.
     if(day==="Sat"){
       var keep = {fajr:1, zuhr:1, asr:1, maghrib:1, isha:1};
