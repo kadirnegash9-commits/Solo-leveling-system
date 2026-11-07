@@ -48,6 +48,17 @@ public class QuestReceiver extends BroadcastReceiver {
     // v2.2 used "solo_leveling" (DEFAULT importance, silent in DND) — deleted.
     public static final String CHANNEL_ID = "solo_leveling_alarm";
     private static final String OLD_CHANNEL_ID = "solo_leveling";
+    // Channel sound can't change after creation (Android restores the
+    // deleted channel's old sound when recreated with the same ID), so
+    // every sound change gets a NEW channel ID (boss, 2026-11-07).
+    private static final String KEY_CHANNEL_VER = "alarm_channel_ver";
+    public static String currentChannelId(Context context) {
+        int v = 0;
+        try {
+            v = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_CHANNEL_VER, 0);
+        } catch (Exception ignored) {}
+        return v <= 0 ? CHANNEL_ID : CHANNEL_ID + "_v" + v;
+    }
     public static final String ACTION_QUEST = "com.kader.systemapp.QUEST_REMINDER";
 
     // {id, HH:MM, title} — same order/times as the web quests
@@ -259,7 +270,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            b = new Notification.Builder(context, CHANNEL_ID);
+            b = new Notification.Builder(context, currentChannelId(context));
         } else {
             b = new Notification.Builder(context);
         }
@@ -310,17 +321,21 @@ public class QuestReceiver extends BroadcastReceiver {
     }
 
     // Save the picked sound and rebuild the channel with it — a
-    // channel's sound can't change after creation, so delete +
-    // recreate is required.
+    // channel's sound can't change after creation, and recreating with
+    // the same ID restores the old sound (Android), so every sound
+    // change moves to a NEW channel ID.
     public static void setAlarmSound(Context context, String uriString) {
+        String oldId = currentChannelId(context);
         try {
-            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                    .edit().putString(KEY_SOUND, uriString == null ? "" : uriString).apply();
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            int v = prefs.getInt(KEY_CHANNEL_VER, 0);
+            prefs.edit().putString(KEY_SOUND, uriString == null ? "" : uriString)
+                    .putInt(KEY_CHANNEL_VER, v + 1).apply();
         } catch (Exception ignored) {}
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (nm != null) nm.deleteNotificationChannel(CHANNEL_ID);
+            if (nm != null) nm.deleteNotificationChannel(oldId);
         }
         ensureChannel(context);
     }
@@ -332,8 +347,21 @@ public class QuestReceiver extends BroadcastReceiver {
         if (nm == null) return;
         // Drop the old silent v2.2 channel so only the alarm channel remains.
         nm.deleteNotificationChannel(OLD_CHANNEL_ID);
+        // v4.0 migration: a custom sound saved under the original channel
+        // ID never actually played (Android restores the old sound when a
+        // channel is recreated with the same ID). Move to a new channel ID
+        // once so the saved sound takes effect.
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            String saved = prefs.getString(KEY_SOUND, null);
+            int v = prefs.getInt(KEY_CHANNEL_VER, 0);
+            if (v == 0 && saved != null && !saved.isEmpty()) {
+                nm.deleteNotificationChannel(CHANNEL_ID);
+                prefs.edit().putInt(KEY_CHANNEL_VER, 1).apply();
+            }
+        } catch (Exception ignored) {}
         NotificationChannel ch = new NotificationChannel(
-                CHANNEL_ID, "Solo Leveling Alarms", NotificationManager.IMPORTANCE_HIGH);
+                currentChannelId(context), "Solo Leveling Alarms", NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription("Quest alarms — ring like a clock alarm");
         ch.setSound(alarmSound(context), new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ALARM)

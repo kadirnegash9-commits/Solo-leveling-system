@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         android.app.Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new android.app.Notification.Builder(this, CHANNEL_ID);
+            builder = new android.app.Notification.Builder(this, QuestReceiver.currentChannelId(this));
         } else {
             builder = new android.app.Notification.Builder(this);
         }
@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pending)
                 .setCategory(android.app.Notification.CATEGORY_ALARM)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+                .setSound(QuestReceiver.alarmSound(this))
                 .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
                 .setPriority(android.app.Notification.PRIORITY_HIGH)
                 .setAutoCancel(true);
