@@ -38,20 +38,24 @@
   body{
     margin:0;
     background:
+      radial-gradient(1000px 520px at 50% -12%, rgba(56,200,255,.20), transparent 62%),
       radial-gradient(900px 500px at 85% -10%, rgba(43,125,224,.16), transparent 60%),
       radial-gradient(700px 420px at -10% 30%, rgba(56,200,255,.07), transparent 55%),
+      radial-gradient(800px 500px at 50% 115%, rgba(124,58,237,.14), transparent 60%),
       var(--bg);
     color:var(--text);
     font-family:"Noto Sans Ethiopic",system-ui,sans-serif;
     min-height:100vh;
     padding-bottom:40px;
   }
-  /* faint grid */
+  /* System grid — brighter (boss, 2026-11-07): the Solo Leveling
+     System's glowing blue hologram grid, now visible further down,
+     plus a purple shadow aura at the bottom */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(rgba(56,200,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.035) 1px,transparent 1px);
+    background-image:linear-gradient(rgba(56,200,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(56,200,255,.06) 1px,transparent 1px);
     background-size:44px 44px;
-    mask-image:linear-gradient(to bottom,black,transparent 70%);
+    mask-image:linear-gradient(to bottom,black,transparent 88%);
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
   .en{font-family:"Rajdhani",sans-serif;letter-spacing:.14em;text-transform:uppercase}
