@@ -13,16 +13,13 @@ import java.util.Calendar;
 
 /**
  * Posts a quest reminder at each daily-plan time and (re)arms the alarms.
- * Wiring (2 small edits, not yet applied):
- *   1. AndroidManifest.xml, inside <application>:
- *        <receiver android:name=".QuestReceiver" android:exported="false" />
- *      plus: <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
- *            <uses-permission android:name="android.permission.INTERNET" />
- *   2. MainActivity.onCreate(), after webView.loadUrl(...):
- *        QuestReceiver.scheduleAll(this);
- * Until wired, this file compiles but does nothing.
- * Times/titles must match BASE_QUESTS in app/src/main/assets/index.html.
- * Limitation: alarms are lost on reboot until the app is opened once.
+ * Wiring: AndroidManifest declares the receiver (+ BOOT_COMPLETED) and the
+ * SCHEDULE_EXACT_ALARM / RECEIVE_BOOT_COMPLETED permissions; MainActivity
+ * calls QuestReceiver.scheduleAll(this) in onCreate. Every delivered
+ * reminder re-arms all alarms, so the chain survives even if the app is
+ * not opened daily. Times/titles must match BASE_QUESTS in
+ * app/src/main/assets/index.html. Alarms are lost on reboot until the
+ * BOOT_COMPLETED receiver re-arms them.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
@@ -49,6 +46,11 @@ public class QuestReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null) return;
+        // Phone restarted: re-arm all quest alarms, no notification.
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            scheduleAll(context);
+            return;
+        }
         String id = intent.getStringExtra("quest_id");
         String title = intent.getStringExtra("quest_title");
         if (title == null) return;
@@ -58,6 +60,28 @@ public class QuestReceiver extends BroadcastReceiver {
             if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) return;
         }
         notifyQuest(context, id == null ? "quest" : id, title);
+        // Keep the chain alive even if the app is not opened daily.
+        scheduleAll(context);
+    }
+
+    /** One-off test alarm, 60s from now, through the exact same code path
+     * as the real quest alarms — proves whether alarms fire on this phone. */
+    public static void scheduleTestAlarm(Context context) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        Intent intent = new Intent(context, QuestReceiver.class);
+        intent.setAction(ACTION_QUEST);
+        intent.putExtra("quest_id", "alarmtest");
+        intent.putExtra("quest_title", "⏰ Test alarm — 1 ደቂቃ ሞልቶአል! Arise!");
+        PendingIntent pi = PendingIntent.getBroadcast(context, 999, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        long when = System.currentTimeMillis() + 60_000;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && !am.canScheduleExactAlarms()) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+        } else {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+        }
     }
 
     /** Arm one alarm per quest for its next occurrence (today, else tomorrow). */

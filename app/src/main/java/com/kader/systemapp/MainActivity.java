@@ -1,6 +1,7 @@
 package com.kader.systemapp;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -117,6 +118,23 @@ public class MainActivity extends Activity {
         public boolean notificationsEnabled() {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             return manager != null && manager.areNotificationsEnabled();
+        }
+
+        @JavascriptInterface
+        public boolean exactAlarmsAllowed() {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            return am != null && am.canScheduleExactAlarms();
+        }
+
+        @JavascriptInterface
+        public void testAlarm() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    QuestReceiver.scheduleTestAlarm(MainActivity.this);
+                }
+            });
         }
     }
 

@@ -350,9 +350,11 @@
         <div class="sys-head"><span class="dot"></span><h2 class="en">Notifications</h2><span class="tag">ማሳወቂያ</span></div>
         <div class="install-body">
           <p id="notifStatus">Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።</p>
+          <p id="alarmStatus" style="margin-top:6px">⏰ Alarm ሁኔታ እየተፈተሸ ነው…</p>
           <div class="frow" style="margin-top:10px">
             <button class="btn" id="notifAllow">🔔 Notification ፍቀድ</button>
             <button class="btn ghost" id="notifTest">Test አድርግ</button>
+            <button class="btn ghost" id="alarmTest">⏰ Alarm Test (1 ደቂቃ)</button>
           </div>
         </div>
       </section>
@@ -738,7 +740,7 @@
 
 /* ---------- Notifications (Android app only) ---------- */
   (function(){
-    var allowBtn = $("notifAllow"), testBtn = $("notifTest"), st = $("notifStatus");
+    var allowBtn = $("notifAllow"), testBtn = $("notifTest"), alarmBtn = $("alarmTest"), st = $("notifStatus"), ast = $("alarmStatus");
     function hasBridge(){ return (typeof window.AndroidBridge !== "undefined") && window.AndroidBridge; }
     function refreshNotifStatus(){
       if(!st) return;
@@ -749,6 +751,20 @@
           st.textContent = "Quest ማሳወቂያ በ app ውስጥ እንዲደርስህ እዚህ ፍቀድ።";
         } else {
           st.textContent = "Notification የሚሰራው በ app (APK) ውስጥ ብቻ ነው — website ላይ አይሰራም።";
+        }
+      }catch(e){}
+      if(!ast) return;
+      try{
+        if(hasBridge() && window.AndroidBridge.exactAlarmsAllowed){
+          if(window.AndroidBridge.exactAlarmsAllowed()){
+            ast.textContent = "⏰ Alarm: ✅ ሰዓት ቆጣሪ ተፈቅዷል — quest reminder በሰዓቱ ይመጣል።";
+          } else {
+            ast.textContent = "⏰ Alarm: ❌ ሰዓት ቆጣሪ አልተፈቀደም — Settings → Apps → Solo Leveling → Alarms & reminders → ፍቀድ።";
+          }
+        } else if(hasBridge()){
+          ast.textContent = "⏰ Alarm: ሁኔታ ማረጋገጥ አልተቻለም — Alarm Test ንካ።";
+        } else {
+          ast.textContent = "⏰ Alarm የሚሰራው በ app (APK) ውስጥ ብቻ ነው — website ላይ አይሰራም።";
         }
       }catch(e){}
     }
@@ -768,6 +784,14 @@
           toast("🔔 Test notification ተልኳል");
         } else { toast("⚠ Notification በ app (APK) ውስጥ ብቻ ይሰራል", true); }
       }catch(e){ toast("⚠ Test አልተላከም", true); }
+    });
+    if(alarmBtn) alarmBtn.addEventListener("click", function(){
+      try{
+        if(hasBridge() && window.AndroidBridge.testAlarm){
+          window.AndroidBridge.testAlarm();
+          toast("⏰ 1 ደቂቃ በኋላ alarm ይመጣል — ስልክህን ዝጋና ጠብቅ");
+        } else { toast("⚠ Alarm በ app (APK) ውስጥ ብቻ ይሰራል", true); }
+      }catch(e){ toast("⚠ Alarm test አልተጀመረም", true); }
     });
     refreshNotifStatus();
   })();
