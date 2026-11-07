@@ -548,7 +548,7 @@
     streak:0, bestStreak:0, forged:0, perfectDay:false,
     questState:{}, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
     statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
-    unlocked:{}, questUndo:{}
+    unlocked:{}
   };
   var quests = BASE_QUESTS.slice();
   var forgeCounter = 0;
@@ -583,7 +583,7 @@
         return;
       }
       var s = data.state;
-      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","catDone","statBonus","unlocked","questUndo"];
+      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","catDone","statBonus","unlocked"];
       keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
       if(data.quests && data.quests.length){
         quests = data.quests;
@@ -856,40 +856,6 @@
   function xpLossFor(id){
     return (id==="sport"||id==="saitamaRun"||id==="saitamaEx") ? 10 : 5;
   }
-  // Reverse XP gain, including dropping a level if XP goes below 0.
-  function loseXp(amount){
-    state.xp -= amount; state.totalXp = Math.max(0, state.totalXp-amount);
-    while(state.xp < 0 && state.level > 1){
-      state.level--;
-      state.xp += xpNeeded(state.level);
-    }
-    state.xp = Math.max(0, state.xp);
-  }
-  // Reverse a previous done/missed tap exactly (XP, HP, counts, stats).
-  // The tap's real effect is recorded in state.questUndo when it is
-  // applied (floors at 0/100 mean the loss/gain can be smaller than the
-  // nominal value), so a round trip can never farm XP or HP.
-  function undoQuest(q, prev){
-    var rec = (state.questUndo && state.questUndo[q.id]) || null;
-    if(prev==="done"){
-      state.doneCount = Math.max(0, state.doneCount-1);
-      state.dayXp = Math.max(0, state.dayXp-q.xp);
-      state.catDone[q.cat] = Math.max(0, (state.catDone[q.cat]||0)-1);
-      state.statBonus[q.cat] = Math.max(0, (state.statBonus[q.cat]||0)-1);
-      if(q.cat==="str"){ state.statBonus.vit=Math.max(0,(state.statBonus.vit||0)-1); state.statBonus.agi=Math.max(0,(state.statBonus.agi||0)-1); }
-      if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=Math.max(0,(state.statBonus.per||0)-1); }
-      state.streak = Math.max(0, state.streak-1);
-      state.hp = Math.max(0, state.hp-(rec ? rec.hp : 2));
-      loseXp(q.xp);
-    } else {
-      state.missedCount = Math.max(0, state.missedCount-1);
-      var back = rec ? rec : {xp:xpLossFor(q.id), hp:10};
-      state.hp = Math.min(100, state.hp+back.hp);
-      state.xp += back.xp; state.totalXp += back.xp;
-      // Streak stays 0 here — the new tap's branch sets it (done: +1).
-    }
-  }
-
   /* ---------- Quest actions ---------- */
   $("questList").addEventListener("click", function(e){
     var btn = e.target.closest ? e.target.closest("button[data-act]") : null;
@@ -898,13 +864,10 @@
     var q=null;
     quests.forEach(function(x){ if(x.id===id) q=x; });
     if(!q) return;
-    // Switchable (boss, 2026-11-07): tapping the other button reverses
-    // the first tap's XP/HP/stats exactly, then applies the new one —
-    // so a mistaken tap can be fixed, but XP/HP can't be farmed by
-    // tapping ✓/✗ back and forth.
+    // One tap only (boss, 2026-11-07): a quest marked ACCEPT or DECLINE
+    // is final for the day — no changing it afterwards.
     var prev = state.questState[id];
-    if(prev && prev===act) return; // same button again: nothing to do
-    if(prev) undoQuest(q, prev);
+    if(prev) return;
 
     if(act==="done"){
       state.questState[id]="done";
@@ -915,9 +878,7 @@
       if(q.cat==="str"){ state.statBonus.vit=(state.statBonus.vit||0)+1; state.statBonus.agi=(state.statBonus.agi||0)+1; }
       if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
       state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
-      var hpBefore = state.hp;
       state.hp = Math.min(100, state.hp+2);
-      state.questUndo[q.id] = {xp:q.xp, hp: state.hp-hpBefore};
       var lv = gainXp(q.xp);
       var list = todayQuests();
       state.perfectDay = list.every(function(x){ return state.questState[x.id]==="done"; });
@@ -929,11 +890,9 @@
       state.streak=0;
       // Missed quest costs XP too (boss, 2026-11-07): run/gym -10, others -5.
       var xpLoss = xpLossFor(id);
-      var xpB = state.xp, hpB = state.hp;
       state.xp = Math.max(0, state.xp-xpLoss);
       state.totalXp = Math.max(0, state.totalXp-xpLoss);
       state.hp = Math.max(0, state.hp-10);
-      state.questUndo[id] = {xp: xpB-state.xp, hp: hpB-state.hp};
       state.perfectDay=false;
       renderAll(); checkAch(); renderAll(); saveGame();
       if(state.hp<=0){ toast("☠ Penalty Zone! HP hit 0 — don't miss the next quest!", true); }
