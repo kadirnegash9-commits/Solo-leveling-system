@@ -63,28 +63,54 @@
   .mono{font-family:"Share Tech Mono",monospace}
 
   /* ---------- System window frame ---------- */
-  /* Sung Jinwoo's System look (boss, 2026-11-07): the anime's bright
-     blue holographic windows — blue-tinted translucent panels,
-     bright cyan border + strong outer glow, white text on top. */
+  /* QUEST INFO frame from the anime (boss, 2026-11-07 — image #5):
+     dark near-black interior, bright glowing blue tech frame with
+     corner brackets + a diamond ornament top and bottom center,
+     glowing cyan headers. Pure CSS — no images. */
   .sys{
-    background:linear-gradient(180deg,rgba(23,78,166,.62),rgba(10,32,74,.72));
-    border:1.5px solid rgba(56,200,255,.55);
-    border-radius:var(--radius);
+    background-image:
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(#8fe9ff,#8fe9ff),
+      linear-gradient(180deg,rgba(6,14,30,.88),rgba(4,10,24,.92));
+    background-size:
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      100% 100%;
+    background-position:
+      left top, left top,
+      right top, right top,
+      left bottom, left bottom,
+      right bottom, right bottom,
+      center;
+    background-repeat:no-repeat;
+    background-origin:border-box;
+    border:2px solid rgba(56,200,255,.75);
+    border-radius:8px;
     position:relative;
-    box-shadow:0 0 36px rgba(56,200,255,.30), 0 0 0 1px rgba(56,200,255,.18), 0 18px 40px rgba(0,0,0,.45), inset 0 0 40px rgba(56,200,255,.10);
+    box-shadow:0 0 42px rgba(56,200,255,.35), 0 18px 40px rgba(0,0,0,.5), inset 0 0 34px rgba(56,200,255,.07);
   }
   .sys::before,.sys::after{
-    content:"";position:absolute;width:16px;height:16px;border-color:var(--cyan);border-style:solid;opacity:.85;pointer-events:none;
+    content:"";position:absolute;left:50%;width:10px;height:10px;
+    background:#8fe9ff;transform:translateX(-50%) rotate(45deg);
+    box-shadow:0 0 14px rgba(126,231,255,.95);pointer-events:none;
   }
-  .sys::before{top:-1px;left:-1px;border-width:2px 0 0 2px;border-top-left-radius:var(--radius)}
-  .sys::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;border-bottom-right-radius:var(--radius)}
+  .sys::before{top:-6px}
+  .sys::after{bottom:-6px}
   .sys-head{
     display:flex;align-items:center;gap:10px;
-    padding:12px 16px;border-bottom:1px solid rgba(56,200,255,.18);
+    padding:12px 16px;border-bottom:1px solid rgba(56,200,255,.35);
   }
   .sys-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan-dim);letter-spacing:.22em}
+  .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan-dim);letter-spacing:.22em;text-shadow:0 0 14px rgba(56,200,255,.8)}
   .sys-head .tag{margin-left:auto;font-size:11px;color:var(--muted)}
 
   /* ---------- Hero / Status ---------- */
