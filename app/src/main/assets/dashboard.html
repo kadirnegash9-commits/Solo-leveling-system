@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Leveling System - Quest Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #020617;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .outer-frame {
+            width: 100%;
+            max-width: 420px;
+            background: linear-gradient(135deg, rgba(0, 150, 255, 0.15), rgba(0, 5, 15, 0.95));
+            border: 3px solid #00bfff;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.5), inset 0 0 20px rgba(0, 191, 255, 0.3);
+            position: relative;
+        }
+        .section-title-box {
+            text-align: center;
+            border: 1px solid rgba(0, 191, 255, 0.4);
+            background: rgba(0, 191, 255, 0.05);
+            padding: 6px;
+            margin: 12px 0 8px 0;
+        }
+        .section-title {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+        }
+        .quest-info-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .goal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+        .goal-item span:last-child {
+            color: #cbd5e1;
+        }
+        .warning-box {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 191, 255, 0.08);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .warning-text {
+            font-size: 10.5px;
+            color: #38bdf8;
+            line-height: 1.3;
+            margin-left: 8px;
+        }
+        .divider {
+            border: none;
+            height: 1px;
+            background: rgba(0, 191, 255, 0.3);
+            margin: 15px 0;
+        }
+        .notification-text {
+            text-align: center;
+            color: #00ffff;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 3px 0;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.9);
+        }
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            color: #f8fafc;
+            margin-bottom: 10px;
+        }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 12px;
+        }
+        .bar-label {
+            width: 35px;
+            color: #cbd5e1;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 9px;
+            background: #090d16;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 191, 255, 0.4);
+            margin: 0 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #00ffff;
+            box-shadow: 0 0 8px #00ffff;
+        }
+        .stats-grid {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-top: 10px;
+        }
+        .ability-points {
+            text-align: center;
+            color: #00ffff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="outer-frame">
+        
+        <!-- QUEST INFO -->
+        <div style="text-align: center; margin-bottom: 5px;">
+            <span style="border: 1px solid #00ffff; padding: 3px 10px; font-size: 14px; color: #00ffff; display: inline-block;">⚠️</span>
+        </div>
+        <div class="section-title-box">
+            <div class="section-title">QUEST INFO</div>
+        </div>
+        <div class="quest-info-text">[Daily Quest: Strength Training has arrived.]</div>
+
+        <div class="section-title-box">
+            <div class="section-title">GOAL</div>
+        </div>
+
+        <!-- NOTIFICATION INSIDE THE FLOW -->
+        <div style="border: 1px dashed rgba(0,191,255,0.4); padding: 8px; margin: 10px 0; background: rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 10px; color: #00ffff;">ᚠᚱᚨᚲᛏᛁᛟᚾ</span>
+                <span style="font-size: 12px; font-weight: bold; color: #00ffff; letter-spacing: 1px;">NOTIFICATION</span>
+                <span style="font-size: 10px; color: #00ffff;">ᚲᛟᛗᛈᛚᛖᛏᛖ</span>
+            </div>
+            <div class="notification-text">Leveled up!</div>
+            <div class="notification-text">Leveled up!</div>
+            <div class="notification-text">Leveled up!</div>
+            <div class="notification-text">Leveled up!</div>
+        </div>
+
+        <!-- GOAL LIST -->
+        <div class="section-title-box" style="margin-top: 10px;">
+            <div class="section-title">GOAL</div>
+        </div>
+        <div class="goal-item"><span>Push-ups</span><span>[100/100] ☑</span></div>
+        <div class="goal-item"><span>Sit-ups</span><span>[100/100] ☑</span></div>
+        <div class="goal-item"><span>Squats</span><span>[100/100] ☑</span></div>
+        <div class="goal-item"><span>Running</span><span>[10/10km] ☑</span></div>
+
+        <div class="warning-box">
+            <span style="color: #00ffff; font-size: 14px;">☑</span>
+            <div class="warning-text">WARNING: Failure to complete the daily quest will result in an appropriate penalty.</div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- STATUS -->
+        <div class="section-title-box">
+            <div class="section-title">STATUS</div>
+        </div>
+        
+        <div class="status-header">
+            <span>LEVEL 18</span>
+            <span>JOB: None</span>
+            <span>TITLE: Wolf Assassin</span>
+        </div>
+
+        <div class="bar-container">
+            <span class="bar-label">HP</span>
+            <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: #00ffcc; box-shadow: 0 0 8px #00ffcc;"></div></div>
+        </div>
+        <div class="bar-container">
+            <span class="bar-label">MP</span>
+            <div class="progress-bar"><div class="progress-fill" style="width: 45%; background: #00bfff; box-shadow: 0 0 8px #00bfff;"></div></div>
+        </div>
+
+        <div class="status-header" style="margin-top: 8px;">
+            <span>FAT</span>
+            <span>FATIGUE: 0</span>
+        </div>
+
+        <div class="stats-grid">
+            <span>STR: 48</span>
+            <span>AGI: 27</span>
+            <span>PER: 27</span>
+            <span>VIT: 27</span>
+        </div>
+
+        <div class="ability-points">
+            Available Ability Points: 12
+        </div>
+
+    </div>
+
+</body>
+</html>
