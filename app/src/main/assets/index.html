@@ -1320,7 +1320,7 @@
      values from the photo (Level 18 etc.); the real game state is
      untouched. Opened from the DASHBOARD button in the header.
      Tap anywhere to close (the photo has no close button). */
-  function showDashboard(){ var el=$("dashboard"); if(el) el.classList.add("show"); }
+  function showDashboard(){ window.location.href="dashboard.html"; }
   function hideDashboard(){ var el=$("dashboard"); if(el) el.classList.remove("show"); }
   var dashBtn=$("dashBtn");
   if(dashBtn) dashBtn.addEventListener("click", showDashboard);
