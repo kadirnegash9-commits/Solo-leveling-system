@@ -80,7 +80,7 @@ public class QuestReceiver extends BroadcastReceiver {
             {"zuhr", "12:35", "Zuhr Prayer + Lunch"},
             {"english", "14:30", "English Lesson"},
             {"asr", "15:35", "Asr Prayer + Quran"},
-            {"maghrib", "18:10", "Close Shop + Maghrib Prayer"},
+            {"maghrib", "18:05", "Close Shop + Maghrib Prayer"},
             {"study", "18:45", "Home Study"},
             {"isha", "19:10", "Isha Prayer + Dinner"},
             {"sleep", "22:15", "Sleep — Go to Bed on Time"},
@@ -189,7 +189,7 @@ public class QuestReceiver extends BroadcastReceiver {
         } catch (Exception e) { handler.post(finish); }
     }
 
-    /** One-off test alarm, 60s from now, through the exact same code path
+    /** One-off test alarm, 120s from now, through the exact same code path
      * as the real quest alarms — proves whether alarms fire on this phone. */
     public static void scheduleTestAlarm(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -197,10 +197,10 @@ public class QuestReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, QuestReceiver.class);
         intent.setAction(ACTION_QUEST);
         intent.putExtra("quest_id", "alarmtest");
-        intent.putExtra("quest_title", "⏰ Test alarm — 1 minute is up! Arise!");
+        intent.putExtra("quest_title", "⏰ Test alarm — 2 minutes is up! Arise!");
         PendingIntent pi = PendingIntent.getBroadcast(context, 999, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        long when = System.currentTimeMillis() + 60_000;
+        long when = System.currentTimeMillis() + 120_000;
         PendingIntent showApp = PendingIntent.getActivity(context, 0,
                 new Intent(context, MainActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
