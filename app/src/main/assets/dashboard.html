@@ -242,12 +242,6 @@
       <div id="hsAsr" class="touch-target" style="top: 48.0%; left: 20%; width: 62%; height: 2.8%;" title="15:35 Asr + Quran"></div>
       <div id="uncheckAsr" class="check-overlay" style="top: 48.2%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
 
-      <div id="hsHandwriting" class="touch-target" style="top: 51.2%; left: 20%; width: 62%; height: 2.8%;" title="16:40 Handwriting Practice"></div>
-      <div id="uncheckHandwriting" class="check-overlay" style="top: 51.4%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
-
-      <div id="hsTrading" class="touch-target" style="top: 54.5%; left: 20%; width: 62%; height: 2.8%;" title="17:45 Trading Preparation"></div>
-      <div id="uncheckTrading" class="check-overlay" style="top: 54.7%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
-
       <div id="hsMaghrib" class="touch-target" style="top: 57.7%; left: 20%; width: 62%; height: 2.8%;" title="18:10 Close Shop + Maghrib"></div>
       <div id="uncheckMaghrib" class="check-overlay" style="top: 57.9%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
 
@@ -256,9 +250,6 @@
 
       <div id="hsIsha" class="touch-target" style="top: 64.2%; left: 20%; width: 62%; height: 2.8%;" title="19:10 Isha Prayer + Dinner"></div>
       <div id="uncheckIsha" class="check-overlay" style="top: 64.4%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
-
-      <div id="hsHomework" class="touch-target" style="top: 67.5%; left: 20%; width: 62%; height: 2.8%;" title="21:00 Homework + Review"></div>
-      <div id="uncheckHomework" class="check-overlay" style="top: 67.7%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
 
       <div id="hsSleep" class="touch-target" style="top: 70.8%; left: 20%; width: 62%; height: 2.8%;" title="22:15 Sleep - Go to Bed"></div>
       <div id="uncheckSleep" class="check-overlay" style="top: 71.0%; left: 74.0%; width: 4.2%; height: 2.4%;"></div>
@@ -329,8 +320,8 @@
   function rankTitle(lv){ if(lv>=60) return "Shadow Monarch"; if(lv>=30) return "Wolf Assassin"; if(lv>=20) return "National Level Hunter"; if(lv>=10) return "S-Rank Hunter"; if(lv>=7) return "A-Rank Hunter"; if(lv>=5) return "B-Rank Hunter"; if(lv>=3) return "C-Rank Hunter"; if(lv>=2) return "D-Rank Hunter"; return "Novice Hunter"; }
   var QMAP={Pushups1:"saitamaEx",Situps1:"saitamaEx",Squats1:"saitamaEx",Running1:"saitamaRun",
     Fajr:"fajr",SaitamaReps:"saitamaEx",Gym:"sport",SaitamaRun:"saitamaRun",Breakfast:"breakfast",
-    School:"school",Zuhr:"zuhr",English:"english",Asr:"asr",Handwriting:"hand",Trading:"trading",
-    Maghrib:"maghrib",Study:"study",Isha:"isha",Homework:"homework",Sleep:"sleep",
+    School:"school",Zuhr:"zuhr",English:"english",Asr:"asr",
+    Maghrib:"maghrib",Study:"study",Isha:"isha",Sleep:"sleep",
     QIPushups:"saitamaEx",QISitups:"saitamaEx",QISquats:"saitamaEx",QIRunning:"saitamaRun"};
   function SL_CHECKED(gid){ var q=QMAP[gid]; if(!q) return true;
     if(s.questState&&s.questDay&&s.questDay[q]===today){
@@ -505,12 +496,9 @@
       { id: 'Zuhr', name: '12:35 Zuhr + Lunch' },
       { id: 'English', name: '14:30 English Lesson' },
       { id: 'Asr', name: '15:35 Asr + Quran' },
-      { id: 'Handwriting', name: '16:40 Handwriting Practice' },
-      { id: 'Trading', name: '17:45 Trading Preparation' },
       { id: 'Maghrib', name: '18:10 Close Shop + Maghrib' },
       { id: 'Study', name: '18:45 Home Study' },
       { id: 'Isha', name: '19:10 Isha Prayer + Dinner' },
-      { id: 'Homework', name: '21:00 Homework + Review' },
       { id: 'Sleep', name: '22:15 Sleep - Go to Bed' }
     ];
 

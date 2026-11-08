@@ -667,7 +667,7 @@
     <div>
       <!-- ===== ACHIEVEMENTS ===== -->
       <section class="sys" aria-label="Achievements">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">Titles · 18</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">Titles · 17</span></div>
         <div class="ach-grid" id="achGrid"></div>
       </section>
 
@@ -893,12 +893,9 @@
     {id:"zuhr",   time:"12:35", end:"13:45", title:"Zuhr Prayer + Lunch", desc:"Prayer on time · lunch", xp:5, cat:"faith", label:"Faith"},
     {id:"english",time:"14:30", end:"15:10", title:"English Lesson", desc:"40 minutes — words + grammar", xp:5, cat:"int", label:"Mind"},
     {id:"asr",    time:"15:35", end:"15:55", title:"Asr Prayer + Quran", desc:"20 minutes of Quran reading", xp:5, cat:"faith", label:"Faith"},
-    {id:"hand",   time:"16:40", end:"16:45", title:"Handwriting Practice ✍", desc:"5 minutes of handwriting practice", xp:5, cat:"skill", label:"Skill"},
-    {id:"trading",time:"17:45", end:"18:00", title:"Trading — Preparation", desc:"Top-down analysis (Daily → H1 → M15) · check news · no confirmation, no trade", xp:5, cat:"trade", label:"Trading"},
     {id:"maghrib",time:"18:10", end:"18:45", title:"Close Shop + Maghrib Prayer", desc:"Close Freedom Shop (Sunday shop is closed — Maghrib only)", xp:5, cat:"faith", label:"Faith"},
     {id:"study",  time:"18:45", end:"19:10", title:"Home Study", desc:"1 hour 30 minutes — school study (rest when Isha comes)", xp:5, cat:"int", label:"Mind"},
     {id:"isha",   time:"19:10", end:"20:00", title:"Isha Prayer + Dinner", desc:"Last prayer of the day, on time", xp:5, cat:"faith", label:"Faith"},
-    {id:"homework",time:"21:00", end:"22:15", title:"Homework + Review", desc:"1 hour 15 minutes — finish homework, review the day", xp:5, cat:"int", label:"Mind"},
     {id:"sleep",  time:"22:15", end:"23:59", title:"Sleep — Go to Bed on Time", desc:"Sport tomorrow morning — turn off the phone and sleep", xp:5, cat:"disc", label:"Discipline"}
   ];
 
@@ -926,7 +923,6 @@
     {id:"gym",    name:"Iron Man", desc:"Complete a sport quest", test:function(s){return s.catDone.str>=1;}},
     {id:"mind",   name:"Scholar", desc:"Complete 3 mind quests", test:function(s){return s.catDone.int>=3;}},
     {id:"faith",  name:"Faith Guardian", desc:"Complete 3 faith quests", test:function(s){return s.catDone.faith>=3;}},
-    {id:"trader", name:"Market Hunter", desc:"Complete a Trading prep quest", test:function(s){return s.catDone.trade>=1;}},
     {id:"early",  name:"Early Bird", desc:"Complete the 06:00 sport quest", test:function(s){return !!s.questState.sport && s.questState.sport==="done";}},
     {id:"forge",  name:"Quest Forger", desc:"Forge your own quest in the Forge", test:function(s){return s.forged>=1;}},
     {id:"streak3",name:"Streak ×3", desc:"Complete 3 quests in a row without missing", test:function(s){return s.bestStreak>=3;}},
@@ -1418,9 +1414,9 @@
       state.doneCount++; state.dayXp+=q.xp;
       state.catDone[q.cat]++; state.statBonus[q.cat]++;
       // Anime stats (boss, 2026-11-07): body quests grow VIT + AGI,
-      // trading + study quests grow PER.
+      // study quests grow PER.
       if(q.cat==="str"){ state.statBonus.vit=(state.statBonus.vit||0)+1; state.statBonus.agi=(state.statBonus.agi||0)+1; }
-      if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
+      if(q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
       state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
       state.hp = Math.min(100, state.hp+2);
       var lv = gainXp(q.xp);

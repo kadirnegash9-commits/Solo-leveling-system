@@ -80,12 +80,9 @@ public class QuestReceiver extends BroadcastReceiver {
             {"zuhr", "12:35", "Zuhr Prayer + Lunch"},
             {"english", "14:30", "English Lesson"},
             {"asr", "15:35", "Asr Prayer + Quran"},
-            {"hand", "16:40", "Handwriting Practice ✍"},
-            {"trading", "17:45", "Trading — Preparation"},
             {"maghrib", "18:10", "Close Shop + Maghrib Prayer"},
             {"study", "18:45", "Home Study"},
             {"isha", "19:10", "Isha Prayer + Dinner"},
-            {"homework", "21:00", "Homework + Review"},
             {"sleep", "22:15", "Sleep — Go to Bed on Time"},
             {"saitamaRun", "06:00", "Saitama Daily Routine — Running 10km"},
             {"saitamaEx", "05:30", "Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
@@ -243,6 +240,25 @@ public class QuestReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
+        // v5.4.1: three quests removed (hand/trading/homework). Removing
+        // entries shifts every request code (100+i), so the old list's
+        // codes 100-115 no longer line up — codes the new list never
+        // re-arms would keep firing as duplicates, and codes reused by
+        // a different quest are only overwritten if re-armed. Cancel
+        // EVERY old quest alarm first (FLAG_NO_CREATE: only existing
+        // ones are touched), then arm the new list. Runs on every
+        // scheduleAll call (app open, boot, each delivery), so it is
+        // idempotent and a removed quest can never fire again.
+        for (int code = 100; code < 100 + 32; code++) {
+            Intent old = new Intent(context, QuestReceiver.class);
+            old.setAction(ACTION_QUEST);
+            PendingIntent oldPi = PendingIntent.getBroadcast(context, code, old,
+                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+            if (oldPi != null) {
+                am.cancel(oldPi);
+                oldPi.cancel();
+            }
+        }
         for (int i = 0; i < QUESTS.length; i++) {
             String[] q = QUESTS[i];
             int hour = Integer.parseInt(q[1].substring(0, 2));
