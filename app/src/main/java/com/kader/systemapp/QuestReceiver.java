@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import java.util.Calendar;
@@ -38,9 +39,9 @@ import java.util.Locale;
  * added 14:36): on Saturday only prayer (fajr/zuhr/asr/maghrib/
  * isha) reminders fire — NO sport/gym, all other quests are
  * excused that day, their alarms move to Sunday.
- * Saitama rule (boss, confirmed 2026-11-07): Sun/Tue/Thu the 05:30 run
- * + 06:30 exercises replace the 06:00 sport quest; Mon/Wed/Fri gym
- * only; Saturday: no Saitama.
+ * Saitama rule (boss, confirmed 2026-11-07; times swapped 2026-11-08):
+ * Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00 sport
+ * quest; Mon/Wed/Fri gym only; Saturday: no Saitama.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
@@ -86,8 +87,8 @@ public class QuestReceiver extends BroadcastReceiver {
             {"isha", "19:25", "Isha Prayer + Dinner"},
             {"homework", "21:00", "Homework + Review"},
             {"sleep", "22:15", "Sleep — Go to Bed on Time"},
-            {"saitamaRun", "05:30", "Saitama Daily Routine — Running 10km"},
-            {"saitamaEx", "06:30", "Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
+            {"saitamaRun", "06:00", "Saitama Daily Routine — Running 10km"},
+            {"saitamaEx", "05:30", "Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
     };
 
     @Override
@@ -101,7 +102,7 @@ public class QuestReceiver extends BroadcastReceiver {
         // Alarm notification swiped away: the alarm is dismissed — stop
         // the looping sound. Nothing else to do (alarms stay armed).
         if (ACTION_STOP_ALARM.equals(intent.getAction())) {
-            stopAlarmLoop();
+            dismissAlarm();
             return;
         }
         String id = intent.getStringExtra("quest_id");
@@ -217,8 +218,9 @@ public class QuestReceiver extends BroadcastReceiver {
                 || "maghrib".equals(id) || "isha".equals(id);
     }
 
-    // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30
-    // exercises replace the 06:00 sport quest; Mon/Wed/Fri gym only.
+    // Saitama rule (boss, 2026-11-07; times swapped 2026-11-08):
+    // Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00
+    // sport quest; Mon/Wed/Fri gym only.
     // Saturday: no Saitama (prayer + gym only, per the Saturday rule).
     private static boolean isAllowedOn(Calendar cal, String id) {
         int dow = cal.get(Calendar.DAY_OF_WEEK);
@@ -261,7 +263,16 @@ public class QuestReceiver extends BroadcastReceiver {
             Intent intent = new Intent(context, QuestReceiver.class);
             intent.setAction(ACTION_QUEST);
             intent.putExtra("quest_id", q[0]);
-            intent.putExtra("quest_title", q[2]);
+            // Sunday (and Saturday) = no school: the 07:00 quest is just
+            // "Breakfast" — "Get Ready for School" only on school days
+            // (boss, 2026-11-08). The title is set from the day the alarm
+            // is armed FOR, so it is right when it fires.
+            String title = q[2];
+            if ("breakfast".equals(q[0])) {
+                int dow = cal.get(Calendar.DAY_OF_WEEK);
+                if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) title = "Breakfast";
+            }
+            intent.putExtra("quest_title", title);
             PendingIntent pi = PendingIntent.getBroadcast(context, 100 + i, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             // Real clock alarm: exact even in Doze, shows the alarm icon,
@@ -279,6 +290,28 @@ public class QuestReceiver extends BroadcastReceiver {
         NotificationManager nm =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
+        // A fresh alarm delivery: not dismissed, loop not started yet.
+        alarmDismissed = false;
+        nm.notify(tag, 1, buildQuestNotification(context, title, SILENT_CHANNEL_ID));
+        // v4.6: loop starts IMMEDIATELY — the notification above is
+        // silent, so the looping MediaPlayer is the only sound (boss,
+        // 2026-11-07: the 46s WAKEY sound must keep repeating until he
+        // dismisses the alarm, like a normal clock alarm).
+        // v4.7: hold a WakeLock while the loop starts — without it the
+        // system can kill the app process right after onReceive returns,
+        // before prepareAsync finishes, and the alarm is completely
+        // silent (that is how the 06:30 alarm was "delivered" 17 min
+        // late on 2026-11-08: it posted silently and he only saw it
+        // when he opened the app at 06:47). The lock releases as soon
+        // as the loop is playing (or the fallback fires), 60s max.
+        acquireAlarmWakeLock(context);
+        startAlarmLoop(context, tag, title);
+    }
+
+    // One builder for the quest alarm notification, on any channel —
+    // the silent channel (loop is the sound) or the sounding channel
+    // (fallback: the channel sound plays once).
+    private static Notification buildQuestNotification(Context context, String title, String channelId) {
         // Full-screen intent (auto-opens the app when the alarm fires):
         // plain open, NO stop extra — the loop must keep ringing.
         Intent open = new Intent(context, MainActivity.class);
@@ -299,7 +332,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            b = new Notification.Builder(context, SILENT_CHANNEL_ID);
+            b = new Notification.Builder(context, channelId);
         } else {
             b = new Notification.Builder(context);
         }
@@ -313,12 +346,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 .setFullScreenIntent(fullScreen, true)
                 .setDeleteIntent(deletePending)
                 .setAutoCancel(true);
-        nm.notify(tag, 1, b.build());
-        // v4.6: loop starts IMMEDIATELY — the notification above is
-        // silent, so the looping MediaPlayer is the only sound (boss,
-        // 2026-11-07: the 46s WAKEY sound must keep repeating until he
-        // dismisses the alarm, like a normal clock alarm).
-        startAlarmLoop(context);
+        return b.build();
     }
 
     // Looping alarm sound (boss, 2026-11-07): Android plays a
@@ -333,9 +361,69 @@ public class QuestReceiver extends BroadcastReceiver {
     // notification is silent (silent channel) and the player starts
     // right away, so there is no doubling and no window to miss.
     private static MediaPlayer loopPlayer;
+    // v4.7: set true the moment the loop is actually playing; the
+    // fallback (below) only fires when this is still false, so the
+    // alarm can never be silent AND never doubles when the loop works.
+    private static boolean loopStarted = false;
+    private static boolean fallbackPosted = false;
+    // Set when the user dismisses the alarm (tap / swipe / ACCEPT /
+    // DECLINE) so the fallback never rings after a dismissal.
+    private static boolean alarmDismissed = false;
+    private static PowerManager.WakeLock alarmWakeLock;
 
-    public static void startAlarmLoop(final Context context) {
+    private static void acquireAlarmWakeLock(Context context) {
+        try {
+            if (alarmWakeLock == null) {
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                if (pm == null) return;
+                alarmWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SoloLeveling:alarm");
+                alarmWakeLock.setReferenceCounted(false);
+            }
+            if (!alarmWakeLock.isHeld()) alarmWakeLock.acquire(60_000);
+        } catch (Exception ignored) {}
+    }
+
+    private static void releaseAlarmWakeLock() {
+        try {
+            if (alarmWakeLock != null && alarmWakeLock.isHeld()) alarmWakeLock.release();
+        } catch (Exception ignored) {}
+    }
+
+    // Fallback (v4.7): the loop did not start — ring the alarm once
+    // from the sounding channel (the saved WAKEY sound) so the alarm
+    // is never silent. The silent notification is cancelled first and
+    // re-posted on the sounding channel (same tag/id, so no duplicate);
+    // a fresh post plays the channel sound. Only fires when the loop
+    // is not playing, so it never doubles with the loop.
+    private static void postFallbackAlarm(final Context context, final String tag, final String title) {
+        try {
+            NotificationManager nm =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm == null) return;
+            nm.cancel(tag, 1);
+            nm.notify(tag, 1, buildQuestNotification(context, title, currentChannelId(context)));
+        } catch (Exception ignored) {}
+    }
+
+    public static void startAlarmLoop(final Context context, final String tag, final String title) {
         stopAlarmLoop();
+        loopStarted = false;
+        fallbackPosted = false;
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final Runnable fallbackCheck = new Runnable() {
+            @Override public void run() {
+                if (loopStarted || fallbackPosted || alarmDismissed) {
+                    releaseAlarmWakeLock();
+                    return;
+                }
+                fallbackPosted = true;
+                postFallbackAlarm(context, tag, title);
+                releaseAlarmWakeLock();
+            }
+        };
+        // If the loop is not playing 5s after the alarm fired, ring once
+        // from the channel instead of staying silent.
+        handler.postDelayed(fallbackCheck, 5000);
         final Uri sound = alarmSound(context);
         try {
             final MediaPlayer mp = new MediaPlayer();
@@ -348,20 +436,28 @@ public class QuestReceiver extends BroadcastReceiver {
             mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override public void onPrepared(MediaPlayer p) {
                     // Stopped before it was ready: do not start.
-                    if (loopPlayer != p) return;
-                    try { p.start(); } catch (Exception ignored) {}
+                    if (loopPlayer != p) { releaseAlarmWakeLock(); return; }
+                    try {
+                        p.start();
+                        loopStarted = true;
+                    } catch (Exception ignored) {}
+                    releaseAlarmWakeLock();
                 }
             });
             mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override public boolean onError(MediaPlayer p, int what, int extra) {
                     try { p.release(); } catch (Exception ignored) {}
                     if (loopPlayer == p) loopPlayer = null;
+                    releaseAlarmWakeLock();
+                    handler.post(fallbackCheck);
                     return true;
                 }
             });
             loopPlayer = mp;
             mp.prepareAsync();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            // prepareAsync never started — the delayed check fires the fallback.
+        }
     }
 
     public static void stopAlarmLoop() {
@@ -371,6 +467,15 @@ public class QuestReceiver extends BroadcastReceiver {
             try { if (mp.isPlaying()) mp.stop(); } catch (Exception ignored) {}
             try { mp.release(); } catch (Exception ignored) {}
         }
+    }
+
+    // The user dismissed the alarm (tap the notification, swipe it away,
+    // or ACCEPT/DECLINE a quest): stop the sound and make sure the
+    // fallback never rings afterwards.
+    public static void dismissAlarm() {
+        alarmDismissed = true;
+        stopAlarmLoop();
+        releaseAlarmWakeLock();
     }
 
     // The user's chosen alarm sound (picked in the app's Notifications

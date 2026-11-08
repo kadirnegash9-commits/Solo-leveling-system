@@ -487,10 +487,10 @@
   /* ---------- Schedule & quests (boss's daily plan) ---------- */
   // cat: str=strength, int=mind, faith=faith, trade=trading, disc=discipline, skill=skill
   var BASE_QUESTS = [
-    {id:"fajr",   time:"05:00", end:"05:30", title:"Fajr Prayer", desc:"First prayer of the day, on time · run after Subhi", xp:5, cat:"faith", label:"Faith"},
+    {id:"fajr",   time:"05:00", end:"05:30", title:"Fajr Prayer", desc:"First prayer of the day, on time · exercises after Subhi", xp:5, cat:"faith", label:"Faith"},
     {id:"sport",  time:"06:00", end:"07:00", title:"Sport — Gym / Run", desc:"Mon · Wed · Fri Gym", xp:10, cat:"str",   label:"Strength"},
-    {id:"saitamaRun", time:"05:30", end:"06:30", title:"Saitama Daily Routine — Running 10km", desc:"Sun · Tue · Thu · after Subhi prayer · 10km run", xp:10, cat:"str", label:"Strength", saitama:true},
-    {id:"saitamaEx", time:"06:30", end:"07:00", title:"Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"Sun · Tue · Thu · after the run", xp:10, cat:"str", label:"Strength", saitama:true},
+    {id:"saitamaRun", time:"06:00", end:"07:00", title:"Saitama Daily Routine — Running 10km", desc:"Sun · Tue · Thu · after exercises · 10km run", xp:10, cat:"str", label:"Strength", saitama:true},
+    {id:"saitamaEx", time:"05:30", end:"06:00", title:"Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"Sun · Tue · Thu · after Subhi prayer", xp:10, cat:"str", label:"Strength", saitama:true},
     {id:"breakfast", time:"07:00", end:"08:00", title:"Breakfast + Get Ready for School", desc:"Eat breakfast, pack your bag", xp:5, cat:"disc", label:"Discipline"},
     {id:"school", time:"08:00", end:"12:30", title:"School — Grade 9", desc:"Focus on lessons · no Sat/Sun", xp:5, cat:"int", label:"Mind", weekdaysOnly:true},
     {id:"zuhr",   time:"12:35", end:"13:45", title:"Zuhr Prayer + Lunch", desc:"Prayer on time · lunch", xp:5, cat:"faith", label:"Faith"},
@@ -722,16 +722,30 @@
       var keep = {fajr:1, zuhr:1, asr:1, maghrib:1, isha:1};
       return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
     }
-    // Saitama rule (boss, 2026-11-07): Sun/Tue/Thu the 05:30 run + 06:30
-    // exercises replace the 06:00 sport quest; Mon/Wed/Fri gym only.
+    // Saitama rule (boss, 2026-11-07; times swapped 2026-11-08):
+    // Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00
+    // sport quest; Mon/Wed/Fri gym only.
     // Saturday: no Saitama (handled by the Saturday rule above).
     var saitamaDay = (day==="Sun"||day==="Tue"||day==="Thu");
-    return quests.filter(function(q){
+    var list = quests.filter(function(q){
       if(q.weekdaysOnly && weekend) return false;
       if(q.saitama) return saitamaDay;
       if(q.id==="sport") return !saitamaDay;
       return true;
     });
+    // Sunday = no school (boss, 2026-11-08): the 07:00 quest is just
+    // "Breakfast" — "Get Ready for School" only on school days.
+    // Copy the quest so BASE_QUESTS itself is not changed.
+    if(weekend){
+      list = list.map(function(q){
+        if(q.id==="breakfast"){
+          var c = {}; for(var k in q) c[k] = q[k];
+          c.title = "Breakfast"; return c;
+        }
+        return q;
+      });
+    }
+    return list;
   }
 
   function currentQuestId(){
