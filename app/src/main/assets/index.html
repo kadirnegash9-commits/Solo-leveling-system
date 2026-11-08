@@ -796,6 +796,8 @@
   .live-vitals .live-cell b { color:#ffffff; }
   .live-abilities { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:700; letter-spacing:0; color:#e0f4ff; margin-top:3px; }
   .live-abilities b { color:var(--neon-cyan); }
+  /* v5.6.1: LIVE NUMBERS ON THE §1 BARS — real save values on the HP/MP/XP bars (like the phone battery shows its number). Pill is centered on the bar track (labels end ~30%, track runs ~31%-76%); dark backing so it reads on the bright fill and on the empty track. z-index below the vitals hotspot (25) + pointer-events:none, so taps still open the vitals toast. */
+  .bar-num { position:absolute; left:53.85%; transform:translate(-50%,-50%); z-index:22; pointer-events:none; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:800; letter-spacing:.5px; color:#ffffff; background:rgba(1,6,18,.80); border:1px solid rgba(0,242,254,.55); border-radius:2px; padding:1px 4px; line-height:1.2; text-shadow:0 0 6px rgba(0,242,254,.8); white-space:nowrap; }
 #rewardBox { border:1px solid rgba(255,215,0,.7); background:rgba(50,35,0,.55); border-radius:5px; padding:8px; margin-top:8px; text-align:center; }
 #rewardBox .rw-title { font-family:'Orbitron',sans-serif; font-size:10.5px; font-weight:800; color:var(--gold); margin-bottom:3px; }
 #rewardBox .rw-sub { font-size:10px; color:#e0f4ff; margin-bottom:6px; }
@@ -842,6 +844,11 @@
     <div class="hotspot" style="top: 2%; left: 16%; width: 68%; height: 11%;" onclick="showHunterToast()"></div>
     <div class="hotspot" style="top: 14%; left: 69%; width: 14%; height: 7%;" onclick="showRankToast()"></div>
     <div class="hotspot" style="top: 20%; left: 22%; width: 56%; height: 13%;" onclick="showVitalsToast()"></div>
+
+    <!-- v5.6.1: LIVE NUMBERS ON THE BARS — real save values on the HP/MP/XP bars (bar centers measured from the artwork: HP 24.26%, MP 26.88%, XP 29.50% of artwork height) -->
+    <div class="bar-num" id="barHp" style="top:24.26%;">–</div>
+    <div class="bar-num" id="barMp" style="top:26.88%;">–</div>
+    <div class="bar-num" id="barXp" style="top:29.50%;">–</div>
 
     <!-- Abilities 3x3 Hotspots -->
     <div class="hotspot" style="top: 38%; left: 20%; width: 33%; height: 24%;" onclick="showAbilitiesToast()"></div>
@@ -1536,6 +1543,11 @@ function renderLiveStrip(){
   if(hp) hp.textContent = state.hp + "/100";
   if(mp) mp.textContent = mpMax() + "/" + mpMax();
   if(xp) xp.textContent = state.xp + "/" + xpNeeded(state.level);
+  /* v5.6.1: same live values ON the §1 bars */
+  var bh=$("barHp"), bm=$("barMp"), bx=$("barXp");
+  if(bh) bh.textContent = state.hp + "/100";
+  if(bm) bm.textContent = mpMax() + "/" + mpMax();
+  if(bx) bx.textContent = state.xp + "/" + xpNeeded(state.level);
   if(lv) lv.textContent = state.level;
   if(ab){
     var parts=[];
