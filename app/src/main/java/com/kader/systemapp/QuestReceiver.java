@@ -292,7 +292,7 @@ public class QuestReceiver extends BroadcastReceiver {
         if (nm == null) return;
         // A fresh alarm delivery: not dismissed, loop not started yet.
         alarmDismissed = false;
-        nm.notify(tag, 1, buildQuestNotification(context, title, SILENT_CHANNEL_ID));
+        nm.notify(tag, 1, buildQuestNotification(context, tag, title, SILENT_CHANNEL_ID));
         // v4.6: loop starts IMMEDIATELY — the notification above is
         // silent, so the looping MediaPlayer is the only sound (boss,
         // 2026-11-07: the 46s WAKEY sound must keep repeating until he
@@ -311,18 +311,26 @@ public class QuestReceiver extends BroadcastReceiver {
     // One builder for the quest alarm notification, on any channel —
     // the silent channel (loop is the sound) or the sounding channel
     // (fallback: the channel sound plays once).
-    private static Notification buildQuestNotification(Context context, String title, String channelId) {
+    private static Notification buildQuestNotification(Context context, String questId, String title, String channelId) {
+        // v4.8: a Saitama alarm opens the app straight onto the full
+        // QUEST INFO screen (the anime panel, not a popup). The
+        // full-screen intent gets its own request code (3) so
+        // scheduleAll's showApp intents (request code 0, created right
+        // after this) cannot clobber it via FLAG_UPDATE_CURRENT.
+        boolean saitama = "saitamaRun".equals(questId) || "saitamaEx".equals(questId);
         // Full-screen intent (auto-opens the app when the alarm fires):
         // plain open, NO stop extra — the loop must keep ringing.
         Intent open = new Intent(context, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent fullScreen = PendingIntent.getActivity(context, 0, open,
+        if (saitama) open.putExtra("show_quest_info", true);
+        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 3 : 0, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but
         // with an extra so MainActivity stops the looping sound.
         Intent tap = new Intent(context, MainActivity.class);
         tap.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         tap.putExtra("stop_alarm_loop", true);
+        if (saitama) tap.putExtra("show_quest_info", true);
         PendingIntent tapPending = PendingIntent.getActivity(context, 1, tap,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Swiping the notification away also dismisses the alarm.
@@ -401,7 +409,7 @@ public class QuestReceiver extends BroadcastReceiver {
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (nm == null) return;
             nm.cancel(tag, 1);
-            nm.notify(tag, 1, buildQuestNotification(context, title, currentChannelId(context)));
+            nm.notify(tag, 1, buildQuestNotification(context, tag, title, currentChannelId(context)));
         } catch (Exception ignored) {}
     }
 

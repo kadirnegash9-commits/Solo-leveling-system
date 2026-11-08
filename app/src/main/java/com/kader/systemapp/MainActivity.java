@@ -29,6 +29,9 @@ public class MainActivity extends Activity {
     private static final String OLD_CHANNEL_ID = "solo_leveling";
     private static final int NOTIF_PERMISSION_CODE = 1001;
     private static final int RINGTONE_PICKER_CODE = 1002;
+    // v4.8: a Saitama alarm opens the app straight onto the full QUEST
+    // INFO screen — set from the launch intent, consumed on page load.
+    private boolean showQuestInfoOnLoad = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,8 @@ public class MainActivity extends Activity {
         // looping sound. A plain launch (launcher / full-screen auto-open)
         // carries no extra, so the loop keeps ringing.
         checkStopAlarm(getIntent());
+        showQuestInfoOnLoad = getIntent() != null
+                && getIntent().getBooleanExtra("show_quest_info", false);
 
         // Alarm-style: show over the lock screen and turn the screen on,
         // like a clock alarm, when a quest reminder fires.
@@ -60,7 +65,17 @@ public class MainActivity extends Activity {
         settings.setUseWideViewPort(true);
 
         webView.addJavascriptInterface(new SystemBridge(), "AndroidBridge");
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                // v4.8: opened from a Saitama alarm — show the full QUEST
+                // INFO screen once the page (and its script) is ready.
+                if (showQuestInfoOnLoad) {
+                    showQuestInfoOnLoad = false;
+                    showQuestInfo();
+                }
+            }
+        });
         webView.loadUrl("file:///android_asset/index.html");
 
         // Arm the daily quest reminders (QuestReceiver)
@@ -99,6 +114,24 @@ public class MainActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         checkStopAlarm(intent);
+        // v4.8: a Saitama alarm tap opens the full QUEST INFO screen
+        // (the page is already loaded, so show it right away).
+        if (intent != null && intent.getBooleanExtra("show_quest_info", false)) {
+            showQuestInfo();
+        }
+    }
+
+    // v4.8: show the full QUEST INFO screen (the anime panel in the web
+    // app) — called from a Saitama alarm's intent, never on a plain launch.
+    private void showQuestInfo() {
+        if (webView == null) return;
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript(
+                        "window.showQuestInfo && window.showQuestInfo()", null);
+            }
+        });
     }
 
     private void checkStopAlarm(Intent intent) {

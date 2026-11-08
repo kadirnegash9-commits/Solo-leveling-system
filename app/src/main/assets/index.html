@@ -314,6 +314,77 @@
   .lu-card .big{font-family:"Rajdhani";font-size:52px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 0 16px #fff, 0 0 44px var(--cyan), 0 0 90px var(--cyan);line-height:1}
   .lu-card p{color:var(--cyan-dim);margin:10px 0 4px;font-size:15px}
   .lu-card .newrank{color:var(--gold);font-weight:800;font-size:17px;margin-bottom:18px}
+  /* ---------- QUEST INFO full screen (v4.8) ----------
+     The anime panel from the reference image — the SOLE design
+     authority. Full screen, not a popup. Ornate glowing blue frame
+     with side pillars and top/bottom diamonds (NOT the simple
+     corner-bracket .sys frame). NO buttons, progress bars or controls
+     that are not in the image: just the goal list with [0/100] /
+     [0/10km] and checkboxes, and the WARNING at the bottom. Compact,
+     so GOAL + WARNING fit on one screen. Tap anywhere to close. */
+  #questInfo{
+    position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+    background:rgba(3,6,12,.88);backdrop-filter:blur(3px);padding:16px;
+  }
+  #questInfo.show{display:flex}
+  .qi-wrap{position:relative;max-width:430px;width:100%}
+  /* Ornate frame: angular cut corners, glowing cyan border. The outer
+     layer is the cyan border (clip-path), the inner layer the dark
+     panel — the 2px gap between them IS the border line. */
+  .qi-frame{
+    background:linear-gradient(180deg,#a5f3ff,#00b8d4 25%,#00f5ff 50%,#00b8d4 75%,#a5f3ff);
+    clip-path:polygon(26px 0, calc(100% - 26px) 0, 100% 26px, 100% calc(100% - 26px), calc(100% - 26px) 100%, 26px 100%, 0 calc(100% - 26px), 0 26px);
+    filter:drop-shadow(0 0 14px rgba(0,245,255,.55)) drop-shadow(0 0 44px rgba(0,245,255,.25));
+    padding:2px;
+  }
+  .qi-inner{
+    background:rgba(2,9,22,.97);
+    clip-path:polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+    padding:20px 16px 16px;text-align:center;
+  }
+  /* Side pillars: tall segmented glowing bars on the frame edges. */
+  .qi-pillar{
+    position:absolute;top:50%;width:12px;height:62%;
+    transform:translateY(-50%);z-index:2;
+    background:repeating-linear-gradient(180deg,#c8f8ff 0 12px,rgba(0,245,255,.3) 12px 16px);
+    box-shadow:0 0 16px rgba(0,245,255,.85),0 0 42px rgba(0,245,255,.4);
+  }
+  .qi-pillar.left{left:-6px}
+  .qi-pillar.right{right:-6px}
+  /* Top / bottom center diamonds. */
+  .qi-diamond{
+    position:absolute;left:50%;width:12px;height:12px;z-index:2;
+    background:var(--cyan-bright);
+    transform:translateX(-50%) rotate(45deg);
+    box-shadow:0 0 14px var(--glow-strong);
+  }
+  .qi-diamond.top{top:-6px}
+  .qi-diamond.bottom{bottom:-6px}
+  .qi-head{display:flex;align-items:center;gap:10px}
+  .qi-excl{
+    width:40px;height:40px;flex:none;border:1px solid var(--cyan);color:var(--cyan);
+    font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    text-shadow:0 0 12px var(--glow-strong);box-shadow:0 0 12px var(--glow);
+  }
+  .qi-head h2{
+    flex:1;margin:0;font-size:21px;font-weight:700;color:var(--cyan);letter-spacing:.16em;text-align:center;
+    text-shadow:0 0 14px var(--glow-strong);border:1px solid var(--cyan);padding:6px 10px;
+    box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15);
+  }
+  .qi-line{margin-top:16px;font-size:15px;color:var(--cyan-dim);line-height:1.5}
+  .qi-goal{
+    margin:18px 0 6px;font-size:22px;font-weight:700;color:var(--cyan);letter-spacing:.16em;
+    text-shadow:0 0 14px var(--glow-strong);text-decoration:underline;text-underline-offset:5px;
+  }
+  .qi-row{display:flex;justify-content:space-between;align-items:center;padding:7px 8px;font-size:16.5px;font-weight:600}
+  .qi-row .qv{font-family:"Share Tech Mono",monospace;color:var(--cyan-dim);font-size:15.5px}
+  .qi-row .qb{color:var(--cyan-dim);font-size:17px;margin-left:10px}
+  .qi-row.done .qv{color:var(--green)}
+  .qi-row.done .qb{color:var(--green)}
+  .qi-row.done span:first-child{color:var(--green)}
+  .qi-warn{margin-top:18px;font-size:15px;line-height:1.6;color:var(--cyan-dim)}
+  .qi-warn b{color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
+
   /* ---------- v3.8 Strict UI Theme spec (boss, 2026-11-07) ----------
      Authentic Solo Leveling System HUD: sharp rectangles, double-line
      neon borders, electric cyan #00f5ff, white values, glowing bars. */
@@ -468,6 +539,27 @@
   </footer>
 </div>
 
+<div id="questInfo" role="dialog" aria-label="Quest info">
+  <div class="qi-wrap">
+    <div class="qi-frame">
+      <div class="qi-inner">
+        <div class="qi-head">
+          <span class="qi-excl">!</span>
+          <h2 class="en">Quest Info</h2>
+        </div>
+        <div class="qi-line">[Daily Quest: Strength Training has arrived.]</div>
+        <div class="qi-goal">GOAL</div>
+        <div id="qiRows"></div>
+        <div class="qi-warn"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate penalty.</div>
+      </div>
+    </div>
+    <span class="qi-pillar left"></span>
+    <span class="qi-pillar right"></span>
+    <span class="qi-diamond top"></span>
+    <span class="qi-diamond bottom"></span>
+  </div>
+</div>
+
 <div id="toast" role="status"></div>
 
 <div id="levelup" role="dialog" aria-label="Level up">
@@ -546,7 +638,7 @@
     level:1, xp:0, totalXp:0, hp:100,
     doneCount:0, missedCount:0, dayXp:0,
     streak:0, bestStreak:0, forged:0, perfectDay:false,
-    questState:{}, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
+    questState:{}, questDay:{}, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
     statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
     unlocked:{}
   };
@@ -575,6 +667,11 @@
         state.bestStreak=data.state.bestStreak||0; state.forged=data.state.forged||0;
         state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0};
         state.unlocked=data.state.unlocked||{};
+        state.v48Healed=!!data.state.v48Healed;
+        // v4.8: the new-day branch never reset the daily quest state —
+        // it relied on the fresh initial literal, so a page that stayed
+        // alive past midnight kept yesterday's Done. Reset it here.
+        resetDailyState();
         quests = BASE_QUESTS.slice();
         var fc=0;
         (data.quests||[]).forEach(function(q){ if(q && q.id && q.id.indexOf("forge")===0){ quests.push(q); fc++; } });
@@ -583,7 +680,7 @@
         return;
       }
       var s = data.state;
-      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","catDone","statBonus","unlocked"];
+      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked"];
       keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
       if(data.quests && data.quests.length){
         quests = data.quests;
@@ -603,10 +700,115 @@
         quests.forEach(function(q){ if(q && q.id && q.id.indexOf("forge")===0) merged.push(q); });
         quests = merged;
       }
+      // v4.8: heal a save written before per-quest date stamps existed,
+      // then drop any entry not stamped with today (see healPreV48Save
+      // and pruneStaleQuestState below).
+      healPreV48Save();
+      pruneStaleQuestState();
       if(data.forgeCounter) forgeCounter = data.forgeCounter;
     }catch(e){}
   }
   loadGame();
+
+  /* ---------- v4.8 daily reset (the bug) ----------
+     ROOT CAUSE (2026-11-08): ACCEPTs tapped on Saturday stayed Done
+     on Sunday. loadGame() only runs once at page load, and its new-day
+     branch never reset questState — it relied on the fresh initial
+     literal. The WebView stays alive across midnight (no reload), so
+     loadGame() never re-ran; when he tapped a quest on Sunday,
+     saveGame() wrote day=Sunday together with the STALE in-memory
+     questState, poisoning the save — from then on even a fresh load
+     took the same-day branch and restored Saturday's Done.
+     FIX: (1) every ACCEPT/DECLINE is stamped with its day
+     (state.questDay); (2) a day-change guard (ensureFreshDay) runs on
+     a timer, on foregrounding, and before any quest tap; (3) on load,
+     entries not stamped with today are pruned; (4) a one-time heal
+     fixes saves written before stamps existed. Only the daily quest
+     state resets — level/XP/total XP/best streak/forged/stats/titles
+     are untouched. HP=100 and streak=0 on a new day are the app's
+     existing new-day behaviour (same as the "Start a new day" button)
+     and are unchanged. */
+  var loadedDay = todayKey(); // the day the in-memory state belongs to
+  function resetDailyState(){
+    state.questState={}; state.questDay={};
+    state.doneCount=0; state.missedCount=0; state.dayXp=0;
+    state.perfectDay=false;
+    state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
+  }
+  // Re-derive the daily counters from questState (used after pruning
+  // stale entries, so the counters can never disagree with the list).
+  function recomputeDaily(){
+    var done=0, missed=0, dayXp=0;
+    var cat={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
+    var byId={};
+    quests.forEach(function(q){ if(q && q.id) byId[q.id]=q; });
+    Object.keys(state.questState).forEach(function(id){
+      var st=state.questState[id], q=byId[id];
+      if(!q) return;
+      if(st==="done"){ done++; dayXp+=q.xp; if(cat[q.cat]!==undefined) cat[q.cat]++; }
+      else if(st==="missed"){ missed++; }
+    });
+    state.doneCount=done; state.missedCount=missed; state.dayXp=dayXp;
+    state.catDone=cat;
+    var list=todayQuests();
+    state.perfectDay = list.length>0 && list.every(function(x){ return state.questState[x.id]==="done"; });
+  }
+  // Drop any done/missed entry not stamped with TODAY (a missing stamp
+  // is stale too — it heals saves poisoned before v4.8).
+  function pruneStaleQuestState(){
+    var changed=false;
+    Object.keys(state.questState).forEach(function(id){
+      if(!state.questDay || state.questDay[id]!==todayKey()){
+        delete state.questState[id];
+        if(state.questDay) delete state.questDay[id];
+        changed=true;
+      }
+    });
+    if(changed) recomputeDaily();
+  }
+  // One-time heal: saves written before v4.8 have no per-quest date
+  // stamps, so a Done carried over from yesterday cannot be told apart
+  // from one tapped today — except by the clock: a quest whose start
+  // time is still in the future TODAY cannot have been done today, so
+  // it must be stale. Drop those, stamp the rest as today's. Runs once
+  // (flagged on the state); afterwards the questDay stamps govern.
+  function healPreV48Save(){
+    if(state.v48Healed) return;
+    state.v48Healed=true;
+    var hasStamps = state.questDay && Object.keys(state.questDay).length>0;
+    if(hasStamps) return;
+    if(!state.questState || Object.keys(state.questState).length===0) return;
+    var n=eatNow(), nowMin=n.h*60+n.m;
+    var byId={};
+    quests.forEach(function(q){ if(q && q.id) byId[q.id]=q; });
+    Object.keys(state.questState).forEach(function(id){
+      var q=byId[id];
+      if(!q){ delete state.questState[id]; return; }
+      if(toMin(q.time)>nowMin){
+        // Not started yet today — this Done/Missed is from an earlier day.
+        delete state.questState[id];
+      } else {
+        // Already started today — keep it, stamp it as today's.
+        state.questDay[id]=todayKey();
+      }
+    });
+    recomputeDaily();
+  }
+  // New-day rollover while the page is alive (the WebView is not
+  // reloaded when the day changes): same reset as loadGame's new-day
+  // branch, then save + re-render. Runs on a timer, when the app comes
+  // back to the foreground, and before any quest tap can save.
+  function ensureFreshDay(){
+    if(todayKey()===loadedDay) return;
+    state.hp=100; state.streak=0;
+    resetDailyState();
+    var forged = quests.filter(function(q){ return q && q.id && q.id.indexOf("forge")===0; });
+    quests = BASE_QUESTS.slice().concat(forged);
+    forgeCounter = forged.length;
+    loadedDay = todayKey();
+    saveGame();
+    renderAll();
+  }
 
   function xpNeeded(level){ return level*100; }
   function rankFor(level){
@@ -765,6 +967,7 @@
       var st = state.questState[q.id] || "";
       var row = document.createElement("div");
       row.className = "quest" + (st==="done"?" done":st==="missed"?" missed":"") + (q.id===cur && !st ? " current":"");
+      row.setAttribute("data-id", q.id);
       var note = "";
       if(st==="done") note = '<span class="state-note good">Done · +'+q.xp+' XP</span>';
       if(st==="missed") note = '<span class="state-note bad">Missed · Penalty −10 HP · −'+((q.id==="sport"||q.id==="saitamaRun"||q.id==="saitamaEx")?10:5)+' XP</span>';
@@ -873,11 +1076,25 @@
   /* ---------- Quest actions ---------- */
   $("questList").addEventListener("click", function(e){
     var btn = e.target.closest ? e.target.closest("button[data-act]") : null;
-    if(!btn) return;
+    if(!btn){
+      // Tapping a Saitama quest row (not a button) opens the full
+      // QUEST INFO screen (v4.8) — the anime panel, not a popup.
+      var row = e.target.closest ? e.target.closest(".quest") : null;
+      if(row){
+        var rid = row.getAttribute("data-id");
+        var rq=null;
+        quests.forEach(function(x){ if(x.id===rid) rq=x; });
+        if(rq && rq.saitama) showQuestInfo();
+      }
+      return;
+    }
     var id = btn.getAttribute("data-id"), act = btn.getAttribute("data-act");
     var q=null;
     quests.forEach(function(x){ if(x.id===id) q=x; });
     if(!q) return;
+    // v4.8: the day may have rolled over while the page was open —
+    // reset the daily state BEFORE this tap can save a stale one.
+    ensureFreshDay();
     // One tap only (boss, 2026-11-07): a quest marked ACCEPT or DECLINE
     // is final for the day — no changing it afterwards.
     var prev = state.questState[id];
@@ -888,6 +1105,7 @@
 
     if(act==="done"){
       state.questState[id]="done";
+      state.questDay[id]=todayKey(); // v4.8: stamp the tap with its day
       state.doneCount++; state.dayXp+=q.xp;
       state.catDone[q.cat]++; state.statBonus[q.cat]++;
       // Anime stats (boss, 2026-11-07): body quests grow VIT + AGI,
@@ -903,6 +1121,7 @@
       if(lv) showLevelUp(); else toast("✅ +"+q.xp+" XP · "+q.title);
     } else {
       state.questState[id]="missed";
+      state.questDay[id]=todayKey(); // v4.8: stamp the tap with its day
       state.missedCount++;
       state.streak=0;
       // Missed quest costs XP too (boss, 2026-11-07): run/gym -10, others -5.
@@ -935,13 +1154,49 @@
 
   /* ---------- Reset day ---------- */
   $("resetDay").addEventListener("click", function(){
-    state.questState={}; state.doneCount=0; state.missedCount=0; state.dayXp=0;
+    state.questState={}; state.questDay={}; state.doneCount=0; state.missedCount=0; state.dayXp=0;
     state.streak=0; state.perfectDay=false; state.hp=100;
     state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
     quests = BASE_QUESTS.slice();
     saveGame(); renderAll();
     toast("🌅 A new day has begun — Arise!");
   });
+
+  /* ---------- QUEST INFO full screen (v4.8) ----------
+     The anime panel from the reference image — full screen, not a
+     popup. Shown when a Saitama alarm fires (MainActivity opens the
+     app with show_quest_info) and when he taps a Saitama quest row.
+     The counters come from the quests he already has: ACCEPT on the
+     exercises quest checks Push-ups / Sit-ups / Squats, ACCEPT on the
+     run checks Running. No separate progress system, no buttons,
+     no progress bars — just the goal list and the WARNING, exactly
+     like the image. Tap anywhere to close (the image has no button). */
+  function saitamaProgress(){
+    var ex = state.questState.saitamaEx==="done";
+    var run = state.questState.saitamaRun==="done";
+    return [
+      {name:"Push-ups", val: ex?"100/100":"0/100", done:ex},
+      {name:"Sit-ups", val: ex?"100/100":"0/100", done:ex},
+      {name:"Squats", val: ex?"100/100":"0/100", done:ex},
+      {name:"Running", val: run?"10/10km":"0/10km", done:run}
+    ];
+  }
+  function showQuestInfo(){
+    var rows=$("qiRows"); if(!rows) return;
+    rows.innerHTML="";
+    saitamaProgress().forEach(function(r){
+      var div=document.createElement("div");
+      div.className="qi-row"+(r.done?" done":"");
+      div.innerHTML='<span>'+r.name+'</span><span><span class="qv">['+r.val+']</span><span class="qb">'+(r.done?"☑":"☐")+'</span></span>';
+      rows.appendChild(div);
+    });
+    $("questInfo").classList.add("show");
+  }
+  function hideQuestInfo(){ var el=$("questInfo"); if(el) el.classList.remove("show"); }
+  // Tap anywhere to close — the reference image has no close button.
+  $("questInfo").addEventListener("click", hideQuestInfo);
+  // Opened by MainActivity when a Saitama alarm fires.
+  window.showQuestInfo = showQuestInfo;
 
 /* ---------- Notifications (Android app only) ---------- */
   (function(){
@@ -1024,6 +1279,10 @@
   renderAll();
   setInterval(renderNow, 1000);
   setInterval(function(){ renderQuests(); }, 60000);
+  // v4.8: midnight rollover while the page is alive — re-check the day
+  // every 30s and whenever the app comes back to the foreground.
+  setInterval(ensureFreshDay, 30000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) ensureFreshDay(); });
 })();
 </script>
 </body>
