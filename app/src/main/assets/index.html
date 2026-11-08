@@ -667,7 +667,7 @@
     <div>
       <!-- ===== ACHIEVEMENTS ===== -->
       <section class="sys" aria-label="Achievements">
-        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">Titles · 17</span></div>
+        <div class="sys-head"><span class="dot"></span><h2 class="en">Titles</h2><span class="tag">Titles · 18</span></div>
         <div class="ach-grid" id="achGrid"></div>
       </section>
 
@@ -923,6 +923,7 @@
     {id:"gym",    name:"Iron Man", desc:"Complete a sport quest", test:function(s){return s.catDone.str>=1;}},
     {id:"mind",   name:"Scholar", desc:"Complete 3 mind quests", test:function(s){return s.catDone.int>=3;}},
     {id:"faith",  name:"Faith Guardian", desc:"Complete 3 faith quests", test:function(s){return s.catDone.faith>=3;}},
+    {id:"trader", name:"Market Hunter", desc:"Complete a Trading prep quest", test:function(s){return s.catDone.trade>=1;}},
     {id:"early",  name:"Early Bird", desc:"Complete the 06:00 sport quest", test:function(s){return !!s.questState.sport && s.questState.sport==="done";}},
     {id:"forge",  name:"Quest Forger", desc:"Forge your own quest in the Forge", test:function(s){return s.forged>=1;}},
     {id:"streak3",name:"Streak ×3", desc:"Complete 3 quests in a row without missing", test:function(s){return s.bestStreak>=3;}},
@@ -1414,9 +1415,9 @@
       state.doneCount++; state.dayXp+=q.xp;
       state.catDone[q.cat]++; state.statBonus[q.cat]++;
       // Anime stats (boss, 2026-11-07): body quests grow VIT + AGI,
-      // study quests grow PER.
+      // trading + study quests grow PER.
       if(q.cat==="str"){ state.statBonus.vit=(state.statBonus.vit||0)+1; state.statBonus.agi=(state.statBonus.agi||0)+1; }
-      if(q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
+      if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
       state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
       state.hp = Math.min(100, state.hp+2);
       var lv = gainXp(q.xp);
