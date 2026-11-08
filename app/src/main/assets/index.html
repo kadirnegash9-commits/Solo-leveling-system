@@ -73,6 +73,15 @@
     opacity: 1;
   }
 
+  /* Level reward popup (v5.6) — notification-style system window */
+  .lr-overlay { position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center; background: rgba(0, 2, 8, 0.82); }
+  .lr-window { width: 86%; max-width: 340px; background: rgba(1, 8, 24, 0.97); border: 1.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(0, 242, 254, 0.75), inset 0 0 20px rgba(0, 168, 255, 0.15); padding: 18px 14px; text-align: center; }
+  .lr-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; color: var(--neon-cyan); text-shadow: 0 0 12px var(--neon-cyan); letter-spacing: 1px; }
+  .lr-sub { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #ffffff; letter-spacing: 2px; margin-top: 8px; }
+  .lr-food { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: var(--gold); text-shadow: 0 0 12px rgba(255, 215, 0, 0.7); margin: 10px 0 4px; }
+  .lr-note { font-size: 13px; color: #cfeaff; margin-bottom: 14px; }
+  .lr-btn { background: #020919; border: 1.5px solid var(--neon-cyan); color: var(--neon-cyan); font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 2px; padding: 9px 26px; cursor: pointer; box-shadow: 0 0 12px rgba(0, 242, 254, 0.4); }
+
   /* Sticky Top System Bar matching 63620.jpg */
   .system-topbar {
     width: 100%;
@@ -597,6 +606,19 @@
     margin-bottom: 6px;
     line-height: 1.2;
   }
+
+  /* Level rewards (v5.6) */
+  .rewards-box { border: 1px solid rgba(0, 242, 254, 0.45); background: rgba(2, 12, 32, 0.9); border-radius: 5px; padding: 10px 8px; margin-bottom: 10px; box-shadow: inset 0 0 10px rgba(0, 168, 255, 0.18); }
+  .rewards-desc { text-align: center; font-size: 13px; color: #cfeaff; margin-bottom: 8px; }
+  .rewards-list { display: flex; flex-direction: column; gap: 7px; }
+  .lr-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid rgba(0, 242, 254, 0.35); background: rgba(2, 12, 32, 0.9); padding: 8px; }
+  .lr-row.claimed { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+  .lr-row.locked { opacity: 0.55; }
+  .lr-row .lr-level { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: var(--neon-cyan); white-space: nowrap; }
+  .lr-row .lr-food { flex: 1; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffffff; }
+  .lr-row.claimed .lr-food { color: var(--gold); }
+  .lr-row .lr-status { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; color: #ffffff; white-space: nowrap; }
+  .lr-row.claimed .lr-status { color: var(--gold); }
   .forge-input-row {
     display: flex;
     gap: 5px;
@@ -785,6 +807,17 @@
 <div id="stopBar"><span id="stopQuestName">⏰ Alarm ringing</span><button id="stopAlarmBtn">STOP ALARM</button></div>
 
 <div id="systemToast" class="system-toast">[THE SYSTEM: ONLINE]</div>
+
+<!-- Level reward popup (v5.6) -->
+<div id="levelRewardPopup" class="lr-overlay">
+  <div class="lr-window">
+    <div class="lr-title" id="lrTitle">⬆ LEVEL 10 REACHED!</div>
+    <div class="lr-sub">REWARD UNLOCKED</div>
+    <div class="lr-food" id="lrFood">2 Sambusa</div>
+    <div class="lr-note">A real reward — you earned it, Hunter.</div>
+    <button class="lr-btn" id="lrClaimBtn">CLAIM</button>
+  </div>
+</div>
 
 <!-- Top Sticky Header matching 63620.jpg -->
 <div class="system-topbar">
@@ -979,6 +1012,13 @@
       </div>
     </div>
 
+    <!-- 7. LEVEL REWARDS -->
+    <div class="inner-section-divider">◆ 7. LEVEL REWARDS ◆</div>
+    <div class="rewards-box">
+      <div class="rewards-desc">Reach a level, unlock a real reward. Claimed rewards stay claimed.</div>
+      <div class="rewards-list" id="levelRewardsList"></div>
+    </div>
+
     <div class="system-arise-footer">
       <div class="arise-title">THE SYSTEM · ARISE</div>
       <div class="arise-motto">Finish your daily quests — leveling up starts today.</div>
@@ -1115,6 +1155,29 @@ var ACH = [
 /* Titles in Gemini v32's display order. */
 var TITLES_ORDER = ["xp300","lv2","lv3","lv5","gym","mind","faith","trader","early","forge","streak3","streak6","perfect","srank","first","five","ten","xp100"];
 
+/* ---------- Level rewards (v5.6, boss 2026-11-08) ----------
+   Real food treats. ONLY these five levels have a reward — do not invent
+   more. Claimed rewards persist in the save and never repeat. */
+var LEVEL_REWARDS = [
+  {level:10, food:"2 Sambusa"},
+  {level:25, food:"3 Sambusa"},
+  {level:40, food:"Strawberry Yogurt"},
+  {level:60, food:"Protein Juice"},
+  {level:80, food:"Protein Juice + Yogurt + Strawberry + 2 Sambusa"}
+];
+var pendingLevelRewards = []; // reward levels crossed since the last popup
+function claimDueLevelRewards(queuePopup){
+  var claimed = 0;
+  LEVEL_REWARDS.forEach(function(r){
+    if(state.level>=r.level && !(state.claimedRewards && state.claimedRewards[r.level])){
+      state.claimedRewards[r.level]=true;
+      claimed++;
+      if(queuePopup) pendingLevelRewards.push(r);
+    }
+  });
+  return claimed;
+}
+
 /* ---------- State (saved on this device) ---------- */
 var state = {
   level:1, xp:0, totalXp:0, hp:100,
@@ -1122,7 +1185,7 @@ var state = {
   streak:0, bestStreak:0, forged:0, perfectDay:false,
   questState:{}, questDay:{}, bonusAP:0, rewardLevel:0, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
   statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
-  unlocked:{}
+  unlocked:{}, claimedRewards:{}
 };
 var quests = BASE_QUESTS.slice();
 var forgeCounter = 0;
@@ -1149,6 +1212,7 @@ function loadGame(){
       state.bestStreak=data.state.bestStreak||0; state.forged=data.state.forged||0;
       state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0};
       state.unlocked=data.state.unlocked||{};
+      state.claimedRewards=data.state.claimedRewards||{};
       state.bonusAP=data.state.bonusAP||0; state.rewardLevel=data.state.rewardLevel||0;
       state.v48Healed=!!data.state.v48Healed;
       resetDailyState();
@@ -1160,7 +1224,7 @@ function loadGame(){
       return;
     }
     var s = data.state;
-    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel"];
+    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards"];
     keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
     if(data.quests && data.quests.length){
       quests = data.quests;
@@ -1181,6 +1245,7 @@ function loadGame(){
   }catch(e){}
 }
 loadGame();
+if(claimDueLevelRewards(false)>0) saveGame(); // rewards already earned stay claimed (no popup on reload)
 
 /* ---------- v4.8 daily reset (verbatim from v5.4.1) ---------- */
 var loadedDay = todayKey();
@@ -1548,9 +1613,39 @@ function renderReward(){
   var box = $("rewardBox"); if(!box) return;
   box.style.display = (state.rewardLevel>0) ? "block" : "none";
 }
+function renderLevelRewards(){
+  var el = $("levelRewardsList"); if(!el) return;
+  var html = "";
+  LEVEL_REWARDS.forEach(function(r){
+    var claimed = !!(state.claimedRewards && state.claimedRewards[r.level]);
+    html += '<div class="lr-row ' + (claimed ? "claimed" : "locked") + '">'
+      + '<div class="lr-level">LEVEL ' + r.level + '</div>'
+      + '<div class="lr-food">' + esc(r.food) + '</div>'
+      + '<div class="lr-status">' + (claimed ? "CLAIMED ✓" : "LOCKED 🔒") + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+function showPendingLevelRewards(){
+  if(!pendingLevelRewards.length) return;
+  var r = pendingLevelRewards[0];
+  pendingLevelRewards = [];
+  var ov = $("levelRewardPopup"); if(!ov) return;
+  $("lrTitle").textContent = "⬆ LEVEL " + r.level + " REACHED!";
+  $("lrFood").textContent = r.food;
+  ov.style.display = "flex";
+  playSystemSound("newday");
+}
+(function(){
+  var b = $("lrClaimBtn");
+  if(b) b.addEventListener("click", function(){
+    var ov = $("levelRewardPopup"); if(ov) ov.style.display = "none";
+    showSystemToast("🎁 Reward claimed — enjoy it, Hunter!");
+  });
+})();
 function renderAll(){
   renderSchedule(); renderTitles(); renderProgress(); applyTheme(); renderLiveStrip();
-  renderNow(); renderNotif(); renderReward(); updateMasks();
+  renderNow(); renderNotif(); renderReward(); renderLevelRewards(); updateMasks();
 }
 
 /* ---------- Achievements + level up ---------- */
@@ -1569,7 +1664,7 @@ function gainXp(amount){
     state.xp -= xpNeeded(state.level);
     state.level++; leveled=true;
   }
-  if(leveled) state.rewardLevel = state.level;
+  if(leveled){ state.rewardLevel = state.level; claimDueLevelRewards(true); }
   return leveled;
 }
 function showLevelUp(){
@@ -1625,6 +1720,7 @@ function decideQuest(id, act){
     var lv = applyDone(q);
     renderAll(); checkAch(); renderAll(); saveGame();
     if(lv) showLevelUp(); else showSystemToast("✅ +"+q.xp+" XP · "+q.title);
+    if(lv) showPendingLevelRewards();
   } else {
     playSystemSound("decline");
     var loss = applyMissed(q);
