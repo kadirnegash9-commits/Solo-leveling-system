@@ -322,8 +322,13 @@ public class QuestReceiver extends BroadcastReceiver {
         // plain open, NO stop extra — the loop must keep ringing.
         Intent open = new Intent(context, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // v5.3: every alarm carries its quest id, so the app can scroll
+        // straight to the ringing quest and show STOP ALARM. Request
+        // code 4 (not 0): scheduleAll's showApp intents use 0 and
+        // would wipe this extra via FLAG_UPDATE_CURRENT.
+        open.putExtra("ringing_quest", questId);
         if (saitama) open.putExtra("show_quest_info", true);
-        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 3 : 0, open,
+        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 3 : 4, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but
         // with an extra so MainActivity stops the looping sound.

@@ -32,6 +32,9 @@ public class MainActivity extends Activity {
     // v4.8: a Saitama alarm opens the app straight onto the full QUEST
     // INFO screen — set from the launch intent, consumed on page load.
     private boolean showQuestInfoOnLoad = false;
+    // v5.3: the quest whose alarm opened the app — set from the launch
+    // intent, consumed on page load (scroll to it + show STOP ALARM).
+    private String ringingQuestOnLoad = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,8 @@ public class MainActivity extends Activity {
         checkStopAlarm(getIntent());
         showQuestInfoOnLoad = getIntent() != null
                 && getIntent().getBooleanExtra("show_quest_info", false);
+        ringingQuestOnLoad = getIntent() != null
+                ? getIntent().getStringExtra("ringing_quest") : null;
 
         // Alarm-style: show over the lock screen and turn the screen on,
         // like a clock alarm, when a quest reminder fires.
@@ -73,6 +78,13 @@ public class MainActivity extends Activity {
                 if (showQuestInfoOnLoad) {
                     showQuestInfoOnLoad = false;
                     showQuestInfo();
+                }
+                // v5.3: opened from a quest alarm — scroll to the ringing
+                // quest and show the STOP ALARM bar.
+                if (ringingQuestOnLoad != null) {
+                    String id = ringingQuestOnLoad;
+                    ringingQuestOnLoad = null;
+                    showRingingQuest(id);
                 }
             }
         });
@@ -119,6 +131,11 @@ public class MainActivity extends Activity {
         if (intent != null && intent.getBooleanExtra("show_quest_info", false)) {
             showQuestInfo();
         }
+        // v5.3: a quest alarm fired while the app was open — scroll to
+        // the ringing quest and show the STOP ALARM bar.
+        if (intent != null && intent.getStringExtra("ringing_quest") != null) {
+            showRingingQuest(intent.getStringExtra("ringing_quest"));
+        }
     }
 
     // v4.8: show the full QUEST INFO screen (the anime panel in the web
@@ -130,6 +147,20 @@ public class MainActivity extends Activity {
             public void run() {
                 webView.evaluateJavascript(
                         "window.showQuestInfo && window.showQuestInfo()", null);
+            }
+        });
+    }
+
+    // v5.3: scroll to the ringing quest and show the STOP ALARM bar —
+    // called when a quest alarm opens the app, never on a plain launch.
+    private void showRingingQuest(final String id) {
+        if (webView == null || id == null) return;
+        final String safeId = id.replace("'", "");
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript(
+                        "window.showRingingQuest && window.showRingingQuest('" + safeId + "')", null);
             }
         });
     }

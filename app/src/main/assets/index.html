@@ -10,9 +10,7 @@
 <meta name="color-scheme" content="dark" />
 <link rel="icon" href="data:," />
 <title>Solo Leveling System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<!-- v5.3: fully offline — no webfont links; system fonts are used. -->
 <style>
   :root{
     --bg:#060a14;
@@ -63,37 +61,33 @@
   body{
     margin:0;
     background:
-      radial-gradient(1000px 520px at 50% -12%, var(--glow-top), transparent 62%),
-      radial-gradient(900px 500px at 85% -10%, var(--glow-mid), transparent 60%),
-      radial-gradient(700px 420px at -10% 30%, var(--grid), transparent 55%),
-      radial-gradient(800px 500px at 50% 115%, var(--aura), transparent 60%),
-      var(--bg);
+      radial-gradient(900px 480px at 50% -10%, var(--glow-top), transparent 60%),
+      linear-gradient(180deg,#010409 0%,#020a18 55%,#010409 100%);
     color:var(--text);
     font-family:"Rajdhani",system-ui,sans-serif;
     min-height:100vh;
     padding-bottom:40px;
   }
-  /* System grid — brighter (boss, 2026-11-07): the Solo Leveling
-     System's glowing blue hologram grid, full height so the change
-     is unmistakable, plus a purple shadow aura at the bottom.
-     The panels are translucent now, so the grid + glow shine
-     THROUGH them — that is why v2.9/v3.2 looked unchanged. */
+  /* v5.3: anime System circuit — faint diagonal tech lines over a
+     fine grid, like the Pinterest reference windows. Pure CSS. */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background-image:
-      radial-gradient(rgba(0,245,255,.10) 1px,transparent 1.3px),
-      linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:18px 18px,44px 44px,44px 44px;
+      repeating-linear-gradient(45deg, var(--grid) 0 1px, transparent 1px 90px),
+      repeating-linear-gradient(-45deg, var(--grid) 0 1px, transparent 1px 110px),
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:auto,auto,46px 46px,46px 46px;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:16px 14px 0;position:relative;z-index:1}
   .en{font-family:"Rajdhani",sans-serif;letter-spacing:.14em;text-transform:uppercase}
   .mono{font-family:"Share Tech Mono",monospace}
 
-  /* ---------- System window frame ---------- */
-  /* QUEST INFO frame from the anime (boss, 2026-11-07 — image #5):
-     dark near-black interior, bright glowing blue tech frame with
-     corner brackets + a diamond ornament top and bottom center,
-     glowing cyan headers. Pure CSS — no images. */
+  /* ---------- System window frame (v5.3) ----------
+     From the reference photos: thin glowing cyan-white DOUBLE
+     border (border + outer hairline) with bright corner accents
+     and an outer blue glow. Translucent, so the circuit grid
+     shines through. */
   .sys{
     background-image:
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
@@ -104,7 +98,7 @@
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
       linear-gradient(var(--cyan-bright),var(--cyan-bright)),
-      linear-gradient(180deg,rgba(6,16,32,0.5),rgba(6,16,32,0.5));
+      linear-gradient(180deg,rgba(4,14,28,.62),rgba(2,8,20,.62));
     background-size:
       26px 3px, 3px 26px,
       26px 3px, 3px 26px,
@@ -119,27 +113,20 @@
       center;
     background-repeat:no-repeat;
     background-origin:border-box;
-    border:1px solid var(--frame);
-    outline:1px solid rgba(0,245,255,.35);
-    outline-offset:3px;
+    border:1px solid rgba(165,243,255,.9);
+    outline:1px solid rgba(0,245,255,.28);
+    outline-offset:4px;
     border-radius:0;
     position:relative;
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    box-shadow:0 0 42px var(--glow), 0 18px 40px rgba(0,0,0,.5), inset 0 0 44px rgba(0,245,255,.10);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 0 28px rgba(0,245,255,.22), 0 0 60px rgba(0,120,255,.12), inset 0 0 30px rgba(0,245,255,.06);
   }
-  .sys::before,.sys::after{
-    content:"";position:absolute;left:50%;width:10px;height:10px;
-    background:var(--cyan-bright);transform:translateX(-50%) rotate(45deg);
-    box-shadow:0 0 14px var(--glow-strong);pointer-events:none;
-  }
-  .sys::before{top:-6px}
-  .sys::after{bottom:-6px}
   .sys-head{
     display:flex;align-items:center;gap:10px;
     padding:12px 16px;border-bottom:1px solid rgba(0,245,255,.35);
   }
-  .sys-head .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite}
+  .sys-head .dot{width:9px;height:9px;border-radius:0;background:var(--cyan);box-shadow:0 0 10px var(--cyan);flex:none;animation:pulse 2.2s infinite;transform:rotate(45deg)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
   .sys-head h2{margin:0;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 14px var(--glow-strong);border:1px solid var(--cyan);padding:4px 12px;box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15)}
   .sys-head .tag{margin-left:auto;font-size:11px;color:var(--muted)}
@@ -175,10 +162,12 @@
   .bar{height:8px;background:transparent;border:1px solid rgba(0,245,255,.45);border-radius:0;overflow:hidden}
   .bar>i{display:block;height:100%;width:0%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
   .bar.xp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,245,255,.7)}
-  .bar.hp>i{background:linear-gradient(90deg,#0d9d6c,var(--green));box-shadow:0 0 12px rgba(46,230,168,.55)}
-  .bar.hp.low>i{background:linear-gradient(90deg,#c22633,var(--red));box-shadow:0 0 12px rgba(255,77,94,.6)}
+  /* v5.3: all bars cyan — green is only for rewards/checkmarks,
+     red only for the word "penalty" (photo spec). */
+  .bar.hp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,245,255,.7)}
+  .bar.hp.low>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px rgba(0,245,255,.7)}
   .bar.mp>i{background:linear-gradient(90deg,#00b8d4,var(--cyan));box-shadow:0 0 12px var(--glow)}
-  .xp-color{color:var(--cyan)} .hp-color{color:var(--green)} .mp-color{color:var(--cyan-dim)}
+  .xp-color{color:var(--cyan)} .hp-color{color:var(--cyan)} .mp-color{color:var(--cyan-dim)}
   .quickstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
   .qs{background:rgba(8,17,32,.7);border:1px solid rgba(0,245,255,.14);border-radius:10px;padding:9px 6px;text-align:center}
   .qs b{display:block;font-family:"Rajdhani";font-size:21px;line-height:1.1}
@@ -197,6 +186,11 @@
   .grid{display:grid;gap:16px;margin-top:16px}
   @media(min-width:900px){ .grid{grid-template-columns:1.25fr .75fr;align-items:start} }
 
+  /* v5.3: STOP ALARM bar — fixed at the top while an alarm rings. */
+  .stop-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:14px;border:1px solid #00f5ff;box-shadow:0 0 14px rgba(0,245,255,.45);background:rgba(6,16,32,.96)}
+  .stop-quest{color:#eafcff;font-weight:700;letter-spacing:.04em}
+  .stop-btn{border:1px solid #00f5ff;background:#00f5ff;color:#04121f;font-weight:800;letter-spacing:.12em;padding:10px 16px;font-size:14px;cursor:pointer}
+  .quest.ringing{outline:2px solid #00f5ff;box-shadow:0 0 18px rgba(0,245,255,.5)}
   /* NOW panel */
   .now-body{padding:16px 18px}
   .now-clock{font-family:"Share Tech Mono";font-size:15px;color:var(--cyan-dim)}
@@ -243,7 +237,9 @@
   .quest.missed .qbtn.ok{opacity:.45}
   .quest.done .qtitle,.quest.missed .qtitle{text-decoration:line-through;text-decoration-thickness:1px}
   .state-note{font-size:12px;font-weight:700}
-  .state-note.good{color:var(--green)} .state-note.bad{color:var(--red)}
+  .state-note.good{color:var(--cyan)} .state-note.bad{color:var(--cyan-dim)}
+  /* v5.3: red is only for the word "penalty" (photo spec). */
+  .pen{color:var(--red);text-shadow:0 0 8px rgba(255,77,94,.7)}
   .day-progress{padding:13px 16px;border-top:1px solid rgba(0,245,255,.15);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
   .day-progress b{color:var(--text)}
 
@@ -331,15 +327,40 @@
   /* Ornate frame: angular cut corners, glowing cyan border. The outer
      layer is the cyan border (clip-path), the inner layer the dark
      panel — the 2px gap between them IS the border line. */
+  /* v5.3: same double border + corner accents as .sys. */
   .qi-frame{
-    background:linear-gradient(180deg,#a5f3ff,#00b8d4 25%,#00f5ff 50%,#00b8d4 75%,#a5f3ff);
-    clip-path:polygon(26px 0, calc(100% - 26px) 0, 100% 26px, 100% calc(100% - 26px), calc(100% - 26px) 100%, 26px 100%, 0 calc(100% - 26px), 0 26px);
-    filter:drop-shadow(0 0 14px rgba(0,245,255,.55)) drop-shadow(0 0 44px rgba(0,245,255,.25));
-    padding:2px;
+    background-image:
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(var(--cyan-bright),var(--cyan-bright)),
+      linear-gradient(180deg,rgba(4,14,28,.66),rgba(2,8,20,.66));
+    background-size:
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      26px 3px, 3px 26px,
+      100% 100%;
+    background-position:
+      left top, left top,
+      right top, right top,
+      left bottom, left bottom,
+      right bottom, right bottom,
+      center;
+    background-repeat:no-repeat;
+    background-origin:border-box;
+    border:1px solid rgba(165,243,255,.9);
+    outline:1px solid rgba(0,245,255,.28);
+    outline-offset:4px;
+    box-shadow:0 0 30px rgba(0,245,255,.22), 0 0 60px rgba(0,120,255,.12), inset 0 0 30px rgba(0,245,255,.06);
+    padding:0;
   }
   .qi-inner{
-    background:rgba(2,9,22,.97);
-    clip-path:polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+    background:transparent;
     padding:20px 16px 16px;text-align:center;
   }
   /* Side pillars: tall segmented glowing bars on the frame edges. */
@@ -360,6 +381,8 @@
   }
   .qi-diamond.top{top:-6px}
   .qi-diamond.bottom{bottom:-6px}
+  /* v5.3: side pillars + diamonds are gone with the ornate frame. */
+  .qi-pillar,.qi-diamond{display:none}
   .qi-head{display:flex;align-items:center;gap:10px}
   .qi-excl{
     width:40px;height:40px;flex:none;border:1px solid var(--cyan);color:var(--cyan);
@@ -451,11 +474,83 @@
   }
   .db-ap{margin-top:12px;text-align:center;font-size:15.5px;color:#fff}
 
+  /* ---------- v5.3 anime System windows ----------
+     Vertical side labels + system menu + new screens (SKILLS /
+     QUEST REWARDS / EQUIPMENT / SHOP), from the 30 Pinterest
+     reference photos. Translucent panels, thin glowing borders,
+     vertical labels, zero rounded corners. */
+  /* v5.3: vertical label BOX on the left of each window (from the
+     photos): a bordered box with glowing vertical text, and below
+     it a square box with a glowing "!" in a circle. */
+  .vlab{position:absolute;left:10px;top:14px;bottom:14px;width:32px;display:flex;flex-direction:column;gap:10px;z-index:1;pointer-events:none}
+  .vlab-box{flex:1;border:1px solid rgba(125,249,255,.8);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,245,255,.25), inset 0 0 10px rgba(0,245,255,.08);background:rgba(0,245,255,.04)}
+  .vlab-box span{writing-mode:vertical-rl;transform:rotate(180deg);font-family:"Rajdhani",sans-serif;font-weight:700;font-size:15px;letter-spacing:.34em;color:var(--cyan);text-shadow:0 0 12px var(--glow-strong);text-transform:uppercase;white-space:nowrap}
+  .vlab-excl{flex:none;width:32px;height:32px;border:1px solid rgba(125,249,255,.8);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,245,255,.25)}
+  .vlab-excl i{font-style:normal;width:22px;height:22px;border:1px solid var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
+  .hero{padding-left:46px}
+  .sysnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .navbtn{
+    background:linear-gradient(180deg,rgba(4,14,28,.66),rgba(2,8,20,.66));
+    border:1px solid rgba(125,249,255,.65);color:var(--cyan);
+    font-family:"Rajdhani",sans-serif;font-weight:700;font-size:15px;letter-spacing:.22em;
+    padding:13px 10px;cursor:pointer;text-transform:uppercase;
+    text-shadow:0 0 10px rgba(0,245,255,.8);box-shadow:0 0 14px rgba(0,245,255,.14), inset 0 0 14px rgba(0,245,255,.06);
+  }
+  .navbtn:active{box-shadow:0 0 22px rgba(0,245,255,.4)}
+  .navbtn.has-reward{border-color:var(--gold);color:var(--gold);text-shadow:0 0 10px rgba(245,185,66,.9);box-shadow:0 0 18px rgba(245,185,66,.35);animation:pulse 2.2s infinite}
+  /* Full-screen system windows (same pattern as #questInfo). */
+  .screen{position:fixed;inset:0;z-index:80;display:none;align-items:flex-start;justify-content:center;background:rgba(1,4,10,.88);backdrop-filter:blur(3px);padding:18px 14px;overflow-y:auto}
+  .screen.show{display:flex}
+  .sc-wrap{position:relative;max-width:430px;width:100%;margin:8px auto}
+  .sc-panel{position:relative;padding:20px 16px 16px 46px}
+  .sc-head{display:flex;align-items:center;gap:10px}
+  .sc-excl{width:40px;height:40px;flex:none;border:1px solid var(--cyan);color:var(--cyan);font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;text-shadow:0 0 12px var(--glow-strong);box-shadow:0 0 12px var(--glow)}
+  /* v5.3: the "!" sits in a glowing circle inside its square box (photos). */
+  .sc-excl i,.qi-excl i{font-style:normal;width:24px;height:24px;border:1px solid var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .sc-head h2{flex:1;margin:0;font-size:20px;font-weight:700;color:var(--cyan);letter-spacing:.16em;text-align:center;text-shadow:0 0 14px var(--glow-strong);border:1px solid var(--cyan);padding:6px 10px;box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15);text-transform:uppercase}
+  .sc-line{margin-top:16px;font-size:15px;color:var(--cyan-dim);line-height:1.55;text-align:center}
+  .sc-close{display:block;width:100%;margin-top:18px;background:transparent;border:1px solid rgba(125,249,255,.65);color:var(--cyan);font-family:"Rajdhani",sans-serif;font-weight:700;font-size:14px;letter-spacing:.24em;padding:11px;cursor:pointer;text-shadow:0 0 10px rgba(0,245,255,.8)}
+  /* Skill rows. */
+  .sk-row{border:1px solid rgba(0,245,255,.22);background:rgba(10,24,48,.5);padding:12px;margin-top:10px;text-align:left}
+  .sk-row .sk-name{font-weight:700;font-size:16px;letter-spacing:.1em;color:#fff}
+  .sk-row .sk-tag{float:right;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--cyan);text-shadow:0 0 8px rgba(0,245,255,.7)}
+  .sk-row .sk-tag.locked{color:var(--cyan-dim);text-shadow:none}
+  .sk-row .sk-det{font-size:13.5px;color:var(--cyan-dim);line-height:1.6;margin-top:4px}
+  .sk-row .sk-det b{color:var(--cyan)}
+  /* Reward rows. */
+  .rw-item{margin-top:12px;font-size:17px;font-weight:700;color:var(--green);text-shadow:0 0 10px rgba(46,230,168,.7);text-align:center}
+  .rw-btns{display:flex;gap:10px;margin-top:16px;justify-content:center}
+  .rw-btns button{flex:none;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:"Rajdhani",sans-serif;font-weight:700;font-size:15px;letter-spacing:.2em;padding:8px 26px;cursor:pointer;text-shadow:0 0 10px rgba(0,245,255,.8)}
+  .rw-btns button.no{border-color:rgba(0,245,255,.6);color:var(--cyan);text-shadow:0 0 10px rgba(0,245,255,.8)}
+  .rw-btns button:disabled{opacity:.4;cursor:default}
+  /* Equipment. */
+  .eq-body{display:flex;gap:12px;margin-top:14px;align-items:flex-start}
+  .eq-figure{flex:none;width:110px}
+  .eq-figure svg{width:100%;height:auto;filter:drop-shadow(0 0 6px rgba(0,245,255,.8))}
+  .eq-slots{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .eq-slot{border:1px solid rgba(0,245,255,.3);background:rgba(10,24,48,.5);padding:9px 8px;text-align:center;cursor:pointer}
+  .eq-slot .eq-ic{font-size:20px;color:var(--cyan);text-shadow:0 0 10px var(--glow-strong);line-height:1}
+  .eq-slot .eq-nm{font-size:12px;font-weight:700;letter-spacing:.1em;margin-top:5px;color:#fff}
+  .eq-slot .eq-st{font-size:11px;color:var(--muted);margin-top:2px}
+  .eq-slot.sel{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,245,255,.35)}
+  .eq-detail{margin-top:14px;border:1px solid rgba(0,245,255,.25);padding:11px 12px;font-size:14px;line-height:1.7;color:var(--cyan-dim);text-align:left}
+  .eq-detail b{color:var(--cyan)}
+  /* Shop. */
+  .shop-item{display:flex;gap:12px;align-items:center;border:1px solid rgba(0,245,255,.3);background:rgba(10,24,48,.5);padding:14px;margin-top:14px}
+  .shop-ic{flex:none;width:52px;height:52px;border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--glow);font-size:28px}
+  .shop-info{flex:1;text-align:left;min-width:0}
+  .shop-info .sh-nm{font-weight:700;font-size:17px;color:#fff}
+  .shop-info .sh-pr{font-family:"Share Tech Mono",monospace;font-size:15px;color:var(--gold);margin-top:3px}
+  .shop-info .sh-bal{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .shop-btns{display:flex;flex-direction:column;gap:8px}
+  .shop-btns button{min-width:86px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:"Rajdhani",sans-serif;font-weight:700;font-size:14px;letter-spacing:.2em;padding:9px 10px;cursor:pointer;text-shadow:0 0 10px rgba(0,245,255,.8)}
+  .shop-btns button.cancel{border-color:rgba(0,245,255,.6);color:var(--cyan);text-shadow:0 0 10px rgba(0,245,255,.8)}
+
   /* ---------- v3.8 Strict UI Theme spec (boss, 2026-11-07) ----------
      Authentic Solo Leveling System HUD: sharp rectangles, double-line
      neon borders, electric cyan #00f5ff, white values, glowing bars. */
   .avatar svg,.qbtn svg,.ach .aicon svg{filter:drop-shadow(0 0 4px #00f5ff)}
-  .sys,.avatar,.rank-badge,.levelbox,.qs,.stat,.quest,.qtime,.xpchip,.catchip,.qbtn,.theme-row,.ach,.frow input[type=text],.frow select,.btn,.warn-box,#toast,.lu-card,.bar,.stat .sbar{border-radius:0}
+  .sys,.avatar,.rank-badge,.levelbox,.qs,.stat,.quest,.qtime,.xpchip,.catchip,.qbtn,.theme-row,.ach,.ach .aicon,.frow input[type=text],.frow select,.btn,.warn-box,#toast,.lu-card,.bar,.stat .sbar,.steps .n,kbd,.navbtn,.sc-panel{border-radius:0}
   .bar{box-shadow:0 0 8px rgba(0,245,255,.4);border-color:rgba(0,245,255,.45)}
   .stat .sname i{color:#fff}
   .bar-row .bv{color:#fff}
@@ -470,8 +565,17 @@
 <body>
 <div class="wrap">
 
+  <!-- v5.3: STOP ALARM bar — shown only while an alarm is ringing
+       (MainActivity passes the ringing quest). Silences the loop
+       WITHOUT deciding the quest. -->
+  <div id="stopBar" class="stop-bar" style="display:none" role="alert">
+    <span class="stop-quest" id="stopQuestName">⏰ Alarm ringing</span>
+    <button class="stop-btn" id="stopAlarmBtn" type="button">STOP ALARM</button>
+  </div>
+
   <!-- ===== STATUS WINDOW ===== -->
   <section class="sys hero" aria-label="Hunter status">
+    <div class="vlab" aria-hidden="true"><div class="vlab-box"><span>Status</span></div><div class="vlab-excl"><i>!</i></div></div>
     <div class="hero-top">
       <div class="avatar" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="#00f5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
@@ -517,6 +621,14 @@
       <div class="qs"><b id="qsAbility">0</b><span>Ability Points</span></div>
     </div>
   </section>
+
+  <!-- ===== SYSTEM MENU (v5.3) — new screens from the reference photos ===== -->
+  <nav class="sysnav" aria-label="System menu">
+    <button type="button" class="navbtn en" id="navSkills">Skills</button>
+    <button type="button" class="navbtn en" id="navRewards">Quest Rewards</button>
+    <button type="button" class="navbtn en" id="navEquip">Equipment</button>
+    <button type="button" class="navbtn en" id="navShop">Shop</button>
+  </nav>
 
   <!-- ===== ABILITIES ===== -->
   <section class="sys" style="margin-top:16px" aria-label="Abilities">
@@ -606,18 +718,95 @@
   </footer>
 </div>
 
+<!-- ===== SKILLS screen (v5.3) — from the reference photos ===== -->
+<div class="screen" id="screenSkills" role="dialog" aria-label="Skills">
+  <div class="sc-wrap sys sc-panel">
+    <div class="vlab" aria-hidden="true"><div class="vlab-box"><span>Skills</span></div><div class="vlab-excl"><i>!</i></div></div>
+    <div class="sc-head"><span class="sc-excl"><i>!</i></span><h2>Skills</h2></div>
+    <div class="sk-row"><span class="sk-tag">Lv.1</span><div class="sk-name">Murderous Intent</div><div class="sk-det">[Active Skill]<br>MP: 100<br><b>-Panic (debuff): ALL ABILITIES −50%</b></div></div>
+    <div class="sk-row"><span class="sk-tag">ACTIVE · Lv.1</span><div class="sk-name">Dash</div><div class="sk-det">[Active Skill]<br>MP: Uses 1/min<br><b>Buff: SPEED +30%</b></div></div>
+    <div class="sk-row"><span class="sk-tag locked">LOCKED</span><div class="sk-name">Shadow Extraction</div><div class="sk-det">[Active Skill]<br>Extract the shadow of a defeated enemy.<br><b>Command word: "Arise"</b><br>Requires a Job Change.</div></div>
+    <div class="sk-row"><span class="sk-tag">Lv.1</span><div class="sk-name">Willpower</div><div class="sk-det">[Passive Skill]<br>Resist the effects of fear and poison.</div></div>
+    <button class="sc-close en" type="button" data-close="screenSkills">Close</button>
+  </div>
+</div>
+
+<!-- ===== QUEST REWARDS screen (v5.3) — from the reference photos ===== -->
+<div class="screen" id="screenRewards" role="dialog" aria-label="Quest rewards">
+  <div class="sc-wrap sys sc-panel">
+    <div class="vlab" aria-hidden="true"><div class="vlab-box"><span>Quest Rewards</span></div><div class="vlab-excl"><i>!</i></div></div>
+    <div class="sc-head"><span class="sc-excl"><i>!</i></span><h2>Quest Rewards</h2></div>
+    <div class="sc-line">You got rewards.</div>
+    <div id="rwPending">
+      <div class="rw-item">1. Ability Points+5</div>
+      <div class="sc-line">Accept this rewards?</div>
+      <div class="rw-btns">
+        <button type="button" id="rwYes">Yes</button>
+        <button type="button" class="no" id="rwNo">No</button>
+      </div>
+    </div>
+    <div id="rwEmpty" class="sc-line">No rewards waiting.<br>Level up to earn Ability Points +5.</div>
+    <button class="sc-close en" type="button" data-close="screenRewards">Close</button>
+  </div>
+</div>
+
+<!-- ===== EQUIPMENT screen (v5.3) — from the reference photos ===== -->
+<div class="screen" id="screenEquip" role="dialog" aria-label="Equipment">
+  <div class="sc-wrap sys sc-panel">
+    <div class="vlab" aria-hidden="true"><div class="vlab-box"><span>Equipment</span></div><div class="vlab-excl"><i>!</i></div></div>
+    <div class="sc-head"><span class="sc-excl"><i>!</i></span><h2>Equipment</h2></div>
+    <div class="eq-body">
+      <div class="eq-figure" aria-hidden="true">
+        <svg viewBox="0 0 100 190" fill="none" stroke="#7df9ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="16" r="11"/>
+          <path d="M50 28 L50 96 M50 40 L22 62 M50 40 L78 62 M50 96 L32 150 M50 96 L68 150 M32 150 L28 184 M68 150 L72 184"/>
+          <path d="M38 32 L62 32 L58 96 L42 96 Z"/>
+        </svg>
+      </div>
+      <div class="eq-slots" id="eqSlots">
+        <div class="eq-slot" data-slot="Helmet"><div class="eq-ic">⛑</div><div class="eq-nm">HELMET</div><div class="eq-st">Empty</div></div>
+        <div class="eq-slot" data-slot="Chestplate"><div class="eq-ic">🛡️</div><div class="eq-nm">CHESTPLATE</div><div class="eq-st">Empty</div></div>
+        <div class="eq-slot" data-slot="Gauntlets"><div class="eq-ic">🧤</div><div class="eq-nm">GAUNTLETS</div><div class="eq-st">Empty</div></div>
+        <div class="eq-slot" data-slot="Ring"><div class="eq-ic">💍</div><div class="eq-nm">RING</div><div class="eq-st">Empty</div></div>
+        <div class="eq-slot" data-slot="Boots"><div class="eq-ic">🥾</div><div class="eq-nm">BOOTS</div><div class="eq-st">Empty</div></div>
+        <div class="eq-slot" data-slot="Dagger"><div class="eq-ic">🗡️</div><div class="eq-nm">DAGGER</div><div class="eq-st">Empty</div></div>
+      </div>
+    </div>
+    <div class="eq-detail" id="eqDetail"><b>ITEM:</b> ???<br><b>CATEGORY:</b> ??<br><b>ACQUISITION DIFFICULTY:</b> ??</div>
+    <button class="sc-close en" type="button" data-close="screenEquip">Close</button>
+  </div>
+</div>
+
+<!-- ===== SHOP screen (v5.3) — from the reference photos ===== -->
+<div class="screen" id="screenShop" role="dialog" aria-label="Shop">
+  <div class="sc-wrap sys sc-panel">
+    <div class="vlab" aria-hidden="true"><div class="vlab-box"><span>Shop</span></div><div class="vlab-excl"><i>!</i></div></div>
+    <div class="sc-head"><span class="sc-excl"><i>!</i></span><h2>Shop</h2></div>
+    <div class="sc-line">Would you like to purchase?</div>
+    <div class="shop-item">
+      <div class="shop-ic" aria-hidden="true">🗡️</div>
+      <div class="shop-info"><div class="sh-nm">[Knight Killer]</div><div class="sh-pr">2,800,000 gold</div><div class="sh-bal">Your Gold: 0</div></div>
+      <div class="shop-btns">
+        <button type="button" id="shopBuy">BUY</button>
+        <button type="button" class="cancel" id="shopCancel">CANCEL</button>
+      </div>
+    </div>
+    <button class="sc-close en" type="button" data-close="screenShop">Close</button>
+  </div>
+</div>
+
 <div id="questInfo" role="dialog" aria-label="Quest info">
   <div class="qi-wrap">
     <div class="qi-frame">
       <div class="qi-inner">
         <div class="qi-head">
-          <span class="qi-excl">!</span>
+          <span class="qi-excl"><i>!</i></span>
           <h2 class="en">Quest Info</h2>
         </div>
         <div class="qi-line">[Daily Quest: Strength Training has arrived.]</div>
         <div class="qi-goal">GOAL</div>
         <div id="qiRows"></div>
-        <div class="qi-warn"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate penalty.</div>
+        <div class="qi-warn"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate <span class="pen">penalty</span>.</div>
       </div>
     </div>
     <span class="qi-pillar left"></span>
@@ -635,7 +824,7 @@
     <div class="qi-frame">
       <div class="qi-inner">
         <div class="qi-head">
-          <span class="qi-excl">!</span>
+          <span class="qi-excl"><i>!</i></span>
           <h2 class="en">Quest Info</h2>
         </div>
         <div class="qi-line">[Daily Quest: Strength Training has arrived.]</div>
@@ -754,7 +943,7 @@
     level:1, xp:0, totalXp:0, hp:100,
     doneCount:0, missedCount:0, dayXp:0,
     streak:0, bestStreak:0, forged:0, perfectDay:false,
-    questState:{}, questDay:{}, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
+    questState:{}, questDay:{}, bonusAP:0, rewardLevel:0, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
     statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
     unlocked:{}
   };
@@ -783,6 +972,7 @@
         state.bestStreak=data.state.bestStreak||0; state.forged=data.state.forged||0;
         state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0};
         state.unlocked=data.state.unlocked||{};
+        state.bonusAP=data.state.bonusAP||0; state.rewardLevel=data.state.rewardLevel||0;
         state.v48Healed=!!data.state.v48Healed;
         // v4.8: the new-day branch never reset the daily quest state —
         // it relied on the fresh initial literal, so a page that stayed
@@ -796,7 +986,7 @@
         return;
       }
       var s = data.state;
-      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked"];
+      var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel"];
       keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
       if(data.quests && data.quests.length){
         quests = data.quests;
@@ -1021,11 +1211,11 @@
     var mpMax = 50 + 5*(14 + (state.statBonus.int||0));
     $("mpBar").style.width = "100%";
     $("mpText").textContent = mpMax+" / "+mpMax;
-    // Fatigue = quests missed today; Ability Points = +3 per level gained.
+    // Fatigue = quests missed today; Ability Points = +3 per level gained + rewards claimed.
     var fat = 0;
     todayQuests().forEach(function(q){ if(state.questState[q.id]==="missed") fat++; });
     $("qsFatigue").textContent = fat;
-    $("qsAbility").textContent = (state.level-1)*3;
+    $("qsAbility").textContent = (state.level-1)*3 + (state.bonusAP||0);
     renderStats();
   }
 
@@ -1086,7 +1276,7 @@
       row.setAttribute("data-id", q.id);
       var note = "";
       if(st==="done") note = '<span class="state-note good">Done · +'+q.xp+' XP</span>';
-      if(st==="missed") note = '<span class="state-note bad">Missed · Penalty −10 HP · −'+((q.id==="sport"||q.id==="saitamaRun"||q.id==="saitamaEx")?10:5)+' XP</span>';
+      if(st==="missed") note = '<span class="state-note bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+((q.id==="sport"||q.id==="saitamaRun"||q.id==="saitamaEx")?10:5)+' XP</span>';
       row.innerHTML =
         '<div class="qtime">'+q.time+'</div>'+
         '<div class="qmain"><div class="qtitle">'+q.title+'</div>'+
@@ -1145,7 +1335,7 @@
     }
   }
 
-  function renderAll(){ renderStatus(); renderQuests(); renderAch(); renderNow(); applyTheme(); }
+  function renderAll(){ renderStatus(); renderQuests(); renderAch(); renderNow(); applyTheme(); renderRewards(); }
 
   /* ---------- Toast ---------- */
   var toastTimer=null;
@@ -1175,6 +1365,8 @@
       state.xp -= xpNeeded(state.level);
       state.level++; leveled=true;
     }
+    // v5.3: a level-up leaves a Quest Reward waiting (Ability Points +5).
+    if(leveled) state.rewardLevel = state.level;
     return leveled;
   }
   function showLevelUp(){
@@ -1218,6 +1410,7 @@
 
     // Tapping ACCEPT or DECLINE dismisses the alarm — stop the looping sound.
     try{ if(window.AndroidBridge && window.AndroidBridge.stopAlarmSound) window.AndroidBridge.stopAlarmSound(); }catch(e){}
+    hideStopBar();
 
     if(act==="done"){
       state.questState[id]="done";
@@ -1314,6 +1507,26 @@
   // Opened by MainActivity when a Saitama alarm fires.
   window.showQuestInfo = showQuestInfo;
 
+  /* ---------- v5.3: ringing quest (alarm stop) ----------
+     MainActivity calls this when a quest alarm opens the app:
+     scroll the ringing quest into view, highlight it, and show
+     the STOP ALARM bar. STOP silences the loop WITHOUT deciding
+     the quest (ACCEPT/DECLINE stays one-tap-final). No auto-stop. */
+  function showRingingQuest(id){
+    var bar=$("stopBar"); if(!bar) return;
+    var q=null; quests.forEach(function(x){ if(x.id===id) q=x; });
+    $("stopQuestName").textContent = q ? ("⏰ Alarm ringing — "+q.title) : "⏰ Alarm ringing";
+    bar.style.display="flex";
+    var row=document.querySelector('.quest[data-id="'+id+'"]');
+    if(row){ row.classList.add("ringing"); row.scrollIntoView({block:"center"}); }
+  }
+  window.showRingingQuest = showRingingQuest;
+  function hideStopBar(){ var bar=$("stopBar"); if(bar) bar.style.display="none"; }
+  $("stopAlarmBtn").addEventListener("click", function(){
+    try{ if(window.AndroidBridge && window.AndroidBridge.stopAlarmSound) window.AndroidBridge.stopAlarmSound(); }catch(e){}
+    hideStopBar();
+  });
+
   /* ---------- DASHBOARD full screen (v4.9) ----------
      The full anime dashboard from the reference photo — QUEST INFO /
      NOTIFICATION / GOAL / STATUS in one ornate panel. Display-only
@@ -1326,6 +1539,65 @@
   if(dashBtn) dashBtn.addEventListener("click", showDashboard);
   $("dashboard").addEventListener("click", hideDashboard);
   window.showDashboard = showDashboard;
+
+  /* ---------- v5.3 System screens: SKILLS / QUEST REWARDS /
+     EQUIPMENT / SHOP (from the 30 reference photos) ---------- */
+  function openScreen(id){ var el=$(id); if(el) el.classList.add("show"); }
+  function closeScreenById(id){ var el=$(id); if(el) el.classList.remove("show"); }
+  // Close buttons + tapping the dark backdrop (not the panel) closes.
+  document.querySelectorAll(".screen").forEach(function(sc){
+    sc.addEventListener("click", function(e){ if(e.target===sc) sc.classList.remove("show"); });
+  });
+  document.querySelectorAll("[data-close]").forEach(function(b){
+    b.addEventListener("click", function(){ closeScreenById(b.getAttribute("data-close")); });
+  });
+  $("navSkills").addEventListener("click", function(){ openScreen("screenSkills"); });
+  $("navRewards").addEventListener("click", function(){ renderRewards(); openScreen("screenRewards"); });
+  $("navEquip").addEventListener("click", function(){ openScreen("screenEquip"); });
+  $("navShop").addEventListener("click", function(){ openScreen("screenShop"); });
+
+  // Quest Rewards: a level-up leaves Ability Points +5 waiting.
+  // Yes = claim once (+5 AP, saved); No = decline (reward is gone).
+  function renderRewards(){
+    var pend = state.rewardLevel>0;
+    var p=$("rwPending"), e=$("rwEmpty");
+    if(p) p.style.display = pend?"block":"none";
+    if(e) e.style.display = pend?"none":"block";
+    var b=$("navRewards"); if(b) b.classList.toggle("has-reward", pend);
+  }
+  $("rwYes").addEventListener("click", function(){
+    if(!(state.rewardLevel>0)) return;
+    state.bonusAP=(state.bonusAP||0)+5;
+    state.rewardLevel=0;
+    saveGame(); renderAll(); renderRewards();
+    toast("✅ Reward accepted: +5 Ability Points");
+  });
+  $("rwNo").addEventListener("click", function(){
+    if(!(state.rewardLevel>0)) return;
+    state.rewardLevel=0;
+    saveGame(); renderRewards();
+    toast("Reward declined — no points gained");
+  });
+
+  // Equipment: tapping a slot shows its (empty) detail, like the
+  // anime's "ITEM: ???" panel.
+  (function(){
+    var slots=$("eqSlots"); if(!slots) return;
+    slots.addEventListener("click", function(e){
+      var s=e.target.closest?e.target.closest(".eq-slot"):null; if(!s) return;
+      slots.querySelectorAll(".eq-slot").forEach(function(x){ x.classList.remove("sel"); });
+      s.classList.add("sel");
+      var d=$("eqDetail");
+      if(d) d.innerHTML="<b>ITEM:</b> "+s.getAttribute("data-slot")+" — ???<br><b>CATEGORY:</b> ??<br><b>ACQUISITION DIFFICULTY:</b> ??<br>Nothing equipped yet.";
+    });
+  })();
+
+  // Shop (display only — no real purchase): BUY always answers
+  // "not enough gold"; CANCEL closes the window.
+  $("shopBuy").addEventListener("click", function(){
+    toast("⚠ Not enough gold — [Knight Killer] costs 2,800,000 gold. Your Gold: 0.", true);
+  });
+  $("shopCancel").addEventListener("click", function(){ closeScreenById("screenShop"); });
 
 /* ---------- Notifications (Android app only) ---------- */
   (function(){
