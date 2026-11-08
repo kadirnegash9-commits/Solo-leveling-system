@@ -1,226 +1,252 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling System - Quest Dashboard</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #020617;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 10px;
-        }
-        .outer-frame {
-            width: 100%;
-            max-width: 420px;
-            background: linear-gradient(135deg, rgba(0, 150, 255, 0.15), rgba(0, 5, 15, 0.95));
-            border: 3px solid #00bfff;
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 0 30px rgba(0, 191, 255, 0.5), inset 0 0 20px rgba(0, 191, 255, 0.3);
-            position: relative;
-        }
-        .section-title-box {
-            text-align: center;
-            border: 1px solid rgba(0, 191, 255, 0.4);
-            background: rgba(0, 191, 255, 0.05);
-            padding: 6px;
-            margin: 12px 0 8px 0;
-        }
-        .section-title {
-            color: #00ffff;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
-        }
-        .quest-info-text {
-            text-align: center;
-            color: #94a3b8;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-        .goal-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            font-size: 13px;
-        }
-        .goal-item span:last-child {
-            color: #cbd5e1;
-        }
-        .warning-box {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 191, 255, 0.08);
-            border: 1px solid rgba(0, 191, 255, 0.3);
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-        .warning-text {
-            font-size: 10.5px;
-            color: #38bdf8;
-            line-height: 1.3;
-            margin-left: 8px;
-        }
-        .divider {
-            border: none;
-            height: 1px;
-            background: rgba(0, 191, 255, 0.3);
-            margin: 15px 0;
-        }
-        .notification-text {
-            text-align: center;
-            color: #00ffff;
-            font-size: 15px;
-            font-weight: 600;
-            margin: 3px 0;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.9);
-        }
-        .status-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: bold;
-            color: #f8fafc;
-            margin-bottom: 10px;
-        }
-        .bar-container {
-            display: flex;
-            align-items: center;
-            margin: 6px 0;
-            font-size: 12px;
-        }
-        .bar-label {
-            width: 35px;
-            color: #cbd5e1;
-        }
-        .progress-bar {
-            flex-grow: 1;
-            height: 9px;
-            background: #090d16;
-            border-radius: 3px;
-            overflow: hidden;
-            border: 1px solid rgba(0, 191, 255, 0.4);
-            margin: 0 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #00ffff;
-            box-shadow: 0 0 8px #00ffff;
-        }
-        .stats-grid {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #cbd5e1;
-            margin-top: 10px;
-        }
-        .ability-points {
-            text-align: center;
-            color: #00ffff;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 12px;
-            letter-spacing: 0.5px;
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<title>Solo Leveling System - Quest Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cyan:#00f5ff;
+    --cyan-dim:#7deeff;
+    --cyan-bright:#a5f3ff;
+    --glow:rgba(0,245,255,.4);
+    --glow-strong:rgba(0,245,255,.95);
+    --green:#2ee6a8;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#000;
+    color:#fff;
+    font-family:"Rajdhani",system-ui,sans-serif;
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;padding:18px 14px;
+  }
+  .en{font-family:"Rajdhani",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+  .db-wrap{position:relative;max-width:430px;width:100%;margin:0 auto}
+  /* Ornate frame: angular cut corners, glowing cyan border. The outer
+     layer is the cyan border (clip-path), the inner layer the dark
+     panel — the 2px gap between them IS the border line. */
+  .qi-frame{
+    background:linear-gradient(180deg,#a5f3ff,#00b8d4 25%,#00f5ff 50%,#00b8d4 75%,#a5f3ff);
+    clip-path:polygon(26px 0, calc(100% - 26px) 0, 100% 26px, 100% calc(100% - 26px), calc(100% - 26px) 100%, 26px 100%, 0 calc(100% - 26px), 0 26px);
+    filter:drop-shadow(0 0 14px rgba(0,245,255,.55)) drop-shadow(0 0 44px rgba(0,245,255,.25));
+    padding:2px;
+  }
+  .qi-inner{
+    background:rgba(2,9,22,.97);
+    clip-path:polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+    padding:20px 16px 16px;text-align:center;
+  }
+  /* Side pillars: tall segmented glowing bars on the frame edges. */
+  .qi-pillar{
+    position:absolute;top:50%;width:12px;height:62%;
+    transform:translateY(-50%);z-index:2;
+    background:repeating-linear-gradient(180deg,#c8f8ff 0 12px,rgba(0,245,255,.3) 12px 16px);
+    box-shadow:0 0 16px rgba(0,245,255,.85),0 0 42px rgba(0,245,255,.4);
+  }
+  .qi-pillar.left{left:-6px}
+  .qi-pillar.right{right:-6px}
+  /* Top / bottom center diamonds. */
+  .qi-diamond{
+    position:absolute;left:50%;width:12px;height:12px;z-index:2;
+    background:var(--cyan-bright);
+    transform:translateX(-50%) rotate(45deg);
+    box-shadow:0 0 14px var(--glow-strong);
+  }
+  .qi-diamond.top{top:-6px}
+  .qi-diamond.bottom{bottom:-6px}
+  .qi-head{display:flex;align-items:center;gap:10px}
+  .qi-excl{
+    width:40px;height:40px;flex:none;border:1px solid var(--cyan);color:var(--cyan);
+    font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    text-shadow:0 0 12px var(--glow-strong);box-shadow:0 0 12px var(--glow);
+    border-radius:50%;
+  }
+  .qi-head h2{
+    flex:1;margin:0;font-size:21px;font-weight:700;color:var(--cyan);letter-spacing:.16em;text-align:center;
+    text-shadow:0 0 14px var(--glow-strong);border:1px solid var(--cyan);padding:6px 10px;
+    box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15);
+  }
+  .qi-line{margin-top:16px;font-size:15px;color:var(--cyan-dim);line-height:1.5}
+  .qi-goal{
+    margin:18px 0 6px;font-size:22px;font-weight:700;color:var(--cyan);letter-spacing:.16em;
+    text-shadow:0 0 14px var(--glow-strong);text-decoration:underline;text-underline-offset:5px;
+  }
+  .qi-row{display:flex;justify-content:space-between;align-items:center;padding:7px 8px;font-size:16.5px;font-weight:600}
+  .qi-row .qv{font-family:"Share Tech Mono",monospace;color:var(--cyan-dim);font-size:15.5px}
+  .qi-row .qb{color:var(--cyan-dim);font-size:17px;margin-left:10px}
+  .qi-row.done .qv{color:var(--green)}
+  .qi-row.done .qb{color:var(--green)}
+  .qi-row.done span:first-child{color:var(--green)}
+  /* ACCEPT / DECLINE under each goal row (one tap is final). */
+  .db-decision{display:flex;gap:10px;padding:2px 8px 0}
+  .db-decision button{
+    font-family:"Rajdhani",sans-serif;font-size:12px;font-weight:700;letter-spacing:.14em;
+    padding:4px 14px;background:transparent;cursor:pointer;border-radius:0;
+  }
+  .db-acc{
+    border:1px solid var(--cyan);color:var(--cyan);
+    text-shadow:0 0 8px var(--glow-strong);box-shadow:0 0 8px var(--glow);
+  }
+  .db-dec{
+    border:1px solid #ff4d6d;color:#ff4d6d;
+    text-shadow:0 0 8px rgba(255,77,109,.8);box-shadow:0 0 8px rgba(255,77,109,.4);
+  }
+  .db-decision button:disabled{opacity:.45;cursor:default}
+  .db-decnote{padding:3px 8px 6px;font-size:12.5px;color:var(--cyan-dim);text-align:left}
+  .qi-warn{margin-top:18px;font-size:15px;line-height:1.6;color:var(--cyan-dim)}
+  .qi-warn b{color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
+  /* Ornate NOTIFICATION band: bordered glowing bar with rune glyphs
+     left/right and NOTIFICATION in the middle, like the photo. */
+  .db-notifbar{
+    display:flex;align-items:center;gap:10px;margin:16px 0 10px;
+    border:1px solid var(--cyan);padding:7px 10px;
+    box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15);
+  }
+  .db-notifbar .nb-run{
+    flex:1;font-size:11px;letter-spacing:2px;color:var(--cyan);
+    text-shadow:0 0 8px var(--glow-strong);white-space:nowrap;overflow:hidden;
+  }
+  .db-notifbar .nb-run.l{text-align:left}
+  .db-notifbar .nb-run.r{text-align:right}
+  .db-notifbar h3{
+    margin:0;font-size:19px;font-weight:700;color:#fff;letter-spacing:.14em;
+    text-shadow:0 0 14px var(--glow-strong);white-space:nowrap;
+  }
+  .db-lvl{
+    text-align:center;color:#7df9ff;font-size:20px;font-weight:600;
+    line-height:1.5;text-shadow:0 0 12px rgba(0,245,255,.9);
+  }
+  .db-div{
+    height:1px;margin:14px 0;
+    background:linear-gradient(90deg,transparent,rgba(0,245,255,.5),transparent);
+  }
+  .db-warnrow{display:flex;align-items:flex-start;gap:10px;margin-top:14px}
+  .db-warnrow .qb{
+    color:var(--cyan);font-size:22px;line-height:1.2;flex:none;margin-top:2px;
+    text-shadow:0 0 10px var(--glow-strong);
+  }
+  .db-warnrow .qw{flex:1;font-size:15px;line-height:1.55;color:var(--cyan-dim);text-align:center}
+  .db-warnrow .qw b{color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
+  .db-status{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;
+    margin-top:6px;font-size:15.5px;font-weight:600;color:#fff;
+  }
+  .db-status span{white-space:nowrap}
+  .db-bars{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:14px}
+  .db-bar{display:flex;align-items:center;gap:8px;font-size:14px}
+  .db-bar .bl{font-family:"Rajdhani",sans-serif;font-weight:700;letter-spacing:.1em;color:#fff;flex:none}
+  .db-bar .bar{flex:1;height:10px}
+  .bar{height:8px;background:transparent;border:1px solid rgba(0,245,255,.45);border-radius:0;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0%}
+  .db-hp>i{background:linear-gradient(90deg,#00e5ff,#7df9ff);box-shadow:0 0 10px rgba(0,245,255,.7)}
+  .db-mp>i{background:linear-gradient(90deg,#0077ff,#00b8d4);box-shadow:0 0 10px rgba(0,119,255,.7)}
+  .db-fat>i{background:transparent;box-shadow:none}
+  .db-fatigue{font-size:14px;color:#fff;align-self:center}
+  .db-stats{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;
+    margin-top:14px;font-size:15.5px;font-weight:600;color:#fff;
+  }
+  .db-ap{margin-top:12px;text-align:center;font-size:15.5px;color:#fff}
+</style>
 </head>
 <body>
-
-    <div class="outer-frame">
-        
-        <!-- QUEST INFO -->
-        <div style="text-align: center; margin-bottom: 5px;">
-            <span style="border: 1px solid #00ffff; padding: 3px 10px; font-size: 14px; color: #00ffff; display: inline-block;">⚠️</span>
+  <div class="db-wrap">
+    <div class="qi-frame">
+      <div class="qi-inner">
+        <div class="qi-head">
+          <span class="qi-excl">!</span>
+          <h2 class="en">Quest Info</h2>
         </div>
-        <div class="section-title-box">
-            <div class="section-title">QUEST INFO</div>
+        <div class="qi-line">[Daily Quest: Strength Training has arrived.]</div>
+        <div class="qi-goal">GOAL</div>
+        <div class="db-notifbar">
+          <span class="nb-run l">ᚠᚱᚨᚱᛞᛁᚾᚾ</span>
+          <h3 class="en">Notification</h3>
+          <span class="nb-run r">ᚲᚨᛏᛁᚾᚨᚱᛟ</span>
         </div>
-        <div class="quest-info-text">[Daily Quest: Strength Training has arrived.]</div>
-
-        <div class="section-title-box">
-            <div class="section-title">GOAL</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-div"></div>
+        <div class="qi-goal">GOAL</div>
+        <div class="qi-row"><span>Push-ups</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="db-decision"><button class="db-acc" type="button">ACCEPT</button><button class="db-dec" type="button">DECLINE</button></div>
+        <div class="db-decnote">Decision: not made</div>
+        <div class="qi-row"><span>Sit-ups</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="db-decision"><button class="db-acc" type="button">ACCEPT</button><button class="db-dec" type="button">DECLINE</button></div>
+        <div class="db-decnote">Decision: not made</div>
+        <div class="qi-row"><span>Squats</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="db-decision"><button class="db-acc" type="button">ACCEPT</button><button class="db-dec" type="button">DECLINE</button></div>
+        <div class="db-decnote">Decision: not made</div>
+        <div class="qi-row"><span>Running</span><span><span class="qv">[10/10km]</span><span class="qb">☑</span></span></div>
+        <div class="db-decision"><button class="db-acc" type="button">ACCEPT</button><button class="db-dec" type="button">DECLINE</button></div>
+        <div class="db-decnote">Decision: not made</div>
+        <div class="db-warnrow"><span class="qb">☑</span><span class="qw"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate penalty.</span></div>
+        <div class="db-div"></div>
+        <div class="qi-goal">STATUS</div>
+        <div class="db-status"><span>LEVEL 18</span><span>JOB: None</span><span>TITLE: Wolf Assassin</span></div>
+        <div class="db-bars">
+          <div class="db-bar"><span class="bl">HP</span><div class="bar db-hp"><i style="width:100%"></i></div></div>
+          <div class="db-bar"><span class="bl">MP</span><div class="bar db-mp"><i style="width:40%"></i></div></div>
+          <div class="db-bar"><span class="bl">FAT</span><div class="bar db-fat"><i style="width:0%"></i></div></div>
+          <div class="db-fatigue">FATIGUE: 0</div>
         </div>
-
-        <!-- NOTIFICATION INSIDE THE FLOW -->
-        <div style="border: 1px dashed rgba(0,191,255,0.4); padding: 8px; margin: 10px 0; background: rgba(0,0,0,0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 10px; color: #00ffff;">ᚠᚱᚨᚲᛏᛁᛟᚾ</span>
-                <span style="font-size: 12px; font-weight: bold; color: #00ffff; letter-spacing: 1px;">NOTIFICATION</span>
-                <span style="font-size: 10px; color: #00ffff;">ᚲᛟᛗᛈᛚᛖᛏᛖ</span>
-            </div>
-            <div class="notification-text">Leveled up!</div>
-            <div class="notification-text">Leveled up!</div>
-            <div class="notification-text">Leveled up!</div>
-            <div class="notification-text">Leveled up!</div>
-        </div>
-
-        <!-- GOAL LIST -->
-        <div class="section-title-box" style="margin-top: 10px;">
-            <div class="section-title">GOAL</div>
-        </div>
-        <div class="goal-item"><span>Push-ups</span><span>[100/100] ☑</span></div>
-        <div class="goal-item"><span>Sit-ups</span><span>[100/100] ☑</span></div>
-        <div class="goal-item"><span>Squats</span><span>[100/100] ☑</span></div>
-        <div class="goal-item"><span>Running</span><span>[10/10km] ☑</span></div>
-
-        <div class="warning-box">
-            <span style="color: #00ffff; font-size: 14px;">☑</span>
-            <div class="warning-text">WARNING: Failure to complete the daily quest will result in an appropriate penalty.</div>
-        </div>
-
-        <hr class="divider">
-
-        <!-- STATUS -->
-        <div class="section-title-box">
-            <div class="section-title">STATUS</div>
-        </div>
-        
-        <div class="status-header">
-            <span>LEVEL 18</span>
-            <span>JOB: None</span>
-            <span>TITLE: Wolf Assassin</span>
-        </div>
-
-        <div class="bar-container">
-            <span class="bar-label">HP</span>
-            <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: #00ffcc; box-shadow: 0 0 8px #00ffcc;"></div></div>
-        </div>
-        <div class="bar-container">
-            <span class="bar-label">MP</span>
-            <div class="progress-bar"><div class="progress-fill" style="width: 45%; background: #00bfff; box-shadow: 0 0 8px #00bfff;"></div></div>
-        </div>
-
-        <div class="status-header" style="margin-top: 8px;">
-            <span>FAT</span>
-            <span>FATIGUE: 0</span>
-        </div>
-
-        <div class="stats-grid">
-            <span>STR: 48</span>
-            <span>AGI: 27</span>
-            <span>PER: 27</span>
-            <span>VIT: 27</span>
-        </div>
-
-        <div class="ability-points">
-            Available Ability Points: 12
-        </div>
-
+        <div class="db-stats"><span>STR: 48</span><span>AGI: 27</span><span>PER: 27</span><span>VIT: 27</span></div>
+        <div class="db-ap">Available Ability Points: 12</div>
+      </div>
     </div>
-
+    <span class="qi-pillar left"></span>
+    <span class="qi-pillar right"></span>
+    <span class="qi-diamond top"></span>
+    <span class="qi-diamond bottom"></span>
+  </div>
+<script>
+(function(){
+  function todayKey(){
+    var d=new Date();
+    var m=String(d.getMonth()+1).padStart(2,'0');
+    var day=String(d.getDate()).padStart(2,'0');
+    return d.getFullYear()+'-'+m+'-'+day;
+  }
+  var STORE='soloLevelingDashboardDecisions';
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ return {}; }
+  }
+  function save(all){
+    try{ localStorage.setItem(STORE, JSON.stringify(all)); }catch(e){}
+  }
+  function apply(dec, note, btns){
+    note.textContent = 'Decision: ' + dec;
+    btns.forEach(function(b){ b.disabled = true; });
+  }
+  var all = load();
+  var today = todayKey();
+  var todays = all[today] || {};
+  document.querySelectorAll('.db-decision').forEach(function(box){
+    var row = box.previousElementSibling;
+    var name = row ? (row.querySelector('span')||{}).textContent : '';
+    if(!name) return;
+    name = name.trim();
+    var note = box.nextElementSibling;
+    var btns = Array.prototype.slice.call(box.querySelectorAll('button'));
+    if(todays[name]){ apply(todays[name], note, btns); return; }
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        var dec = b.classList.contains('db-acc') ? 'ACCEPTED' : 'DECLINED';
+        var cur = load(); if(!cur[today]) cur[today]={};
+        cur[today][name] = dec; save(cur);
+        apply(dec, note, btns);
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
