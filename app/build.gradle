@@ -10,6 +10,18 @@ if (keyB64File.exists() && !keyFile.exists()) {
     java.nio.file.Files.write(keyFile.toPath(), java.util.Base64.getDecoder().decode(b64))
 }
 
+// Restore the launcher icon foreground from the committed base64 copy
+// (the GitHub integration pushes UTF-8 files only, so the PNG is decoded
+// here instead of being committed as a binary — same pattern as the
+// debug keystore above). Pure Java APIs only. Decoded on every build so
+// a future icon swap regenerates automatically.
+def iconB64File = file("../icon/ic_launcher_foreground.png.b64")
+def iconPngFile = file("src/main/res/drawable/ic_launcher_foreground_png.png")
+if (iconB64File.exists()) {
+    String iconB64 = new String(java.nio.file.Files.readAllBytes(iconB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(iconPngFile.toPath(), java.util.Base64.getDecoder().decode(iconB64))
+}
+
 android {
     namespace 'com.kader.systemapp'
     compileSdk 34
@@ -18,8 +30,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 35
-        versionName '5.3.1'
+        versionCode 36
+        versionName '5.3.2'
     }
 
     signingConfigs {
