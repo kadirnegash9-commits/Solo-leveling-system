@@ -385,6 +385,72 @@
   .qi-warn{margin-top:18px;font-size:15px;line-height:1.6;color:var(--cyan-dim)}
   .qi-warn b{color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
 
+  /* ---------- DASHBOARD full screen (v4.9) ----------
+     The full anime dashboard from the reference photo — QUEST INFO /
+     NOTIFICATION / GOAL / STATUS in one long ornate panel. Reuses the
+     v4.8 .qi-frame / .qi-inner / .qi-pillar / .qi-diamond (same
+     glowing blue frame, side pillars, top/bottom diamonds). The
+     values are DISPLAY ONLY, from the photo (Level 18 etc.) — the
+     real game state (Level 1, real XP/quests) is untouched. The
+     panel is taller than one phone screen, so the overlay scrolls;
+     tap anywhere to close (the photo has no close button). */
+  #dashboard{
+    position:fixed;inset:0;z-index:80;display:none;overflow-y:auto;
+    background:rgba(3,6,12,.88);backdrop-filter:blur(3px);padding:16px;
+  }
+  #dashboard.show{display:block}
+  .db-wrap{position:relative;max-width:430px;width:100%;margin:8px auto}
+  /* Ornate NOTIFICATION band: bordered glowing bar with rune glyphs
+     left/right and NOTIFICATION in the middle, like the photo. */
+  .db-notifbar{
+    display:flex;align-items:center;gap:10px;margin:16px 0 10px;
+    border:1px solid var(--cyan);padding:7px 10px;
+    box-shadow:0 0 12px var(--glow), inset 0 0 8px rgba(0,245,255,.15);
+  }
+  .db-notifbar .nb-run{
+    flex:1;font-size:11px;letter-spacing:2px;color:var(--cyan);
+    text-shadow:0 0 8px var(--glow-strong);white-space:nowrap;overflow:hidden;
+  }
+  .db-notifbar .nb-run.l{text-align:left}
+  .db-notifbar .nb-run.r{text-align:right}
+  .db-notifbar h3{
+    margin:0;font-size:19px;font-weight:700;color:#fff;letter-spacing:.14em;
+    text-shadow:0 0 14px var(--glow-strong);white-space:nowrap;
+  }
+  .db-lvl{
+    text-align:center;color:#7df9ff;font-size:20px;font-weight:600;
+    line-height:1.5;text-shadow:0 0 12px rgba(0,245,255,.9);
+  }
+  .db-div{
+    height:1px;margin:14px 0;
+    background:linear-gradient(90deg,transparent,rgba(0,245,255,.5),transparent);
+  }
+  .db-warnrow{display:flex;align-items:flex-start;gap:10px;margin-top:14px}
+  .db-warnrow .qb{
+    color:var(--cyan);font-size:22px;line-height:1.2;flex:none;margin-top:2px;
+    text-shadow:0 0 10px var(--glow-strong);
+  }
+  .db-warnrow .qw{flex:1;font-size:15px;line-height:1.55;color:var(--cyan-dim);text-align:center}
+  .db-warnrow .qw b{color:var(--cyan);text-shadow:0 0 10px var(--glow-strong)}
+  .db-status{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;
+    margin-top:6px;font-size:15.5px;font-weight:600;color:#fff;
+  }
+  .db-status span{white-space:nowrap}
+  .db-bars{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:14px}
+  .db-bar{display:flex;align-items:center;gap:8px;font-size:14px}
+  .db-bar .bl{font-family:"Rajdhani",sans-serif;font-weight:700;letter-spacing:.1em;color:#fff;flex:none}
+  .db-bar .bar{flex:1;height:10px}
+  .db-hp>i{background:linear-gradient(90deg,#00e5ff,#7df9ff);box-shadow:0 0 10px rgba(0,245,255,.7)}
+  .db-mp>i{background:linear-gradient(90deg,#0077ff,#00b8d4);box-shadow:0 0 10px rgba(0,119,255,.7)}
+  .db-fat>i{background:transparent;box-shadow:none}
+  .db-fatigue{font-size:14px;color:#fff;align-self:center}
+  .db-stats{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;
+    margin-top:14px;font-size:15.5px;font-weight:600;color:#fff;
+  }
+  .db-ap{margin-top:12px;text-align:center;font-size:15.5px;color:#fff}
+
   /* ---------- v3.8 Strict UI Theme spec (boss, 2026-11-07) ----------
      Authentic Solo Leveling System HUD: sharp rectangles, double-line
      neon borders, electric cyan #00f5ff, white values, glowing bars. */
@@ -421,6 +487,7 @@
         <div class="lv" id="levelNum">1</div>
         <div class="lvlabel en">Level</div>
       </div>
+      <button class="btn en" id="dashBtn" style="padding:10px 16px;font-size:13px;letter-spacing:.2em">Dashboard</button>
     </div>
 
     <div class="bars">
@@ -551,6 +618,55 @@
         <div class="qi-goal">GOAL</div>
         <div id="qiRows"></div>
         <div class="qi-warn"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate penalty.</div>
+      </div>
+    </div>
+    <span class="qi-pillar left"></span>
+    <span class="qi-pillar right"></span>
+    <span class="qi-diamond top"></span>
+    <span class="qi-diamond bottom"></span>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD full screen (v4.9) — the reference photo, as a screen.
+     Display-only values from the photo (Level 18 etc.); the real game
+     state is untouched. Tap anywhere to close. -->
+<div id="dashboard" role="dialog" aria-label="Dashboard">
+  <div class="db-wrap">
+    <div class="qi-frame">
+      <div class="qi-inner">
+        <div class="qi-head">
+          <span class="qi-excl">!</span>
+          <h2 class="en">Quest Info</h2>
+        </div>
+        <div class="qi-line">[Daily Quest: Strength Training has arrived.]</div>
+        <div class="qi-goal">GOAL</div>
+        <div class="db-notifbar">
+          <span class="nb-run l">ᚠᚱᚨᚱᛞᛁᚾᚾ</span>
+          <h3 class="en">Notification</h3>
+          <span class="nb-run r">ᚲᚨᛏᛁᚾᚨᚱᛟ</span>
+        </div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-lvl">Leveled up!</div>
+        <div class="db-div"></div>
+        <div class="qi-goal">GOAL</div>
+        <div class="qi-row done"><span>Push-ups</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="qi-row done"><span>Sit-ups</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="qi-row done"><span>Squats</span><span><span class="qv">[100/100]</span><span class="qb">☑</span></span></div>
+        <div class="qi-row done"><span>Running</span><span><span class="qv">[10/10km]</span><span class="qb">☑</span></span></div>
+        <div class="db-warnrow"><span class="qb">☑</span><span class="qw"><b>WARNING:</b> Failure to complete the daily quest will result in an appropriate penalty.</span></div>
+        <div class="db-div"></div>
+        <div class="qi-goal">STATUS</div>
+        <div class="db-status"><span>LEVEL 18</span><span>JOB: None</span><span>TITLE: Wolf Assassin</span></div>
+        <div class="db-bars">
+          <div class="db-bar"><span class="bl">HP</span><div class="bar db-hp"><i style="width:100%"></i></div></div>
+          <div class="db-bar"><span class="bl">MP</span><div class="bar db-mp"><i style="width:40%"></i></div></div>
+          <div class="db-bar"><span class="bl">FAT</span><div class="bar db-fat"><i style="width:0%"></i></div></div>
+          <div class="db-fatigue">FATIGUE: 0</div>
+        </div>
+        <div class="db-stats"><span>STR: 48</span><span>AGI: 27</span><span>PER: 27</span><span>VIT: 27</span></div>
+        <div class="db-ap">Available Ability Points: 12</div>
       </div>
     </div>
     <span class="qi-pillar left"></span>
@@ -1197,6 +1313,19 @@
   $("questInfo").addEventListener("click", hideQuestInfo);
   // Opened by MainActivity when a Saitama alarm fires.
   window.showQuestInfo = showQuestInfo;
+
+  /* ---------- DASHBOARD full screen (v4.9) ----------
+     The full anime dashboard from the reference photo — QUEST INFO /
+     NOTIFICATION / GOAL / STATUS in one ornate panel. Display-only
+     values from the photo (Level 18 etc.); the real game state is
+     untouched. Opened from the DASHBOARD button in the header.
+     Tap anywhere to close (the photo has no close button). */
+  function showDashboard(){ var el=$("dashboard"); if(el) el.classList.add("show"); }
+  function hideDashboard(){ var el=$("dashboard"); if(el) el.classList.remove("show"); }
+  var dashBtn=$("dashBtn");
+  if(dashBtn) dashBtn.addEventListener("click", showDashboard);
+  $("dashboard").addEventListener("click", hideDashboard);
+  window.showDashboard = showDashboard;
 
 /* ---------- Notifications (Android app only) ---------- */
   (function(){
