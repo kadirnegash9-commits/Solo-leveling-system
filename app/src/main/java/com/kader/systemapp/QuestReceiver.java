@@ -84,7 +84,7 @@ public class QuestReceiver extends BroadcastReceiver {
             {"trading", "17:45", "Trading — Preparation"},
             {"maghrib", "18:10", "Close Shop + Maghrib Prayer"},
             {"study", "18:45", "Home Study"},
-            {"isha", "19:25", "Isha Prayer + Dinner"},
+            {"isha", "19:10", "Isha Prayer + Dinner"},
             {"homework", "21:00", "Homework + Review"},
             {"sleep", "22:15", "Sleep — Go to Bed on Time"},
             {"saitamaRun", "06:00", "Saitama Daily Routine — Running 10km"},
