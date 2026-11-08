@@ -763,6 +763,17 @@
 .theme-badge.active { border-color:var(--gold); box-shadow:0 0 8px rgba(255,215,0,.35); }
 .theme-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .theme-active { color:var(--gold); }
+  /* v5.5.1: level-theme preview — body[data-theme] overrides the accent vars (session-only; reload returns to the real level theme). */
+  body[data-theme="purple"] { --neon-cyan:#c084fc; --bright-blue:#a855f7; }
+  body[data-theme="gold"] { --neon-cyan:#fbbf24; --bright-blue:#f59e0b; }
+  .theme-badge { cursor:pointer; }
+  /* v5.5.1: LIVE NUMBERS STRIP under §1 — real save values (the artwork pixels above are baked Gemini numbers). */
+  .live-strip { border:1px solid var(--neon-cyan); background:rgba(2,12,32,.92); box-shadow:0 0 12px rgba(0,242,254,.35); padding:6px 8px; margin:0 0 2px; text-align:center; }
+  .live-vitals { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; letter-spacing:1px; color:var(--neon-cyan); text-shadow:0 0 8px rgba(0,242,254,.6); }
+  .live-vitals .live-cell { margin:0 6px; white-space:nowrap; }
+  .live-vitals .live-cell b { color:#ffffff; }
+  .live-abilities { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:700; letter-spacing:0; color:#e0f4ff; margin-top:3px; }
+  .live-abilities b { color:var(--neon-cyan); }
 #rewardBox { border:1px solid rgba(255,215,0,.7); background:rgba(50,35,0,.55); border-radius:5px; padding:8px; margin-top:8px; text-align:center; }
 #rewardBox .rw-title { font-family:'Orbitron',sans-serif; font-size:10.5px; font-weight:800; color:var(--gold); margin-bottom:3px; }
 #rewardBox .rw-sub { font-size:10px; color:#e0f4ff; margin-bottom:6px; }
@@ -820,6 +831,17 @@
 
     <!-- Notification Leveled Up Hotspot -->
     <div class="hotspot" style="top: 87.5%; left: 25%; width: 50%; height: 5%;" onclick="showLevelToast()"></div>
+  </div>
+
+  <!-- v5.5.1: LIVE NUMBERS STRIP — real save values (HP/MP/XP + 9 abilities); artwork pixels above are baked Gemini numbers -->
+  <div class="live-strip" id="liveStrip">
+    <div class="live-vitals">
+      <span class="live-cell">HP <b id="lsHp">–</b></span>
+      <span class="live-cell">MP <b id="lsMp">–</b></span>
+      <span class="live-cell">XP <b id="lsXp">–</b></span>
+      <span class="live-cell">LV <b id="lsLv">–</b></span>
+    </div>
+    <div class="live-abilities" id="lsAbilities"></div>
   </div>
 
   <!-- PIECE 2: SEAMLESS ELECTRIC BLUE FLAME EXTENSION FOR SECTION 2 (DAILY ROUTINE WITH ACCEPT & DECLINE) -->
@@ -1429,7 +1451,7 @@ function renderProgress(){
   if(bar) bar.style.width = (list.length ? Math.round(state.doneCount/list.length*100) : 0) + "%";
 }
 function renderThemes(){
-  var cur = themeForLevel(state.level);
+  var cur = themePreview || themeForLevel(state.level);
   document.querySelectorAll(".theme-badge").forEach(function(b){
     var on = b.getAttribute("data-theme") === cur;
     b.classList.toggle("active", on);
@@ -1438,6 +1460,24 @@ function renderThemes(){
   });
 }
 function themeForLevel(level){ if(level>=60) return "gold"; if(level>=30) return "purple"; return "blue"; }
+/* ---------- v5.5.1: live numbers strip + level-theme preview ---------- */
+var themePreview = null; // session only — reload returns to the real level theme
+function applyTheme(){
+  document.body.setAttribute("data-theme", themePreview || themeForLevel(state.level));
+  renderThemes();
+}
+function renderLiveStrip(){
+  var hp=$("lsHp"), mp=$("lsMp"), xp=$("lsXp"), lv=$("lsLv"), ab=$("lsAbilities");
+  if(hp) hp.textContent = state.hp + "/100";
+  if(mp) mp.textContent = mpMax() + "/" + mpMax();
+  if(xp) xp.textContent = state.xp + "/" + xpNeeded(state.level);
+  if(lv) lv.textContent = state.level;
+  if(ab){
+    var parts=[];
+    STATS.forEach(function(s){ parts.push(s.en + " <b>" + statVal(s.key) + "</b>"); });
+    ab.innerHTML = parts.join(" · ");
+  }
+}
 function renderNow(){
   var n = eatNow();
   var c = $("nowClock"); if(!c) return;
@@ -1509,7 +1549,7 @@ function renderReward(){
   box.style.display = (state.rewardLevel>0) ? "block" : "none";
 }
 function renderAll(){
-  renderSchedule(); renderTitles(); renderProgress(); renderThemes();
+  renderSchedule(); renderTitles(); renderProgress(); applyTheme(); renderLiveStrip();
   renderNow(); renderNotif(); renderReward(); updateMasks();
 }
 
@@ -1739,6 +1779,15 @@ window.showDashboard = showDashboard;
 
 /* ---------- Clock tick + day rollover ---------- */
 renderAll();
+/* v5.5.1: level-theme preview — tap a theme badge to preview its color (session-only). */
+document.querySelectorAll(".theme-badge").forEach(function(b){
+  b.addEventListener("click", function(){
+    var t = b.getAttribute("data-theme");
+    themePreview = (t === themeForLevel(state.level)) ? null : t;
+    applyTheme();
+    showSystemToast("Theme preview: " + (themePreview || themeForLevel(state.level)).toUpperCase());
+  });
+});
 setInterval(renderNow, 1000);
 setInterval(function(){ renderAll(); }, 60000);
 setInterval(ensureFreshDay, 30000);
