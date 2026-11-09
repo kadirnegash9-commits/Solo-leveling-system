@@ -870,8 +870,11 @@
          Baked samples (photo): level 1, HP 72/100, MP 135/135, XP 55/100, FATIGUE 0,
          STR 14 INT 14 FAITH 19 / VIT 12 AGI 12 PER 10 / TRADE 10 DISC 13 SKILL 9,
          Available Points 0. Live values come from soloLevelingSaveV4 (renderLiveStrip). -->
-    <div class="photo-mask" style="left:48.1%; top:12.1%; width:3.1%; height:2.0%;"></div>
-    <div class="photo-val big" id="lvNum" style="left:49.6%; top:13.09%;">1</div>
+    <!-- v5.6.8: level mask re-measured — v5.6.7 mask (top 12.1%, height 2.0%) covered only
+     the top of the baked "1" (stem y 251-316 on the 1143x2048 photo); the bottom 27px
+     showed through and the tiny 14px live "1" read as cut off. Mask now covers the whole stem. -->
+    <div class="photo-mask" style="left:49.3%; top:12.0%; width:2.1%; height:3.8%;"></div>
+    <div class="photo-val big" id="lvNum" style="left:50.3%; top:13.84%; font-size:84px;">1</div>
     <div class="photo-mask" style="left:52.0%; top:34.1%; width:8.4%; height:1.2%;"></div>
     <div class="photo-mask" style="left:51.6%; top:36.7%; width:9.0%; height:1.3%;"></div>
     <div class="photo-mask" style="left:52.0%; top:39.5%; width:8.4%; height:1.2%;"></div>
@@ -1391,6 +1394,11 @@ function eatNow(){
 }
 function toMin(t){ var p=t.split(":"); return parseInt(p[0],10)*60+parseInt(p[1],10); }
 function pad(n){ return (n<10?"0":"")+n; }
+/* v5.6.8: 12-hour DISPLAY (boss 2026-11-09 13:42) — display only. The stored
+   times stay 24-hour (BASE_QUESTS + QuestReceiver alarms fire at the same clock
+   times). 13->1, 14->2, ... 23->11; 12 stays 12; 00->12. Minutes keep the leading
+   zero; hours have none. No AM/PM — just the number, as he speaks it. */
+function fmt12(t){ var p=String(t).split(":"); var h=parseInt(p[0],10)%24; var m=p[1]||"00"; var h12=h%12; if(h12===0) h12=12; return h12+":"+m; }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
@@ -1537,7 +1545,7 @@ function renderSchedule(){
     if(st==="missed") note = '<div class="routine-state bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+xpLossFor(q.id)+' XP</div>';
     row.innerHTML =
       '<div class="routine-info-col">' +
-        '<div class="routine-time-title"><span class="routine-time-badge">'+q.time+'</span><span>'+esc(q.title)+'</span></div>' +
+        '<div class="routine-time-title"><span class="routine-time-badge">'+fmt12(q.time)+'</span><span>'+esc(q.title)+'</span></div>' +
         '<div class="routine-desc">'+esc(q.desc)+'</div>' +
         '<div class="routine-rewards"><span class="reward-xp"'+(q.id.indexOf("forge")===0?' style="color:var(--gold);"':'')+'>+'+q.xp+' XP</span><span class="reward-attr">'+esc(q.label)+'</span></div>' +
         note +
@@ -1633,7 +1641,7 @@ function renderLiveStrip(){
 function renderNow(){
   var n = eatNow();
   var c = $("nowClock"); if(!c) return;
-  c.textContent = "EAT · " + pad(n.h) + ":" + pad(n.m) + ":" + pad(n.s);
+  c.textContent = "EAT · " + ((n.h%12)||12) + ":" + pad(n.m) + ":" + pad(n.s); // v5.6.8: 12-hour display
   var nowMin = n.h*60+n.m;
   var list = todayQuests();
   var cur=null, next=null;
@@ -1650,10 +1658,10 @@ function renderNow(){
   }
   if(cur){
     $("nowAct").textContent = cur.title;
-    $("nowSub").textContent = cur.desc + " · " + cur.time + " – " + cur.end;
+    $("nowSub").textContent = cur.desc + " · " + fmt12(cur.time) + " – " + fmt12(cur.end);
   } else if(list.length && nowMin < toMin(list[0].time)){
     $("nowAct").textContent = "The day hasn't started yet";
-    $("nowSub").textContent = "The first quest starts at " + list[0].time + " — get ready.";
+    $("nowSub").textContent = "The first quest starts at " + fmt12(list[0].time) + " — get ready.";
   } else {
     $("nowAct").textContent = "Rest / free time";
     $("nowSub").textContent = "This hour is not in the plan. Wait for the next quest or take a rest.";
@@ -1661,9 +1669,9 @@ function renderNow(){
   if(next){
     var diff = toMin(next.time)-nowMin;
     var hh = Math.floor(diff/60), mm = diff%60;
-    $("nowNext").innerHTML = "Next: <b>" + esc(next.title) + "</b> · " + next.time + " · in <span class='countdown'>" + (hh>0?hh+" hr ":"") + mm + " min</span>";
+    $("nowNext").innerHTML = "Next: <b>" + esc(next.title) + "</b> · " + fmt12(next.time) + " · in <span class='countdown'>" + (hh>0?hh+" hr ":"") + mm + " min</span>";
   } else {
-    $("nowNext").innerHTML = "No more quests today — <b>22:15 Sleep</b> closes the day.";
+    $("nowNext").innerHTML = "No more quests today — <b>10:15 Sleep</b> closes the day.";
   }
 }
 function hasBridge(){ return (typeof window.AndroidBridge !== "undefined") && window.AndroidBridge; }
