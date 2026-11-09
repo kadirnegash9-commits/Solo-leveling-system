@@ -22,6 +22,24 @@ if (iconB64File.exists()) {
     java.nio.file.Files.write(iconPngFile.toPath(), java.util.Base64.getDecoder().decode(iconB64))
 }
 
+// Restore the v5.6.7 photo artwork from the committed base64 copies
+// (the GitHub integration pushes UTF-8 files only, so the JPEGs are decoded
+// here instead of being committed as binaries — same pattern as the
+// launcher icon and the debug keystore above). Pure Java APIs only.
+// Decoded on every build so a future photo swap regenerates automatically.
+def statusB64File = file("../photos/status-photo.jpg.b64")
+def statusJpgFile = file("src/main/assets/status-photo.jpg")
+if (statusB64File.exists()) {
+    String statusB64 = new String(java.nio.file.Files.readAllBytes(statusB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(statusJpgFile.toPath(), java.util.Base64.getDecoder().decode(statusB64))
+}
+def questB64File = file("../photos/quest-photo.jpg.b64")
+def questJpgFile = file("src/main/assets/quest-photo.jpg")
+if (questB64File.exists()) {
+    String questB64 = new String(java.nio.file.Files.readAllBytes(questB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(questJpgFile.toPath(), java.util.Base64.getDecoder().decode(questB64))
+}
+
 android {
     namespace 'com.kader.systemapp'
     compileSdk 34
@@ -30,8 +48,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 47
-        versionName '5.6.6'
+        versionCode 48
+        versionName '5.6.7'
     }
 
     signingConfigs {
