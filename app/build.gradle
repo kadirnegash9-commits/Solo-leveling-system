@@ -40,14 +40,13 @@ if (questB64File.exists()) {
     java.nio.file.Files.write(questJpgFile.toPath(), java.util.Base64.getDecoder().decode(questB64))
 }
 
-// Restore the v5.7.0 EQUIPMENT photo from the committed base64 copy
-// (boss's EQUIPMENT screenshot, cropped + rotated upright — same pattern
-// as the status/quest photos above). Pure Java APIs only.
-def equipB64File = file("../photos/equipment-photo.jpg.b64")
-def equipJpgFile = file("src/main/assets/equipment-photo.jpg")
-if (equipB64File.exists()) {
-    String equipB64 = new String(java.nio.file.Files.readAllBytes(equipB64File.toPath()), "UTF-8").replaceAll("\\s", "")
-    java.nio.file.Files.write(equipJpgFile.toPath(), java.util.Base64.getDecoder().decode(equipB64))
+// Body-only crop of the EQUIPMENT photo (center figure, no baked slot boxes)
+// for the §9 body-diagram center cell. Same pattern as above.
+def equipBodyB64File = file("../photos/equipment-body.jpg.b64")
+def equipBodyJpgFile = file("src/main/assets/equipment-body.jpg")
+if (equipBodyB64File.exists()) {
+    String equipBodyB64 = new String(java.nio.file.Files.readAllBytes(equipBodyB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(equipBodyJpgFile.toPath(), java.util.Base64.getDecoder().decode(equipBodyB64))
 }
 
 android {
