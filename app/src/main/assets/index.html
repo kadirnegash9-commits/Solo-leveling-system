@@ -152,6 +152,10 @@
     position: relative;
     width: 100%;
     line-height: 0;
+    /* v5.6.9: query container so the level "1" can size in cqw (1% of this photo's
+       width) — px font-sizes do NOT scale with the photo, which is why v5.6.8's
+       84px "1" rendered ~3x too big on the phone and covered LEVEL. */
+    container-type: inline-size;
   }
   .hud-top-artwork img {
     width: 100%;
@@ -873,8 +877,14 @@
     <!-- v5.6.8: level mask re-measured — v5.6.7 mask (top 12.1%, height 2.0%) covered only
      the top of the baked "1" (stem y 251-316 on the 1143x2048 photo); the bottom 27px
      showed through and the tiny 14px live "1" read as cut off. Mask now covers the whole stem. -->
+    <!-- v5.6.9: MEDIUM "1" (boss 14:26 — v5.6.8's 84px "1" was ~3x too big on the phone and
+     covered LEVEL, only "LEV" showed). Root cause: 84px is absolute — the photo is only
+     ~480 CSS px wide on his phone (max-width:480px cap), so 84px = 17.5% of the photo
+     width, while the baked "1" is 66px on a 1143px photo (5.8%). Fix: 8cqw — Orbitron "1"
+     is 0.72em tall, so 8cqw (= 8% of this photo's width) renders a 66px glyph, matching
+     the baked "1"; 38px is the fallback for WebViews without cqw. Mask + position unchanged. -->
     <div class="photo-mask" style="left:49.3%; top:12.0%; width:2.1%; height:3.8%;"></div>
-    <div class="photo-val big" id="lvNum" style="left:50.3%; top:13.84%; font-size:84px;">1</div>
+    <div class="photo-val big" id="lvNum" style="left:50.3%; top:13.84%; font-size:38px; font-size:8cqw;">1</div>
     <div class="photo-mask" style="left:52.0%; top:34.1%; width:8.4%; height:1.2%;"></div>
     <div class="photo-mask" style="left:51.6%; top:36.7%; width:9.0%; height:1.3%;"></div>
     <div class="photo-mask" style="left:52.0%; top:39.5%; width:8.4%; height:1.2%;"></div>
