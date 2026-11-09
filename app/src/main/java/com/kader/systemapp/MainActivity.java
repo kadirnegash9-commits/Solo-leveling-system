@@ -100,6 +100,17 @@ public class MainActivity extends Activity {
         askBatteryOptimizationOnce();
     }
 
+    // v5.6.4: re-arm on every foreground too, not just onCreate —
+    // bringing the app forward from recents must also restore any
+    // lost alarm. (Safety net only: the alarms must NOT depend on
+    // the app being opened at all — MY_PACKAGE_REPLACED + the
+    // 30-min watchdog keep them armed on their own.)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        QuestReceiver.scheduleAll(this);
+    }
+
     // One-time system prompt: "Allow Solo Leveling System to run in the
     // background without battery optimization?" — the user taps Allow.
     // If he declines (or the phone does not offer it), never ask again.

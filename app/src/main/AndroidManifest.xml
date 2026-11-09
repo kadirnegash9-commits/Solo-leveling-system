@@ -30,6 +30,8 @@
         <receiver android:name=".QuestReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- v5.6.4: re-arm after an app update, with no app open -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

@@ -35,6 +35,15 @@ import java.util.Locale;
  * notification with the alarm ringtone, vibration and a full-screen intent
  * — it rings like a clock alarm. Times/titles must match BASE_QUESTS in
  * app/src/main/assets/index.html. BOOT_COMPLETED re-arms after a reboot.
+ * v5.6.4 (2026-11-09): Mon 2026-11-09 Fajr 05:00 + Gym 06:00 never
+ * fired and Breakfast 07:00 fired ~20 min late, after 3 app updates
+ * Sunday evening — the chain had no re-arm on update and no watchdog,
+ * so lost alarms stayed lost (re-opening the app Monday morning could
+ * not bring them back: a 07:20 re-arm pushes Fajr to Tue, Gym to Wed).
+ * Now: MY_PACKAGE_REPLACED re-arms after every update, a 30-min
+ * watchdog re-arms any missing alarm, every delivery re-arms the
+ * chain FIRST (even a skipped one), and MainActivity re-arms on
+ * every foreground (onResume), not just onCreate.
  * Saturday rule (boss, confirmed 2026-11-07, updated 14:22, Fajr
  * added 14:36): on Saturday only prayer (fajr/zuhr/asr/maghrib/
  * isha) reminders fire — NO sport/gym, all other quests are
@@ -70,6 +79,12 @@ public class QuestReceiver extends BroadcastReceiver {
     public static final String ACTION_QUEST = "com.kader.systemapp.QUEST_REMINDER";
     // Sent when the alarm notification is swiped away — stop the loop.
     public static final String ACTION_STOP_ALARM = "com.kader.systemapp.STOP_ALARM";
+    // v5.6.4 watchdog: fires every 30 min and re-arms any missing quest
+    // alarm (see scheduleWatchdog). Distinct request code (900) so the
+    // cancel sweep in scheduleAll (codes 100-131) never touches it.
+    public static final String ACTION_WATCHDOG = "com.kader.systemapp.ALARM_WATCHDOG";
+    private static final int WATCHDOG_CODE = 900;
+    private static final long WATCHDOG_INTERVAL_MS = 30 * 60 * 1000;
 
     // {id, HH:MM, title} — same order/times as the web quests
     public static final String[][] QUESTS = {
@@ -96,6 +111,21 @@ public class QuestReceiver extends BroadcastReceiver {
             scheduleAll(context);
             return;
         }
+        // v5.6.4: app updated — re-arm all quest alarms (and the
+        // watchdog). An update can clear alarms, and without this the
+        // chain stays dead until the app is opened (this is how Fajr
+        // 05:00 + Gym 06:00 were lost on Mon 2026-11-09 after 3
+        // updates Sunday evening).
+        if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) {
+            scheduleAll(context);
+            return;
+        }
+        // v5.6.4 watchdog: re-arm any missing quest alarm (scheduleAll
+        // also re-arms the watchdog itself, so the check repeats).
+        if (ACTION_WATCHDOG.equals(intent.getAction())) {
+            scheduleAll(context);
+            return;
+        }
         // Alarm notification swiped away: the alarm is dismissed — stop
         // the looping sound. Nothing else to do (alarms stay armed).
         if (ACTION_STOP_ALARM.equals(intent.getAction())) {
@@ -104,6 +134,11 @@ public class QuestReceiver extends BroadcastReceiver {
         }
         String id = intent.getStringExtra("quest_id");
         String title = intent.getStringExtra("quest_title");
+        // v5.6.4: re-arm the chain FIRST, before any early return below
+        // (weekend school, null title) — a skipped delivery must not
+        // break the chain. The alarm that just fired is already spent,
+        // so cancelling + re-arming it here only sets its next day.
+        scheduleAll(context);
         if (title == null) return;
         // Weekends = no school (his daily-plan rule)
         if ("school".equals(id)) {
@@ -111,8 +146,6 @@ public class QuestReceiver extends BroadcastReceiver {
             if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) return;
         }
         notifyQuest(context, id == null ? "quest" : id, title);
-        // Keep the chain alive even if the app is not opened daily.
-        scheduleAll(context);
         // English quest: speak a motivational phrase out loud (boss,
         // 2026-11-07). The Alarm Test button speaks too, so he can
         // hear the voice today instead of waiting for 14:30.
@@ -187,6 +220,34 @@ public class QuestReceiver extends BroadcastReceiver {
                 }
             });
         } catch (Exception e) { handler.post(finish); }
+    }
+
+    // v5.6.4 watchdog (boss: "make it auto, so I don't need to enter
+    // the app"): a repeating 30-min check that re-arms any missing quest
+    // alarm — no app open needed. It fires on its own, calls
+    // scheduleAll (which re-arms the quest alarms AND this watchdog),
+    // so the chain repairs itself within 30 minutes of any break
+    // (update, force-stop, system clearing alarms). Uses
+    // setExactAndAllowWhileIdle so it fires even in Doze; falls back
+    // to setAndAllowWhileIdle if the exact-alarm permission was
+    // revoked (the quest alarms themselves use setAlarmClock, which
+    // needs no exact-alarm permission). Request code 900, outside the
+    // cancel sweep (100-131), so the sweep never kills the watchdog.
+    public static void scheduleWatchdog(Context context) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        Intent intent = new Intent(context, QuestReceiver.class);
+        intent.setAction(ACTION_WATCHDOG);
+        PendingIntent pi = PendingIntent.getBroadcast(context, WATCHDOG_CODE, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        long when = System.currentTimeMillis() + WATCHDOG_INTERVAL_MS;
+        try {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+        } catch (Exception e) {
+            try {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+            } catch (Exception ignored) {}
+        }
     }
 
     /** One-off test alarm, 120s from now, through the exact same code path
@@ -299,6 +360,9 @@ public class QuestReceiver extends BroadcastReceiver {
             am.setAlarmClock(
                     new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
         }
+        // v5.6.4: always arm the watchdog with the quest alarms, so the
+        // chain repairs itself without any app open.
+        scheduleWatchdog(context);
     }
 
     public static void notifyQuest(Context context, String tag, String title) {
