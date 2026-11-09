@@ -40,6 +40,16 @@ if (questB64File.exists()) {
     java.nio.file.Files.write(questJpgFile.toPath(), java.util.Base64.getDecoder().decode(questB64))
 }
 
+// Restore the v5.7.0 EQUIPMENT photo from the committed base64 copy
+// (boss's EQUIPMENT screenshot, cropped + rotated upright — same pattern
+// as the status/quest photos above). Pure Java APIs only.
+def equipB64File = file("../photos/equipment-photo.jpg.b64")
+def equipJpgFile = file("src/main/assets/equipment-photo.jpg")
+if (equipB64File.exists()) {
+    String equipB64 = new String(java.nio.file.Files.readAllBytes(equipB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(equipJpgFile.toPath(), java.util.Base64.getDecoder().decode(equipB64))
+}
+
 android {
     namespace 'com.kader.systemapp'
     compileSdk 34
@@ -48,8 +58,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 50
-        versionName '5.6.9'
+        versionCode 51
+        versionName '5.7.0'
     }
 
     signingConfigs {

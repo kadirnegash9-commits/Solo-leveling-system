@@ -812,6 +812,37 @@
 #rewardBox .rw-title { font-family:'Orbitron',sans-serif; font-size:10.5px; font-weight:800; color:var(--gold); margin-bottom:3px; }
 #rewardBox .rw-sub { font-size:10px; color:#e0f4ff; margin-bottom:6px; }
 #rewardBox .rw-btns { display:flex; gap:6px; justify-content:center; }
+
+/* ---------- v5.7.0: GOLD + SHOP STORE + EQUIPMENT + SKILLS WINDOW ----------
+   Same HUD language: glass dark slate-blue + blur, laser cyan #00f5ff,
+   glowing rectangular bracket headers, ZERO rounded corners. Gold uses
+   --gold (#ffd700). Shop is §8 below the main content; Skills is its own
+   §10 section (NOT inside the Shop). No Penalty Zone anywhere. */
+.gold-line { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; letter-spacing:2px; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,.7); text-align:center; margin:2px 0 6px; }
+.shop-gold-line { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; letter-spacing:1px; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,.7); text-align:center; margin:2px 0 8px; }
+.shop-group-title { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:900; letter-spacing:2px; color:var(--neon-cyan); text-shadow:0 0 8px var(--neon-cyan); text-align:center; margin:10px 0 6px; }
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.shop-cube { background:rgba(6,16,32,.6); border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 12px rgba(0,168,255,.08); padding:10px 6px 8px; text-align:center; border-radius:0; }
+.shop-cube.owned { border-color:var(--gold); box-shadow:0 0 12px rgba(255,215,0,.45), inset 0 0 12px rgba(255,215,0,.1); }
+.cube-icon { font-size:30px; line-height:1.1; }
+.cube-name { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; color:var(--neon-cyan); letter-spacing:.5px; margin-top:4px; }
+.cube-sub { font-family:'Share Tech Mono',monospace; font-size:11px; color:#9fd8ff; margin-top:2px; }
+.cube-price { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.6); margin-top:4px; }
+.cube-btn { display:block; width:100%; margin-top:6px; background:#020919; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; padding:6px 0; cursor:pointer; box-shadow:0 0 8px rgba(0,242,254,.3); border-radius:0; }
+.cube-btn.owned-btn { border-color:var(--gold); color:var(--gold); box-shadow:0 0 8px rgba(255,215,0,.3); }
+.equip-photo { width:100%; display:block; border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 14px rgba(0,242,254,.3); }
+.equip-list { margin-top:8px; }
+.equip-row { display:flex; justify-content:space-between; gap:8px; font-family:'Share Tech Mono',monospace; font-size:12px; padding:6px 8px; border-bottom:1px solid rgba(0,242,254,.2); }
+.equip-row .slot { color:var(--neon-cyan); letter-spacing:1px; }
+.equip-row .val { color:#7fa8c9; text-align:right; }
+.equip-row .val.on { color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.5); }
+.skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(6,16,32,.6); box-shadow:0 0 10px rgba(0,242,254,.25); padding:10px; margin-bottom:8px; border-radius:0; }
+.skill-card.locked { opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none; }
+.skill-name { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:800; color:var(--neon-cyan); letter-spacing:1px; }
+.skill-type { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--gold); margin-top:2px; }
+.skill-desc { font-size:13px; color:#cfeaff; margin-top:4px; }
+.skill-state { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; margin-top:6px; color:var(--neon-cyan); }
+.skill-card.locked .skill-state { color:#7fa8c9; }
 </style>
 </head>
 <body>
@@ -839,6 +870,7 @@
 </div>
 
 <div class="top-section-label">◆ 1. STATUS DASHBOARD &amp; BODY ◆</div>
+<div class="gold-line">🪙 GOLD: <span id="goldVal">0</span></div>
 
 <!-- =========================================================================
      ONE CONTINUOUS LONG HUD CONTAINER WITH THE REAL ELECTRIC BLUE FLAME ARTWORK
@@ -1072,6 +1104,23 @@
       <div class="rewards-list" id="levelRewardsList"></div>
     </div>
 
+    <!-- 8. SHOP STORE (v5.7.0 — new section BELOW the main content) -->
+    <div class="inner-section-divider">◆ 8. SHOP STORE ◆</div>
+    <div class="shop-gold-line">🪙 YOUR GOLD: <span id="shopGoldVal">0</span> Gold</div>
+    <div class="shop-group-title">◆ CLOTHES ◆</div>
+    <div class="shop-grid" id="shopClothesGrid"></div>
+    <div class="shop-group-title">◆ WEAPONS — RANKED #7 → #1 ◆</div>
+    <div class="shop-grid" id="shopWeaponsGrid"></div>
+
+    <!-- 9. EQUIPMENT (v5.7.0 — boss's EQUIPMENT photo + equipped slots) -->
+    <div class="inner-section-divider">◆ 9. EQUIPMENT ◆</div>
+    <img class="equip-photo" src="equipment-photo.jpg" alt="Equipment — Sung Jinwoo System">
+    <div class="equip-list" id="equippedList"></div>
+
+    <!-- 10. SKILLS WINDOW (v5.7.0 — its own section, NOT inside the Shop) -->
+    <div class="inner-section-divider">◆ 10. SKILLS WINDOW ◆</div>
+    <div id="skillsGrid"></div>
+
     <div class="system-arise-footer">
       <div class="arise-title">THE SYSTEM · ARISE</div>
       <div class="arise-motto">Finish your daily quests — leveling up starts today.</div>
@@ -1231,6 +1280,48 @@ function claimDueLevelRewards(queuePopup){
   return claimed;
 }
 
+/* ---------- v5.7.0: GOLD + SHOP STORE + EQUIPMENT + SKILLS WINDOW ----------
+   Boss confirmed 2026-11-09 18:49: clothes FIRST in the Shop (Box 1 Kofiyya,
+   Box 2 Coat, Box 3 Surrii, Box 4 Cama, Box 5 Gwant), THEN the 7 weapons in
+   ranking order #7 -> #1. Shop is §8 below the main content; Skills is its
+   own §10 section. NO Penalty Zone. Gold mirrors XP: normal quest 5 Gold,
+   gym/run quest 10 Gold. */
+var SHOP_CLOTHES = [
+  {id:"kofiyya", name:"Kofiyya", sub:"Cap", price:250, icon:"🧢", slot:"head"},
+  {id:"coat",    name:"Coat",    sub:"Coat", price:500, icon:"🧥", slot:"chest"},
+  {id:"surrii",  name:"Surrii",  sub:"Trousers", price:250, icon:"👖", slot:"legs"},
+  {id:"cama",    name:"Cama",    sub:"Shoes", price:250, icon:"👟", slot:"feet"},
+  {id:"gwant",   name:"Gwant",   sub:"Gloves", price:250, icon:"🧤", slot:"hands"}
+];
+var SHOP_WEAPONS = [
+  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:7, price:200,  icon:"🗡", atk:25},
+  {id:"knightkiller", name:"Knight Killer",        rank:6, price:300,  icon:"🗡", atk:75},
+  {id:"baruka",     name:"Baruka's Dagger",        rank:5, price:400,  icon:"🗡", atk:110},
+  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:4, price:500, icon:"⚔", atk:220},
+  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:3, price:600, icon:"⚔", atk:350},
+  {id:"kamish",     name:"Kamish's Wrath",         rank:2, price:800,  icon:"🗡", atk:1500},
+  {id:"antares",    name:"Antares' Fangs",         rank:1, price:1000, icon:"⚔", atk:null}
+];
+var SKILLS = [
+  {id:"sprint",      name:"Sprint",      type:"Active Skill",  level:10, desc:"Move faster for a short burst."},
+  {id:"stealth",     name:"Stealth",     type:"Passive Skill", level:20, desc:"Move unseen by enemies."},
+  {id:"vitalstrike", name:"Vital Strike", type:"Active Skill", level:30, desc:"Strike a vital point for heavy damage."}
+];
+var EQUIP_SLOTS = [
+  {slot:"head",   label:"HEAD",   item:"kofiyya"},
+  {slot:"chest",  label:"CHEST",  item:"coat"},
+  {slot:"legs",   label:"LEGS",   item:"surrii"},
+  {slot:"feet",   label:"FEET",   item:"cama"},
+  {slot:"hands",  label:"HANDS",  item:"gwant"},
+  {slot:"weapon", label:"WEAPON", item:null}
+];
+function shopItemById(id){
+  var all = SHOP_CLOTHES.concat(SHOP_WEAPONS);
+  for(var i=0;i<all.length;i++) if(all[i].id===id) return all[i];
+  return null;
+}
+function goldFor(q){ return q.xp||0; } // Gold mirrors XP: normal 5, gym/run 10
+
 /* ---------- State (saved on this device) ---------- */
 var state = {
   level:1, xp:0, totalXp:0, hp:100,
@@ -1239,7 +1330,8 @@ var state = {
   questState:{}, questDay:{}, bonusAP:0, rewardLevel:0, catDone:{str:0,int:0,faith:0,trade:0,disc:0,skill:0},
   statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
   unlocked:{}, claimedRewards:{},
-  goalToggle:{push:false,sit:false,squat:false,run:false}, goalDayXp:0 // v5.6.6: §1 GOAL row toggles (±2 XP each, reset daily)
+  goalToggle:{push:false,sit:false,squat:false,run:false}, goalDayXp:0, // v5.6.6: §1 GOAL row toggles (±2 XP each, reset daily)
+  gold:0, owned:{} // v5.7.0: Gold balance + owned shop items (persist in soloLevelingSaveV4)
 };
 var quests = BASE_QUESTS.slice();
 var forgeCounter = 0;
@@ -1268,6 +1360,7 @@ function loadGame(){
       state.unlocked=data.state.unlocked||{};
       state.claimedRewards=data.state.claimedRewards||{};
       state.bonusAP=data.state.bonusAP||0; state.rewardLevel=data.state.rewardLevel||0;
+      state.gold=data.state.gold||0; state.owned=data.state.owned||{}; // v5.7.0: Gold + owned items persist across days
       state.v48Healed=!!data.state.v48Healed;
       resetDailyState();
       quests = BASE_QUESTS.slice();
@@ -1278,7 +1371,7 @@ function loadGame(){
       return;
     }
     var s = data.state;
-    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp"];
+    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp","gold","owned"];
     keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
     if(data.quests && data.quests.length){
       quests = data.quests;
@@ -1748,9 +1841,89 @@ function showPendingLevelRewards(){
     showSystemToast("🎁 Reward claimed — enjoy it, Hunter!");
   });
 })();
+/* ---------- v5.7.0: GOLD + SHOP STORE + EQUIPMENT + SKILLS WINDOW ---------- */
+function renderGold(){
+  var g = state.gold||0;
+  var a = $("goldVal"); if(a) a.textContent = g;
+  var b = $("shopGoldVal"); if(b) b.textContent = g;
+}
+function shopCubeHtml(item){
+  var owned = !!(state.owned && state.owned[item.id]);
+  var sub = item.sub ? esc(item.sub) : ("Rank #"+item.rank+" · ATK "+(item.atk===null?"?":"+"+item.atk));
+  var btn = owned
+    ? '<button class="cube-btn owned-btn" onclick="buyItem(\''+item.id+'\')">✓ OWNED</button>'
+    : '<button class="cube-btn" onclick="buyItem(\''+item.id+'\')">BUY · '+item.price+' Gold</button>';
+  return '<div class="shop-cube'+(owned?" owned":"")+'">' +
+    '<div class="cube-icon">'+item.icon+'</div>' +
+    '<div class="cube-name">'+esc(item.name)+'</div>' +
+    '<div class="cube-sub">'+sub+'</div>' +
+    '<div class="cube-price">🪙 '+item.price+' Gold</div>' + btn + '</div>';
+}
+function renderShop(){
+  var c = $("shopClothesGrid");
+  if(c){
+    var h = "";
+    SHOP_CLOTHES.forEach(function(it){ h += shopCubeHtml(it); });
+    c.innerHTML = h;
+  }
+  var w = $("shopWeaponsGrid");
+  if(w){
+    var h2 = "";
+    SHOP_WEAPONS.forEach(function(it){ h2 += shopCubeHtml(it); });
+    w.innerHTML = h2;
+  }
+}
+function buyItem(id){
+  var item = shopItemById(id);
+  if(!item) return;
+  ensureFreshDay();
+  if(state.owned && state.owned[id]){ showSystemToast("✅ "+item.name+" is already yours — EQUIPPED"); return; }
+  var gold = state.gold||0;
+  if(gold < item.price){ showSystemToast("⚠ Not enough Gold — "+item.name+" costs "+item.price+" Gold"); return; } // deducts nothing
+  state.gold = gold - item.price;
+  if(!state.owned) state.owned = {};
+  state.owned[id] = true;
+  saveGame(); renderGold(); renderShop(); renderEquipment();
+  showSystemToast("🛒 "+item.name+" bought for "+item.price+" Gold — EQUIPPED");
+}
+window.buyItem = buyItem;
+function renderEquipment(){
+  var el = $("equippedList");
+  if(!el) return;
+  var h = "";
+  EQUIP_SLOTS.forEach(function(s){
+    var name = null;
+    if(s.item){
+      if(state.owned && state.owned[s.item]){ var it = shopItemById(s.item); name = it ? it.name : null; }
+    } else {
+      var ownedW = [];
+      SHOP_WEAPONS.forEach(function(w){ if(state.owned && state.owned[w.id]) ownedW.push(w); });
+      ownedW.sort(function(a,b){ return a.rank-b.rank; }); // strongest (rank #1) first
+      if(ownedW.length) name = ownedW.map(function(w){ return w.name; }).join(" · ");
+    }
+    h += '<div class="equip-row"><span class="slot">'+s.label+'</span><span class="val'+(name?" on":"")+'">'+(name?esc(name):"— Empty —")+'</span></div>';
+  });
+  el.innerHTML = h;
+}
+function renderSkills(){
+  var el = $("skillsGrid");
+  if(!el) return;
+  var h = "";
+  SKILLS.forEach(function(sk){
+    var unlocked = state.level >= sk.level;
+    h += '<div class="skill-card'+(unlocked?"":" locked")+'">' +
+      '<div class="skill-name">'+esc(sk.name)+'</div>' +
+      '<div class="skill-type">'+esc(sk.type)+'</div>' +
+      '<div class="skill-desc">'+esc(sk.desc)+'</div>' +
+      '<div class="skill-state">'+(unlocked ? "✓ AVAILABLE" : "🔒 Unlocks at Lv "+sk.level)+'</div></div>';
+  });
+  el.innerHTML = h;
+}
+
 function renderAll(){
   renderSchedule(); renderTitles(); renderProgress(); applyTheme(); renderLiveStrip();
   renderNow(); renderNotif(); renderReward(); renderLevelRewards(); updateMasks();
+  renderGold(); renderShop(); renderEquipment(); renderSkills(); // v5.7.0
 }
 
 /* ---------- Achievements + level up ---------- */
@@ -1790,6 +1963,7 @@ function applyDone(q){
   state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
   state.hp = Math.min(100, state.hp+2);
   var lv = gainXp(q.xp);
+  state.gold = (state.gold||0) + goldFor(q); // v5.7.0: Gold mirrors XP (normal 5, gym/run 10)
   var list = todayQuests();
   state.perfectDay = list.every(function(x){ return state.questState[x.id]==="done"; });
   return lv;
@@ -1824,7 +1998,7 @@ function decideQuest(id, act){
     playSystemSound("accept");
     var lv = applyDone(q);
     renderAll(); checkAch(); renderAll(); saveGame();
-    if(lv) showLevelUp(); else showSystemToast("✅ +"+q.xp+" XP · "+q.title);
+    if(lv) showLevelUp(); else showSystemToast("✅ +"+q.xp+" XP · +"+goldFor(q)+" Gold · "+q.title);
     if(lv) showPendingLevelRewards();
   } else {
     playSystemSound("decline");
