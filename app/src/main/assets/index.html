@@ -822,7 +822,7 @@
 .shop-gold-line { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; letter-spacing:1px; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,.7); text-align:center; margin:2px 0 8px; }
 .shop-group-title { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:900; letter-spacing:2px; color:var(--neon-cyan); text-shadow:0 0 8px var(--neon-cyan); text-align:center; margin:10px 0 6px; }
 .shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.shop-cube { background:rgba(6,16,32,.6); border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 12px rgba(0,168,255,.08); padding:10px 6px 8px; text-align:center; border-radius:0; }
+.shop-cube { background:rgba(2,12,32,.9); backdrop-filter:blur(8px); border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px 6px 8px; text-align:center; border-radius:0; }
 .shop-cube.owned { border-color:var(--gold); box-shadow:0 0 12px rgba(255,215,0,.45), inset 0 0 12px rgba(255,215,0,.1); }
 .cube-icon { font-size:30px; line-height:1.1; }
 .cube-name { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; color:var(--neon-cyan); letter-spacing:.5px; margin-top:4px; }
@@ -836,7 +836,7 @@
 .equip-row .slot { color:var(--neon-cyan); letter-spacing:1px; }
 .equip-row .val { color:#7fa8c9; text-align:right; }
 .equip-row .val.on { color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.5); }
-.skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(6,16,32,.6); box-shadow:0 0 10px rgba(0,242,254,.25); padding:10px; margin-bottom:8px; border-radius:0; }
+.skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(2,12,32,.9); backdrop-filter:blur(8px); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px; margin-bottom:8px; border-radius:0; }
 .skill-card.locked { opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none; }
 .skill-name { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:800; color:var(--neon-cyan); letter-spacing:1px; }
 .skill-type { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--gold); margin-top:2px; }
@@ -1281,17 +1281,25 @@ function claimDueLevelRewards(queuePopup){
 }
 
 /* ---------- v5.7.0: GOLD + SHOP STORE + EQUIPMENT + SKILLS WINDOW ----------
-   Boss confirmed 2026-11-09 18:49: clothes FIRST in the Shop (Box 1 Kofiyya,
-   Box 2 Coat, Box 3 Surrii, Box 4 Cama, Box 5 Gwant), THEN the 7 weapons in
-   ranking order #7 -> #1. Shop is §8 below the main content; Skills is its
-   own §10 section. NO Penalty Zone. Gold mirrors XP: normal quest 5 Gold,
-   gym/run quest 10 Gold. */
+   Boss confirmed 2026-11-09 18:49 + 18:56: clothes FIRST in the Shop, THEN the
+   7 weapons in ranking order #7 -> #1. Clothes use the REAL Sung Jinwoo names
+   + stats (no generic names): Box 1 Crimson Knight's Helmet 250, Box 2
+   High-Rank Knight's Chestplate 500, Box 3 High-Rank Knight's Gauntlets 250,
+   Box 4 Mid-Rank Assassin's Boots 250, Box 5 High-Rank Mage's Ring 250.
+   Shop is §8 below the main content; Skills is its own §10 section.
+   NO Penalty Zone. Gold mirrors XP: normal quest 5 Gold, gym/run quest 10 Gold.
+   STYLE (boss 18:56): SAME as §1 STATUS / §3 QUEST — glass dark slate-blue +
+   blur, laser cyan #00f5ff (var --neon-cyan), glowing bracket headers, ZERO
+   rounded corners, 100% English.
+   AUTO-EQUIP (boss 18:58): buying an item equips it BY ITSELF in its slot —
+   no manual equip step. Helmet->head, Chestplate->chest, Gauntlets->hands,
+   Boots->feet, Ring->finger, weapons->weapon hand. Owned = equipped. */
 var SHOP_CLOTHES = [
-  {id:"kofiyya", name:"Kofiyya", sub:"Cap", price:250, icon:"🧢", slot:"head"},
-  {id:"coat",    name:"Coat",    sub:"Coat", price:500, icon:"🧥", slot:"chest"},
-  {id:"surrii",  name:"Surrii",  sub:"Trousers", price:250, icon:"👖", slot:"legs"},
-  {id:"cama",    name:"Cama",    sub:"Shoes", price:250, icon:"👟", slot:"feet"},
-  {id:"gwant",   name:"Gwant",   sub:"Gloves", price:250, icon:"🧤", slot:"hands"}
+  {id:"helmet",     name:"Crimson Knight's Helmet",       sub:"S-rank · Phys Dmg -20% · VIT +20 · STR +20", price:250, icon:"⛑", slot:"head"},
+  {id:"chestplate", name:"High-Rank Knight's Chestplate", sub:"Phys Dmg -7%",  price:500, icon:"🛡", slot:"chest"},
+  {id:"gauntlets",  name:"High-Rank Knight's Gauntlets",  sub:"Phys Dmg -3%",  price:250, icon:"🧤", slot:"hands"},
+  {id:"boots",      name:"Mid-Rank Assassin's Boots",     sub:"AGI +10",       price:250, icon:"👢", slot:"feet"},
+  {id:"ring",       name:"High-Rank Mage's Ring",         sub:"Magic Dmg -1%", price:250, icon:"💍", slot:"ring"}
 ];
 var SHOP_WEAPONS = [
   {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:7, price:200,  icon:"🗡", atk:25},
@@ -1308,11 +1316,11 @@ var SKILLS = [
   {id:"vitalstrike", name:"Vital Strike", type:"Active Skill", level:30, desc:"Strike a vital point for heavy damage."}
 ];
 var EQUIP_SLOTS = [
-  {slot:"head",   label:"HEAD",   item:"kofiyya"},
-  {slot:"chest",  label:"CHEST",  item:"coat"},
-  {slot:"legs",   label:"LEGS",   item:"surrii"},
-  {slot:"feet",   label:"FEET",   item:"cama"},
-  {slot:"hands",  label:"HANDS",  item:"gwant"},
+  {slot:"head",   label:"HEAD",   item:"helmet"},
+  {slot:"chest",  label:"CHEST",  item:"chestplate"},
+  {slot:"hands",  label:"HANDS",  item:"gauntlets"},
+  {slot:"feet",   label:"FEET",   item:"boots"},
+  {slot:"ring",   label:"FINGER", item:"ring"},
   {slot:"weapon", label:"WEAPON", item:null}
 ];
 function shopItemById(id){
