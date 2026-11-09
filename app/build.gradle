@@ -41,12 +41,29 @@ if (questB64File.exists()) {
 }
 
 // Body-only crop of the EQUIPMENT photo (center figure, no baked slot boxes)
-// for the §9 body-diagram center cell. Same pattern as above.
+// for the §1 big body-diagram center cell. Same pattern as above.
 def equipBodyB64File = file("../photos/equipment-body.jpg.b64")
 def equipBodyJpgFile = file("src/main/assets/equipment-body.jpg")
 if (equipBodyB64File.exists()) {
     String equipBodyB64 = new String(java.nio.file.Files.readAllBytes(equipBodyB64File.toPath()), "UTF-8").replaceAll("\\s", "")
     java.nio.file.Files.write(equipBodyJpgFile.toPath(), java.util.Base64.getDecoder().decode(equipBodyB64))
+}
+
+// v5.7.1: real item photos for the Shop cubes + §1 Equipment slots
+// (boss: REAL PHOTOS, no emoji). Same base64-decode pattern as above.
+def itemPhotos = [
+    "item-helmet", "item-chestplate", "item-gauntlets", "item-boots", "item-ring",
+    "item-archergauntlets", "item-collar",
+    "item-antares", "item-kamish", "item-demonkinglongsword", "item-demonkingdaggers",
+    "item-baruka", "item-knightkiller", "item-kasaka"
+]
+itemPhotos.each { name ->
+    def b64File = file("../photos/${name}.jpg.b64")
+    def jpgFile = file("src/main/assets/${name}.jpg")
+    if (b64File.exists()) {
+        String b64 = new String(java.nio.file.Files.readAllBytes(b64File.toPath()), "UTF-8").replaceAll("\\s", "")
+        java.nio.file.Files.write(jpgFile.toPath(), java.util.Base64.getDecoder().decode(b64))
+    }
 }
 
 android {
@@ -57,8 +74,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 51
-        versionName '5.7.0'
+        versionCode 52
+        versionName '5.7.1'
     }
 
     signingConfigs {
