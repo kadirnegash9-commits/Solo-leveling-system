@@ -414,13 +414,18 @@
      ========================================================================= */
   .body-diagram-wrapper {
     position: relative;
-    width: 100%;
+    width: 155.3%;
+    margin: 0 0 10px -27.6%;
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 10px;
     box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
     line-height: 0;
   }
+  /* v5.7.3: body BIG — wrapper breaks out of the .hud-flame-body 17.8% side padding
+     (content is 64.4% wide; 100/64.4 = 155.3%, margin-left -27.6%) so the upright
+     EQUIPMENT body spans the full panel width instead of ~309px. Hotspots are
+     %-positioned so they stay aligned. Boss: "Body Gemini yesarraawu bexaam
+     tenish now ante teliq argawu" (the Gemini body is very small — make it BIG). */
   .body-diagram-wrapper img {
     width: 100%;
     height: auto;
