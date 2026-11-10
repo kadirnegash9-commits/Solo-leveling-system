@@ -828,6 +828,7 @@
 .shop-cube { background:rgba(2,12,32,.9); backdrop-filter:blur(8px); border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px 6px 8px; text-align:center; border-radius:0; }
 .shop-cube.owned { border-color:var(--gold); box-shadow:0 0 12px rgba(255,215,0,.45), inset 0 0 12px rgba(255,215,0,.1); }
 .cube-photo { width:100%; height:110px; object-fit:cover; object-position:center 30%; display:block; border:1px solid rgba(0,242,254,.35); }
+.cube-photo.icon { object-fit:contain; } /* v5.7.6: Gemini line icons are square — show the whole icon, never crop it */
 .cube-name { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; color:var(--neon-cyan); letter-spacing:.5px; margin-top:4px; }
 .cube-sub { font-family:'Share Tech Mono',monospace; font-size:11px; color:#9fd8ff; margin-top:2px; }
 .cube-price { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.6); margin-top:4px; }
@@ -844,6 +845,7 @@
 .equip-panel-img { width:100%; display:block; }
 .equip-ov { position:absolute; }
 .equip-ov img { width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block; }
+.equip-ov img.icon { object-fit:contain; } /* v5.7.6: line-icon overlays show whole, never cropped */
 .skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(2,12,32,.9); backdrop-filter:blur(8px); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px; margin-bottom:8px; border-radius:0; }
 .skill-card.locked { opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none; }
 .skill-name { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:800; color:var(--neon-cyan); letter-spacing:1px; }
@@ -1123,7 +1125,7 @@
     <div class="shop-gold-line">YOUR GOLD: <span id="shopGoldVal">0</span> Gold</div>
     <div class="shop-group-title">◆ CLOTHES ◆</div>
     <div class="shop-grid" id="shopClothesGrid"></div>
-    <div class="shop-group-title">◆ WEAPONS — RANKED #7 → #1 ◆</div>
+    <div class="shop-group-title">◆ WEAPONS — RANKED #8 → #1 ◆</div>
     <div class="shop-grid" id="shopWeaponsGrid"></div>
 
     <!-- 9. SKILLS WINDOW (v5.7.1 — renumbered: §9 EQUIPMENT removed, Skills is now §9) -->
@@ -1291,14 +1293,21 @@ function claimDueLevelRewards(queuePopup){
 
 /* ---------- v5.7.0: GOLD + SHOP STORE + EQUIPMENT + SKILLS WINDOW ----------
    Boss confirmed 2026-11-09 18:49 + 18:56: clothes FIRST in the Shop, THEN the
-   7 weapons in ranking order #7 -> #1. Clothes use the REAL Sung Jinwoo names
+   8 weapons in ranking order #8 -> #1. Clothes use the REAL Sung Jinwoo names
    + stats (no generic names): Box 1 Crimson Knight's Helmet 250, Box 2
    High-Rank Knight's Chestplate 500, Box 3 High-Rank Knight's Gauntlets 250,
    Box 4 Mid-Rank Assassin's Boots 250, Box 5 High-Rank Mage's Ring 250.
    v5.7.1 (boss 20:24 — "Clothes 7 no izii photo layi"): the EQUIPMENT
    reference photo shows SEVEN items, so Box 6 Low-Rank Archer's Gauntlets 150
    (Phys Dmg -1%) and Box 7 Kasaka's Collar 300 (AGI +20, PER +20) join the
-   Shop. Clothes total 1,950 Gold; all 14 shop items total 5,950 Gold.
+   Shop. Clothes total 2,000 Gold; weapons total 5,500 Gold; all 15 shop items total 7,500 Gold.
+   v5.7.6 (boss 05:35 — app Shop must match Gemini's Shop): 8th weapon Antares'
+   Dragon Blade Rank #1, 1500 Gold, ATK +5000 (Gemini shop-wp-8 photo); re-ranked
+   Fangs #2 (1200 Gold — boss's own price, kept), Kamish #3, Longsword #4,
+   Daggers #5, Baruka #6, Knight Killer #7, Kasaka #8. ALL 7 clothes now use
+   Gemini's white line icons (webp); Archer's Gauntlets 150 -> 200 Gold (Gemini).
+   Kasaka's Collar name kept (Gemini calls it Gatekeeper's Necklace); helmet
+   Phys Dmg -20% kept (Gemini says -15%); Skills set unchanged (boss's Lv 10/20/30).
    v5.7.2 (boss 20:59): Antares' Fangs price 1000 -> 1200 Gold (weapons total 4,000);
    Antares photo replaced with the red dragon-fang daggers he sent (64245_66_hd2h.jpg).
    Kasaka's Collar equips to a new NECK slot in the §1 big body. Two
@@ -1314,27 +1323,28 @@ function claimDueLevelRewards(queuePopup){
    EQUIPMENT DIAGRAM (boss 20:13, v5.7.1): §9 REMOVED — the §1 body IS the Equipment
    display: BIG Jinwoo body + LARGE slots, thin lines like the Sung Jinwoo reference.
    Equipped items show ITEM PHOTO + name + stats; empty slots are dashed boxes (auto-equip).
-   SHOP CUBES (boss 20:20): REAL PHOTOS, no emoji — clothes first, then 7 weapons ranked.
+   SHOP CUBES: clothes = Gemini white line icons (webp), weapons = REAL PHOTOS, no emoji — clothes first, then 8 weapons ranked.
    LEVEL FIX (boss 19:03): one-time migration in loadGame — saved Level 2 with
    XP < 100 is a mistake (Level 1 needs XP >= 100). Correct level to 1, keep XP.
    gainXp audited: level-up ONLY when xp >= level*100 (while loop) — correct. */
 var SHOP_CLOTHES = [
-  {id:"helmet",     name:"Crimson Knight's Helmet",       sub:"S-rank · Phys Dmg -20% · VIT +20 · STR +20", price:250, photo:"item-helmet.jpg", slot:"head"},
-  {id:"chestplate", name:"High-Rank Knight's Chestplate", sub:"Phys Dmg -7%",  price:500, photo:"item-chestplate.jpg", slot:"chest"},
-  {id:"gauntlets",  name:"High-Rank Knight's Gauntlets",  sub:"Phys Dmg -3%",  price:250, photo:"item-gauntlets.jpg", slot:"hands"},
-  {id:"boots",      name:"Mid-Rank Assassin's Boots",     sub:"AGI +10",       price:250, photo:"item-boots.jpg", slot:"feet"},
-  {id:"ring",       name:"High-Rank Mage's Ring",         sub:"Magic Dmg -1%", price:250, photo:"item-ring.jpg", slot:"ring"},
-  {id:"archergauntlets", name:"Low-Rank Archer's Gauntlets", sub:"Phys Dmg -1%", price:150, photo:"item-archergauntlets.jpg", slot:"hands"},
-  {id:"collar",     name:"Kasaka's Collar",               sub:"AGI +20 · PER +20", price:300, photo:"item-collar.jpg", slot:"neck"}
+  {id:"helmet",     name:"Crimson Knight's Helmet",       sub:"S-rank · Phys Dmg -20% · VIT +20 · STR +20", price:250, photo:"item-helmet.webp", slot:"head"},
+  {id:"chestplate", name:"High-Rank Knight's Chestplate", sub:"Phys Dmg -7%",  price:500, photo:"item-chestplate.webp", slot:"chest"},
+  {id:"gauntlets",  name:"High-Rank Knight's Gauntlets",  sub:"Phys Dmg -3%",  price:250, photo:"item-gauntlets.webp", slot:"hands"},
+  {id:"boots",      name:"Mid-Rank Assassin's Boots",     sub:"AGI +10",       price:250, photo:"item-boots.webp", slot:"feet"},
+  {id:"ring",       name:"High-Rank Mage's Ring",         sub:"Magic Dmg -1%", price:250, photo:"item-ring.webp", slot:"ring"},
+  {id:"archergauntlets", name:"Low-Rank Archer's Gauntlets", sub:"Phys Dmg -1%", price:200, photo:"item-archergauntlets.webp", slot:"hands"},
+  {id:"collar",     name:"Kasaka's Collar",               sub:"AGI +20 · PER +20", price:300, photo:"item-collar.webp", slot:"neck"}
 ];
 var SHOP_WEAPONS = [
-  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:7, price:200,  photo:"item-kasaka.jpg", atk:25},
-  {id:"knightkiller", name:"Knight Killer",        rank:6, price:300,  photo:"item-knightkiller.jpg", atk:75},
-  {id:"baruka",     name:"Baruka's Dagger",        rank:5, price:400,  photo:"item-baruka.jpg", atk:110},
-  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:4, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
-  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:3, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
-  {id:"kamish",     name:"Kamish's Wrath",         rank:2, price:800,  photo:"item-kamish.jpg", atk:1500},
-  {id:"antares",    name:"Antares' Fangs",         rank:1, price:1200, photo:"item-antares.jpg", atk:null}
+  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:8, price:200,  photo:"item-kasaka.jpg", atk:25},
+  {id:"knightkiller", name:"Knight Killer",        rank:7, price:300,  photo:"item-knightkiller.jpg", atk:75},
+  {id:"baruka",     name:"Baruka's Dagger",        rank:6, price:400,  photo:"item-baruka.jpg", atk:110},
+  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:5, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
+  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:4, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
+  {id:"kamish",     name:"Kamish's Wrath",         rank:3, price:800,  photo:"item-kamish.jpg", atk:1500},
+  {id:"antares",    name:"Antares' Fangs",         rank:2, price:1200, photo:"item-antares.jpg", atk:null},
+  {id:"shop-wp-8",  name:"Antares' Dragon Blade",  rank:1, price:1500, photo:"item-dragonblade.jpg", atk:5000}
 ];
 var SKILLS = [
   {id:"sprint",      name:"Sprint",      type:"Active Skill",  level:10, desc:"Move faster for a short burst."},
@@ -1907,7 +1917,7 @@ function shopCubeHtml(item){
     ? '<button class="cube-btn owned-btn" onclick="buyItem(\''+item.id+'\')">✓ OWNED</button>'
     : '<button class="cube-btn" onclick="buyItem(\''+item.id+'\')">BUY · '+item.price+' Gold</button>';
   return '<div class="shop-cube'+(owned?" owned":"")+'">' +
-    '<img class="cube-photo" src="'+item.photo+'" alt="">' +
+    '<img class="cube-photo'+(item.photo.slice(-5)===".webp"?" icon":"")+'" src="'+item.photo+'" alt="">' +
     '<div class="cube-name">'+esc(item.name)+'</div>' +
     '<div class="cube-sub">'+sub+'</div>' +
     '<div class="cube-price">'+item.price+' Gold</div>' + btn + '</div>';
@@ -1989,7 +1999,7 @@ function equipOverlayForSlot(slotKey){
   if(!name || !icon) return ""; // empty baked box stays empty — nothing drawn
   var p = EQUIP_BOX_POS[slotKey];
   return '<div class="equip-ov" style="left:'+p.left+';top:'+p.top+';width:'+p.width+';height:'+p.height+'">'+
-    '<img src="'+icon+'" alt="'+esc(name)+'"></div>';
+    '<img src="'+icon+'" alt="'+esc(name)+'"'+(icon.slice(-5)===".webp"?' class="icon"':'')+'></div>';
 }
 function renderEquipment(){
   var el = $("statusEquipBody"); // v5.7.5: whole panel image as-is; overlays only for owned items

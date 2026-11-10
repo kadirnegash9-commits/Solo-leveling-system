@@ -53,11 +53,11 @@ if (equipPanelB64File.exists()) {
 
 // v5.7.1: real item photos for the Shop cubes + §1 Equipment slots
 // (boss: REAL PHOTOS, no emoji). Same base64-decode pattern as above.
+// v5.7.6: weapons stay JPG photos (now incl. Antares' Dragon Blade);
+// the 7 clothes use Gemini's white line icons (webp) — decoded below.
 def itemPhotos = [
-    "item-helmet", "item-chestplate", "item-gauntlets", "item-boots", "item-ring",
-    "item-archergauntlets", "item-collar",
     "item-antares", "item-kamish", "item-demonkinglongsword", "item-demonkingdaggers",
-    "item-baruka", "item-knightkiller", "item-kasaka"
+    "item-baruka", "item-knightkiller", "item-kasaka", "item-dragonblade"
 ]
 itemPhotos.each { name ->
     def b64File = file("../photos/${name}.jpg.b64")
@@ -65,6 +65,22 @@ itemPhotos.each { name ->
     if (b64File.exists()) {
         String b64 = new String(java.nio.file.Files.readAllBytes(b64File.toPath()), "UTF-8").replaceAll("\\s", "")
         java.nio.file.Files.write(jpgFile.toPath(), java.util.Base64.getDecoder().decode(b64))
+    }
+}
+
+// v5.7.6: clothes line icons (webp) from the Gemini Shop file. Same decode
+// pattern, .webp source instead of .jpg. The old item-*.jpg.b64 clothes files
+// stay in the repo (push cannot delete) but are no longer decoded or referenced.
+def itemIconPhotos = [
+    "item-helmet", "item-chestplate", "item-gauntlets", "item-boots", "item-ring",
+    "item-archergauntlets", "item-collar"
+]
+itemIconPhotos.each { name ->
+    def b64File = file("../photos/${name}.webp.b64")
+    def webpFile = file("src/main/assets/${name}.webp")
+    if (b64File.exists()) {
+        String b64 = new String(java.nio.file.Files.readAllBytes(b64File.toPath()), "UTF-8").replaceAll("\\s", "")
+        java.nio.file.Files.write(webpFile.toPath(), java.util.Base64.getDecoder().decode(b64))
     }
 }
 
@@ -76,8 +92,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 56
-        versionName '5.7.5'
+        versionCode 57
+        versionName '5.7.6'
     }
 
     signingConfigs {
