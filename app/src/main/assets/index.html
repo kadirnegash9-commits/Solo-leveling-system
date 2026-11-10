@@ -1300,15 +1300,16 @@ function claimDueLevelRewards(queuePopup){
    v5.7.1 (boss 20:24 — "Clothes 7 no izii photo layi"): the EQUIPMENT
    reference photo shows SEVEN items, so Box 6 Low-Rank Archer's Gauntlets 150
    (Phys Dmg -1%) and Box 7 Kasaka's Collar 300 (AGI +20, PER +20) join the
-   Shop. Clothes total 2,000 Gold; weapons total 5,500 Gold; all 15 shop items total 7,500 Gold.
+   Shop. Clothes total 2,000 Gold; weapons total 5,300 Gold; all 15 shop items total 7,300 Gold.
    v5.7.6 (boss 05:35 — app Shop must match Gemini's Shop): 8th weapon Antares'
    Dragon Blade Rank #1, 1500 Gold, ATK +5000 (Gemini shop-wp-8 photo); re-ranked
-   Fangs #2 (1200 Gold — boss's own price, kept), Kamish #3, Longsword #4,
+   Fangs #2 (1000 Gold — like Gemini; 1200 was boss's own price, reverted v5.7.7), Kamish #3, Longsword #4,
    Daggers #5, Baruka #6, Knight Killer #7, Kasaka #8. ALL 7 clothes now use
    Gemini's white line icons (webp); Archer's Gauntlets 150 -> 200 Gold (Gemini).
    Kasaka's Collar name kept (Gemini calls it Gatekeeper's Necklace); helmet
    Phys Dmg -20% kept (Gemini says -15%); Skills set unchanged (boss's Lv 10/20/30).
-   v5.7.2 (boss 20:59): Antares' Fangs price 1000 -> 1200 Gold (weapons total 4,000);
+   v5.7.7 (boss 05:51 — ALL weapons exactly like Gemini, add nothing, reduce nothing): Antares' Fangs price 1200 -> 1000 Gold (weapons total 5,300; all 15 items 7,300).
+   v5.7.2 (boss 20:59): Antares' Fangs price 1000 -> 1200 Gold (weapons total 4,000); reverted to 1000 Gold in v5.7.7 (shop must match Gemini exactly).
    Antares photo replaced with the red dragon-fang daggers he sent (64245_66_hd2h.jpg).
    Kasaka's Collar equips to a new NECK slot in the §1 big body. Two
    gauntlets share the HANDS slot — the last-bought one shows (ownedOrder).
@@ -1343,7 +1344,7 @@ var SHOP_WEAPONS = [
   {id:"demonkingdaggers", name:"Demon King's Daggers", rank:5, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
   {id:"demonkinglongsword", name:"Demon King's Longsword", rank:4, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
   {id:"kamish",     name:"Kamish's Wrath",         rank:3, price:800,  photo:"item-kamish.jpg", atk:1500},
-  {id:"antares",    name:"Antares' Fangs",         rank:2, price:1200, photo:"item-antares.jpg", atk:null},
+  {id:"antares",    name:"Antares' Fangs",         rank:2, price:1000, photo:"item-antares.jpg", atk:null},
   {id:"shop-wp-8",  name:"Antares' Dragon Blade",  rank:1, price:1500, photo:"item-dragonblade.jpg", atk:5000}
 ];
 var SKILLS = [
