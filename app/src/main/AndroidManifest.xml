@@ -27,6 +27,19 @@
             </intent-filter>
         </activity>
 
+        <!-- v5.7.12: full-screen System quest window — the anime's blue
+             NOTIFICATION panel with ACCEPT / DECLINE below. Opened by
+             the alarm notification's full-screen intent; never launched
+             from the launcher. USE_FULL_SCREEN_INTENT is already
+             declared above (Android 14+: the user can revoke it in
+             Settings → the notification then falls back to a normal
+             tap-to-open). -->
+        <activity
+            android:name=".QuestAlarmActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Material.NoActionBar" />
+
         <receiver android:name=".QuestReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

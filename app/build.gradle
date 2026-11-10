@@ -84,6 +84,15 @@ itemIconPhotos.each { name ->
     }
 }
 
+// v5.7.12: Solo Leveling System notification ding (real anime sound,
+// bundled offline — no streaming). Same base64-decode pattern.
+def dingB64File = file("../sounds/system-ding.mp3.b64")
+def dingMp3File = file("src/main/assets/system-ding.mp3")
+if (dingB64File.exists()) {
+    String dingB64 = new String(java.nio.file.Files.readAllBytes(dingB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(dingMp3File.toPath(), java.util.Base64.getDecoder().decode(dingB64))
+}
+
 android {
     namespace 'com.kader.systemapp'
     compileSdk 34
@@ -92,8 +101,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 62
-        versionName '5.7.11'
+        versionCode 63
+        versionName '5.7.12'
     }
 
     signingConfigs {

@@ -373,6 +373,10 @@ public class QuestReceiver extends BroadcastReceiver {
         // A fresh alarm delivery: not dismissed, loop not started yet.
         alarmDismissed = false;
         nm.notify(tag, 1, buildQuestNotification(context, tag, title, SILENT_CHANNEL_ID));
+        // v5.7.12: the Solo Leveling System ding, once, when the alarm
+        // fires — in ADDITION to the WAKEY loop (which keeps ringing
+        // until dismissed). Bundled offline in assets/system-ding.mp3.
+        playSystemDing(context);
         // v4.6: loop starts IMMEDIATELY — the notification above is
         // silent, so the looping MediaPlayer is the only sound (boss,
         // 2026-11-07: the 46s WAKEY sound must keep repeating until he
@@ -388,27 +392,35 @@ public class QuestReceiver extends BroadcastReceiver {
         startAlarmLoop(context, tag, title);
     }
 
+    // v5.7.12: the quest's HH:MM for the full-screen System window.
+    // "alarmtest" has no entry — the window shows no time line.
+    private static String questTimeFor(String questId) {
+        if (questId == null) return "";
+        for (String[] q : QUESTS) {
+            if (questId.equals(q[0])) return q[1];
+        }
+        return "";
+    }
+
     // One builder for the quest alarm notification, on any channel —
     // the silent channel (loop is the sound) or the sounding channel
     // (fallback: the channel sound plays once).
     private static Notification buildQuestNotification(Context context, String questId, String title, String channelId) {
-        // v4.8: a Saitama alarm opens the app straight onto the full
-        // QUEST INFO screen (the anime panel, not a popup). The
-        // full-screen intent gets its own request code (3) so
-        // scheduleAll's showApp intents (request code 0, created right
-        // after this) cannot clobber it via FLAG_UPDATE_CURRENT.
+        // v5.7.12: a quest alarm opens the full-screen System window
+        // (QuestAlarmActivity) — the anime's blue NOTIFICATION panel
+        // with ACCEPT / DECLINE below — instead of MainActivity.
+        // Request codes 5/6: scheduleAll's showApp intents use 0 and
+        // the notification tap uses 1, so nothing can clobber this
+        // via FLAG_UPDATE_CURRENT. The loop keeps ringing (no stop
+        // extra) until ACCEPT/DECLINE or a notification tap/swipe.
         boolean saitama = "saitamaRun".equals(questId) || "saitamaEx".equals(questId);
-        // Full-screen intent (auto-opens the app when the alarm fires):
-        // plain open, NO stop extra — the loop must keep ringing.
-        Intent open = new Intent(context, MainActivity.class);
-        open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        // v5.3: every alarm carries its quest id, so the app can scroll
-        // straight to the ringing quest and show STOP ALARM. Request
-        // code 4 (not 0): scheduleAll's showApp intents use 0 and
-        // would wipe this extra via FLAG_UPDATE_CURRENT.
-        open.putExtra("ringing_quest", questId);
+        Intent open = new Intent(context, QuestAlarmActivity.class);
+        open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        open.putExtra("quest_id", questId);
+        open.putExtra("quest_title", title);
+        open.putExtra("quest_time", questTimeFor(questId));
         if (saitama) open.putExtra("show_quest_info", true);
-        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 3 : 4, open,
+        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 6 : 5, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but
         // with an extra so MainActivity stops the looping sound.
@@ -495,6 +507,36 @@ public class QuestReceiver extends BroadcastReceiver {
             if (nm == null) return;
             nm.cancel(tag, 1);
             nm.notify(tag, 1, buildQuestNotification(context, tag, title, currentChannelId(context)));
+        } catch (Exception ignored) {}
+    }
+
+    // v5.7.12: one-shot System ding (assets/system-ding.mp3 — the real
+    // Solo Leveling System notification sound, bundled offline). Never
+    // throws: a missing asset must not break the alarm.
+    private static void playSystemDing(Context context) {
+        try {
+            android.content.res.AssetFileDescriptor afd =
+                    context.getAssets().openFd("system-ding.mp3");
+            final MediaPlayer mp = new MediaPlayer();
+            mp.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build());
+            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            try { afd.close(); } catch (Exception ignored) {}
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override public void onCompletion(MediaPlayer p) {
+                    try { p.release(); } catch (Exception ignored) {}
+                }
+            });
+            mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override public boolean onError(MediaPlayer p, int what, int extra) {
+                    try { p.release(); } catch (Exception ignored) {}
+                    return true;
+                }
+            });
+            mp.prepare();
+            mp.start();
         } catch (Exception ignored) {}
     }
 

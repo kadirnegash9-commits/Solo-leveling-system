@@ -35,6 +35,11 @@ public class MainActivity extends Activity {
     // v5.3: the quest whose alarm opened the app — set from the launch
     // intent, consumed on page load (scroll to it + show STOP ALARM).
     private String ringingQuestOnLoad = null;
+    // v5.7.12: ACCEPT ("done") / DECLINE ("missed") tapped in the
+    // full-screen System window — set from the launch intent, consumed
+    // on page load (decideQuest guards one-tap-only, so a repeated
+    // call is a no-op).
+    private String questDecisionOnLoad = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,8 @@ public class MainActivity extends Activity {
                 && getIntent().getBooleanExtra("show_quest_info", false);
         ringingQuestOnLoad = getIntent() != null
                 ? getIntent().getStringExtra("ringing_quest") : null;
+        questDecisionOnLoad = getIntent() != null
+                ? getIntent().getStringExtra("quest_decision") : null;
 
         // Alarm-style: show over the lock screen and turn the screen on,
         // like a clock alarm, when a quest reminder fires.
@@ -85,6 +92,13 @@ public class MainActivity extends Activity {
                     String id = ringingQuestOnLoad;
                     ringingQuestOnLoad = null;
                     showRingingQuest(id);
+                    // v5.7.12: ACCEPT/DECLINE tapped in the full-screen
+                    // System window — apply the decision now.
+                    if (questDecisionOnLoad != null) {
+                        String act = questDecisionOnLoad;
+                        questDecisionOnLoad = null;
+                        applyQuestDecision(id, act);
+                    }
                 }
             }
         });
@@ -145,7 +159,13 @@ public class MainActivity extends Activity {
         // v5.3: a quest alarm fired while the app was open — scroll to
         // the ringing quest and show the STOP ALARM bar.
         if (intent != null && intent.getStringExtra("ringing_quest") != null) {
-            showRingingQuest(intent.getStringExtra("ringing_quest"));
+            String id = intent.getStringExtra("ringing_quest");
+            showRingingQuest(id);
+            // v5.7.12: ACCEPT/DECLINE tapped in the full-screen System
+            // window while the app was open — apply it right away.
+            if (intent.getStringExtra("quest_decision") != null) {
+                applyQuestDecision(id, intent.getStringExtra("quest_decision"));
+            }
         }
     }
 
@@ -172,6 +192,23 @@ public class MainActivity extends Activity {
             public void run() {
                 webView.evaluateJavascript(
                         "window.showRingingQuest && window.showRingingQuest('" + safeId + "')", null);
+            }
+        });
+    }
+
+    // v5.7.12: apply an ACCEPT ("done") / DECLINE ("missed") decision
+    // from the full-screen System window. decideQuest guards one-tap-only,
+    // so calling it twice (load + new intent) is safe; "alarmtest" is not
+    // a real quest, so decideQuest ignores it.
+    private void applyQuestDecision(final String id, final String act) {
+        if (webView == null || id == null || act == null) return;
+        final String safeId = id.replace("'", "");
+        final String safeAct = "done".equals(act) ? "done" : "missed";
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript(
+                        "window.decideQuest && window.decideQuest('" + safeId + "','" + safeAct + "')", null);
             }
         });
     }
