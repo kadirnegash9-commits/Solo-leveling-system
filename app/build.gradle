@@ -56,7 +56,7 @@ if (equipPanelB64File.exists()) {
 // v5.7.6: weapons stay JPG photos (Dragon Blade deleted v5.7.8 — no longer decoded);
 // the 7 clothes use Gemini's white line icons (webp) — decoded below.
 def itemPhotos = [
-    "item-antares", "item-kamish", "item-demonkinglongsword", "item-demonkingdaggers",
+    "item-antares", "item-antares-red", "item-kamish", "item-demonkinglongsword", "item-demonkingdaggers",
     "item-baruka", "item-knightkiller", "item-kasaka"
 ]
 itemPhotos.each { name ->
@@ -92,8 +92,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 59
-        versionName '5.7.8'
+        versionCode 60
+        versionName '5.7.9'
     }
 
     signingConfigs {

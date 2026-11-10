@@ -1128,7 +1128,7 @@
     <div class="shop-gold-line">YOUR GOLD: <span id="shopGoldVal">0</span> Gold</div>
     <div class="shop-group-title">◆ CLOTHES ◆</div>
     <div class="shop-grid" id="shopClothesGrid"></div>
-    <div class="shop-group-title">◆ WEAPONS — RANKED #7 → #1 ◆</div>
+    <div class="shop-group-title">◆ WEAPONS — RANKED #8 → #1 ◆</div>
     <div class="shop-grid" id="shopWeaponsGrid"></div>
 
     <!-- 9. SKILLS WINDOW (v5.7.1 — renumbered: §9 EQUIPMENT removed, Skills is now §9) -->
@@ -1303,7 +1303,7 @@ function claimDueLevelRewards(queuePopup){
    v5.7.1 (boss 20:24 — "Clothes 7 no izii photo layi"): the EQUIPMENT
    reference photo shows SEVEN items, so Box 6 Low-Rank Archer's Gauntlets 150
    (Phys Dmg -1%) and Box 7 Kasaka's Collar 300 (AGI +20, PER +20) join the
-   Shop. Clothes total 2,000 Gold; weapons total 3,800 Gold; all 14 shop items total 5,800 Gold.
+   Shop. Clothes total 2,000 Gold; weapons total 5,300 Gold; all 15 shop items total 7,300 Gold.
    v5.7.6 (boss 05:35 — app Shop must match Gemini's Shop): 8th weapon Antares'
    Dragon Blade Rank #1, 1500 Gold, ATK +5000 (Gemini shop-wp-8 photo); re-ranked
    Fangs #2 (1000 Gold — like Gemini; 1200 was boss's own price, reverted v5.7.7), Kamish #3, Longsword #4,
@@ -1313,6 +1313,7 @@ function claimDueLevelRewards(queuePopup){
    Phys Dmg -20% kept (Gemini says -15%); Skills set unchanged (boss's Lv 10/20/30).
    v5.7.7 (boss 05:51 — ALL weapons exactly like Gemini, add nothing, reduce nothing): Antares' Fangs price 1200 -> 1000 Gold (weapons total 5,300; all 15 items 7,300).
    v5.7.8 (boss 06:08 + 06:12 + 06:15 — Weapon Store fixes ONLY): Antares' Fangs ATK ? -> +3000; weapon photos object-fit:contain + blue radial-gradient + 8px padding (never cropped); weapon cards flex-column so BUY buttons align at the bottom; BUY -> EQUIP -> EQUIPPED manual equip for WEAPONS (ATK bonus applies on equip, one weapon at a time); 06:15 DELETE Antares' Dragon Blade entirely (boss tapped "Delete one Antares") — 7 weapons left, Fangs re-ranked #1 (1000 Gold, ATK +3000), all re-ranked #7 -> #1; Fangs image = boss's Shadow Fangs crop (64380_6_ofdy.jpg, tight crop of the Pinterest triple-blade artwork); weapons total 3,800, all 14 items 5,800.
+   v5.7.9 (boss 06:29 — "No qayyi weapon camir minim atqanis shadow weapon indazaawu yiqamax" = ADD the red weapon, reduce nothing, shadow weapon stays as it is): ADD red Antares' Fangs Rank #1 (1500 Gold, ATK +5000, red dual-daggers photo 64381_9_f22x.jpg, new id "antares"); purple weapon renamed "Shadow Fangs" Rank #2 (1000 Gold, ATK +3000, image item-antares.jpg UNCHANGED); all re-ranked #8 -> #1; weapons total 5,300, all 15 items 7,300. Old saves: owned/equipped id "antares" (v5.7.8 purple) migrates to "shadowfangs".
    v5.7.2 (boss 20:59): Antares' Fangs price 1000 -> 1200 Gold (weapons total 4,000); reverted to 1000 Gold in v5.7.7 (shop must match Gemini exactly).
    Antares photo replaced with the red dragon-fang daggers he sent (64245_66_hd2h.jpg).
    Kasaka's Collar equips to a new NECK slot in the §1 big body. Two
@@ -1343,13 +1344,14 @@ var SHOP_CLOTHES = [
   {id:"collar",     name:"Kasaka's Collar",               sub:"AGI +20 · PER +20", price:300, photo:"item-collar.webp", slot:"neck"}
 ];
 var SHOP_WEAPONS = [
-  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:7, price:200,  photo:"item-kasaka.jpg", atk:25},
-  {id:"knightkiller", name:"Knight Killer",        rank:6, price:300,  photo:"item-knightkiller.jpg", atk:75},
-  {id:"baruka",     name:"Baruka's Dagger",        rank:5, price:400,  photo:"item-baruka.jpg", atk:110},
-  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:4, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
-  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:3, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
-  {id:"kamish",     name:"Kamish's Wrath",         rank:2, price:800,  photo:"item-kamish.jpg", atk:1500},
-  {id:"antares",    name:"Antares' Fangs",         rank:1, price:1000, photo:"item-antares.jpg", atk:3000}
+  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:8, price:200,  photo:"item-kasaka.jpg", atk:25},
+  {id:"knightkiller", name:"Knight Killer",        rank:7, price:300,  photo:"item-knightkiller.jpg", atk:75},
+  {id:"baruka",     name:"Baruka's Dagger",        rank:6, price:400,  photo:"item-baruka.jpg", atk:110},
+  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:5, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
+  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:4, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
+  {id:"kamish",     name:"Kamish's Wrath",         rank:3, price:800,  photo:"item-kamish.jpg", atk:1500},
+  {id:"shadowfangs", name:"Shadow Fangs",          rank:2, price:1000, photo:"item-antares.jpg", atk:3000},
+  {id:"antares",    name:"Antares' Fangs",         rank:1, price:1500, photo:"item-antares-red.jpg", atk:5000}
 ];
 var SKILLS = [
   {id:"sprint",      name:"Sprint",      type:"Active Skill",  level:10, desc:"Move faster for a short burst."},
@@ -1404,9 +1406,18 @@ function fixMistakenLevelV570(){
   if(state.level === 2 && (state.xp||0) < 100){ state.level = 1; return true; }
   return false;
 }
+// v5.7.9: the v5.7.8 "antares" item (purple Shadow Fangs crop, 1000 Gold) is now
+// id "shadowfangs"; id "antares" is the new red Antares' Fangs (1500 Gold).
+// Old saves that own/equip "antares" keep the purple weapon they bought.
+function migrateAntaresIdV579(){
+  if(state.owned && state.owned["antares"]){ state.owned["shadowfangs"] = true; delete state.owned["antares"]; }
+  if(state.ownedOrder){ for(var i=0;i<state.ownedOrder.length;i++){ if(state.ownedOrder[i]==="antares") state.ownedOrder[i]="shadowfangs"; } }
+  if(state.equippedWeapon === "antares") state.equippedWeapon = "shadowfangs";
+}
 // v5.7.1: rebuild purchase order for saves made before ownedOrder existed
 // (shop order = clothes then weapons); new purchases append in buyItem.
 function ensureOwnedOrder(){
+  migrateAntaresIdV579();
   if(!state.ownedOrder) state.ownedOrder = [];
   var have = {};
   state.ownedOrder.forEach(function(id){ have[id]=true; });
