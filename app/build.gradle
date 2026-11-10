@@ -40,16 +40,15 @@ if (questB64File.exists()) {
     java.nio.file.Files.write(questJpgFile.toPath(), java.util.Base64.getDecoder().decode(questB64))
 }
 
-// Body-only crop of the EQUIPMENT photo (center figure, no baked slot boxes)
-// for the §1 big body-diagram center cell. Same pattern as above.
-// v5.7.2: body is the DETAILED Jinwoo figure cropped from the EQUIPMENT reference
-// (63437_7_bc9i.jpg), rotated so it SITS UP (head top, feet bottom), with the thin
-// connector lines as in the reference — replaces the plain wireframe outline (boss 20:49).
-def equipBodyB64File = file("../photos/equipment-body.jpg.b64")
-def equipBodyJpgFile = file("src/main/assets/equipment-body.jpg")
-if (equipBodyB64File.exists()) {
-    String equipBodyB64 = new String(java.nio.file.Files.readAllBytes(equipBodyB64File.toPath()), "UTF-8").replaceAll("\\s", "")
-    java.nio.file.Files.write(equipBodyJpgFile.toPath(), java.util.Base64.getDecoder().decode(equipBodyB64))
+// v5.7.5: the §1 panel is the WHOLE EQUIPMENT diagram image as-is (boss 05:15 —
+// don't reduce, don't add): figure + 7 slot boxes + EQUIPMENT label + connector
+// lines all baked into equipment-panel.png. The old cropped body
+// (equipment-body.jpg, v5.7.2-v5.7.4) is retired — nothing references it anymore.
+def equipPanelB64File = file("../photos/equipment-panel.png.b64")
+def equipPanelPngFile = file("src/main/assets/equipment-panel.png")
+if (equipPanelB64File.exists()) {
+    String equipPanelB64 = new String(java.nio.file.Files.readAllBytes(equipPanelB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(equipPanelPngFile.toPath(), java.util.Base64.getDecoder().decode(equipPanelB64))
 }
 
 // v5.7.1: real item photos for the Shop cubes + §1 Equipment slots
@@ -77,8 +76,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 55
-        versionName '5.7.4'
+        versionCode 56
+        versionName '5.7.5'
     }
 
     signingConfigs {

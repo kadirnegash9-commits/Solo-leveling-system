@@ -833,17 +833,17 @@
 .cube-price { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.6); margin-top:4px; }
 .cube-btn { display:block; width:100%; margin-top:6px; background:#020919; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; padding:6px 0; cursor:pointer; box-shadow:0 0 8px rgba(0,242,254,.3); border-radius:0; }
 .cube-btn.owned-btn { border-color:var(--gold); color:var(--gold); box-shadow:0 0 8px rgba(255,215,0,.3); }
-.equip-diagram { display:grid; grid-template-columns:1fr 16px 132px 16px 1fr; gap:6px 0; align-items:stretch; } /* v5.7.3: body MEDIUM (was 168px) — boss: 'body medium argi, little now' */
-/* v5.7.2: equipment-body.jpg is now the DETAILED Jinwoo figure cropped from the EQUIPMENT reference, SITTING UP (head top, feet bottom), thin connector lines as in the reference — replaces the plain wireframe outline (boss 20:49). */
-.equip-body { grid-column:3; grid-row:1 / 5; background:url('equipment-body.jpg') center/cover no-repeat; border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 14px rgba(0,242,254,.3); min-height:264px; } /* v5.7.3: min-height 264px (was 340px) — medium body */
-.equip-line { align-self:center; border-top:1px solid rgba(0,242,254,.7); box-shadow:0 0 6px rgba(0,242,254,.5); height:0; }
-.equip-slot { background:rgba(2,12,32,.9); backdrop-filter:blur(8px); border:1.5px solid rgba(0,242,254,.5); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:8px 6px 7px; min-height:108px; border-radius:0; }
-.equip-slot.empty { opacity:.55; border-style:dashed; box-shadow:none; }
-.equip-slot .slot { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; letter-spacing:1px; color:var(--neon-cyan); }
-.equip-slot .s-photo { width:64px; height:64px; object-fit:cover; object-position:center 30%; display:block; margin:4px auto 2px; border:1px solid rgba(0,242,254,.4); }
-.equip-slot .s-name { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.5); margin-top:3px; line-height:1.25; }
-.equip-slot .s-sub { font-family:'Share Tech Mono',monospace; font-size:9px; color:#9fd8ff; margin-top:2px; line-height:1.3; }
-.equip-slot .s-empty { font-family:'Share Tech Mono',monospace; font-size:11px; color:#7fa8c9; margin-top:4px; }
+/* v5.7.5: §1 IS THE WHOLE EQUIPMENT PANEL IMAGE AS-IS (boss 05:15 — don't reduce,
+   don't add): the glowing Jinwoo figure + 7 slot boxes + EQUIPMENT label + connector
+   lines are all baked into equipment-panel.png. NOTHING is drawn over it — no HTML
+   slot boxes, no EQUIPMENT label, no connector lines. Owned items appear ONLY as
+   their photo inside their own baked box (.equip-ov, positioned from the measured
+   box rects). The v5.7.1-v5.7.4 grid (.equip-body center cell + .equip-slot boxes +
+   .equip-line connectors) is retired. Panel is full §1 width, aspect preserved. */
+.equip-diagram { position:relative; }
+.equip-panel-img { width:100%; display:block; }
+.equip-ov { position:absolute; }
+.equip-ov img { width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block; }
 .skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(2,12,32,.9); backdrop-filter:blur(8px); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px; margin-bottom:8px; border-radius:0; }
 .skill-card.locked { opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none; }
 .skill-name { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:800; color:var(--neon-cyan); letter-spacing:1px; }
@@ -959,10 +959,11 @@
     <div class="hotspot" style="top: 18.1%; left: 45%; width: 10%; height: 9.05%;" onclick="showLevelToast()"></div>
   </div>
 
-  <!-- v5.7.1: §1 EQUIPMENT BODY — the §1 body IS the Equipment display (boss 20:13).
-       §9 EQUIPMENT removed entirely; the 2 bodies are now 1 BIG body here in §1.
-       BIG Jinwoo body + LARGE item boxes, thin lines like the Sung Jinwoo reference.
-       Equipped items (auto-equip) show ITEM PHOTO + name + stats; empty = dashed box. -->
+  <!-- v5.7.5: §1 EQUIPMENT = the WHOLE panel image as-is (boss 05:15 — don't reduce,
+       don't add). The Jinwoo figure + 7 slot boxes + EQUIPMENT label + connector lines
+       are baked into equipment-panel.png; owned items appear as their photo inside
+       their own baked box (auto-equip), empty boxes stay empty. No HTML-drawn boxes,
+       label, or lines. The v5.7.1-v5.7.4 grid (cropped body + drawn slots) is retired. -->
   <div class="inner-section-divider">◆ EQUIPMENT ◆</div>
   <div class="equip-diagram" id="statusEquipBody"></div>
 
@@ -1955,47 +1956,47 @@ function lastOwnedForSlot(slot){
   cands.sort(function(a,b){ return order.indexOf(a.id)-order.indexOf(b.id); });
   return cands[cands.length-1];
 }
-function equipSlotHtml(s, col, row){
-  var name = null, sub = null, icon = "";
-  if(s.slot !== "weapon"){
-    var it = lastOwnedForSlot(s.slot);
-    if(it){ name = it.name; sub = it.sub || null; icon = it.photo || ""; }
+// v5.7.5: §1 is the WHOLE EQUIPMENT panel image as-is (boss 05:15 — don't reduce,
+// don't add). Figure + 7 slot boxes + EQUIPMENT label + connector lines are all
+// baked into equipment-panel.png; nothing is drawn over it except the owned item
+// photo inside its own baked box. Box rects measured from the 680x565 image
+// (5px inset, % of panel). Slot -> box by anatomy: head top-right (head height),
+// neck right (neck height), chest left (chest height), hands left (hand height),
+// weapon right (hand height, weapon held in hand), feet bottom-left (feet height),
+// ring bottom-right. Empty baked box stays empty — nothing drawn in it.
+var EQUIP_BOX_POS = {
+  head:  {left:"85.0%", top:"4.1%",  width:"10.9%", height:"13.8%"},
+  neck:  {left:"75.1%", top:"26.0%", width:"11.0%", height:"13.8%"},
+  chest: {left:"4.9%",  top:"20.4%", width:"9.4%",  height:"12.7%"},
+  hands: {left:"13.8%", top:"43.0%", width:"11.2%", height:"14.0%"},
+  weapon:{left:"76.0%", top:"52.6%", width:"9.3%",  height:"14.0%"},
+  feet:  {left:"4.0%",  top:"68.8%", width:"10.7%", height:"13.8%"},
+  ring:  {left:"85.3%", top:"75.6%", width:"10.3%", height:"14.0%"}
+};
+function equipOverlayForSlot(slotKey){
+  var s = equipSlotByKey(slotKey);
+  if(!s) return "";
+  var name = null, icon = "";
+  if(slotKey !== "weapon"){
+    var it = lastOwnedForSlot(slotKey);
+    if(it){ name = it.name; icon = it.photo || ""; }
   } else {
     var ownedW = [];
     SHOP_WEAPONS.forEach(function(w){ if(state.owned && state.owned[w.id]) ownedW.push(w); });
     ownedW.sort(function(a,b){ return a.rank-b.rank; }); // strongest (rank #1) first
-    if(ownedW.length){ var w0 = ownedW[0]; name = w0.name; sub = "Rank #"+w0.rank+" · ATK "+(w0.atk===null?"?":"+"+w0.atk); icon = w0.photo || ""; }
+    if(ownedW.length){ var w0 = ownedW[0]; name = w0.name; icon = w0.photo || ""; }
   }
-  var inner;
-  if(name){
-    inner = '<div class="slot">'+s.label+'</div>' +
-      '<img class="s-photo" src="'+icon+'" alt="">' +
-      '<div class="s-name">'+esc(name)+'</div>' +
-      (sub ? '<div class="s-sub">'+esc(sub)+'</div>' : '');
-  } else {
-    inner = '<div class="slot">'+s.label+'</div><div class="s-empty">— Empty —</div>';
-  }
-  return '<div class="equip-slot'+(name?"":" empty")+'" style="grid-column:'+col+';grid-row:'+row+'">'+inner+'</div>';
+  if(!name || !icon) return ""; // empty baked box stays empty — nothing drawn
+  var p = EQUIP_BOX_POS[slotKey];
+  return '<div class="equip-ov" style="left:'+p.left+';top:'+p.top+';width:'+p.width+';height:'+p.height+'">'+
+    '<img src="'+icon+'" alt="'+esc(name)+'"></div>';
 }
 function renderEquipment(){
-  var el = $("statusEquipBody"); // v5.7.1: §9 gone — the big body lives in §1 now
+  var el = $("statusEquipBody"); // v5.7.5: whole panel image as-is; overlays only for owned items
   if(!el) return;
-  // Body diagram: body photo center (col 3), slots around it, cyan connector
-  // lines (cols 2/4) — like the EQUIPMENT photo. Bought items appear in their
-  // slots by themselves (auto-equip); empty slots show as empty boxes.
-  // v5.7.1: 7 slots (NECK added for Kasaka's Collar) = 4 rows.
-  var rows = [["head","neck"],["chest","ring"],["hands","weapon"],["feet",null]];
-  var h = '<div class="equip-body" style="grid-column:3;grid-row:1 / 5"></div>';
-  rows.forEach(function(pair, i){
-    var r = i+1;
-    var ls = equipSlotByKey(pair[0]), rs = pair[1] ? equipSlotByKey(pair[1]) : null;
-    if(ls) h += equipSlotHtml(ls, 1, r);
-    h += '<div class="equip-line" style="grid-column:2;grid-row:'+r+'"></div>';
-    if(rs){
-      h += '<div class="equip-line" style="grid-column:4;grid-row:'+r+'"></div>';
-      h += equipSlotHtml(rs, 5, r);
-    }
-  });
+  // Bought items appear in their baked boxes by themselves (auto-equip).
+  var h = '<img class="equip-panel-img" src="equipment-panel.png" alt="Equipment">';
+  ["head","neck","chest","hands","weapon","feet","ring"].forEach(function(k){ h += equipOverlayForSlot(k); });
   el.innerHTML = h;
 }
 function renderSkills(){
