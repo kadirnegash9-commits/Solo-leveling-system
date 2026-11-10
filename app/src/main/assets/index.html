@@ -829,6 +829,8 @@
 .shop-cube.owned { border-color:var(--gold); box-shadow:0 0 12px rgba(255,215,0,.45), inset 0 0 12px rgba(255,215,0,.1); }
 .cube-photo { width:100%; height:110px; object-fit:cover; object-position:center 30%; display:block; border:1px solid rgba(0,242,254,.35); }
 .cube-photo.icon { object-fit:contain; } /* v5.7.6: Gemini line icons are square — show the whole icon, never crop it */
+.cube-photo.weapon-photo { object-fit:contain; object-position:center; background:radial-gradient(circle, rgba(0,119,255,0.18), #020814); padding:8px; } /* v5.7.8 (boss 06:08): weapon photos show the WHOLE weapon, never cropped */
+.weapon-card { display:flex; flex-direction:column; justify-content:space-between; height:100%; } /* v5.7.8 (boss 06:08): weapon cards are flex columns so all BUY buttons sit at the bottom of each row */
 .cube-name { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; color:var(--neon-cyan); letter-spacing:.5px; margin-top:4px; }
 .cube-sub { font-family:'Share Tech Mono',monospace; font-size:11px; color:#9fd8ff; margin-top:2px; }
 .cube-price { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:800; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.6); margin-top:4px; }
@@ -846,6 +848,7 @@
 .equip-ov { position:absolute; }
 .equip-ov img { width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block; }
 .equip-ov img.icon { object-fit:contain; } /* v5.7.6: line-icon overlays show whole, never cropped */
+.equip-atk { position:absolute; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:800; letter-spacing:1px; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.7); text-align:center; white-space:nowrap; } /* v5.7.8: equipped weapon's ATK bonus under the WEAPON slot box */
 .skill-card { border:1.5px solid rgba(0,242,254,.5); background:rgba(2,12,32,.9); backdrop-filter:blur(8px); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px; margin-bottom:8px; border-radius:0; }
 .skill-card.locked { opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none; }
 .skill-name { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:800; color:var(--neon-cyan); letter-spacing:1px; }
@@ -1125,7 +1128,7 @@
     <div class="shop-gold-line">YOUR GOLD: <span id="shopGoldVal">0</span> Gold</div>
     <div class="shop-group-title">◆ CLOTHES ◆</div>
     <div class="shop-grid" id="shopClothesGrid"></div>
-    <div class="shop-group-title">◆ WEAPONS — RANKED #8 → #1 ◆</div>
+    <div class="shop-group-title">◆ WEAPONS — RANKED #7 → #1 ◆</div>
     <div class="shop-grid" id="shopWeaponsGrid"></div>
 
     <!-- 9. SKILLS WINDOW (v5.7.1 — renumbered: §9 EQUIPMENT removed, Skills is now §9) -->
@@ -1300,7 +1303,7 @@ function claimDueLevelRewards(queuePopup){
    v5.7.1 (boss 20:24 — "Clothes 7 no izii photo layi"): the EQUIPMENT
    reference photo shows SEVEN items, so Box 6 Low-Rank Archer's Gauntlets 150
    (Phys Dmg -1%) and Box 7 Kasaka's Collar 300 (AGI +20, PER +20) join the
-   Shop. Clothes total 2,000 Gold; weapons total 5,300 Gold; all 15 shop items total 7,300 Gold.
+   Shop. Clothes total 2,000 Gold; weapons total 3,800 Gold; all 14 shop items total 5,800 Gold.
    v5.7.6 (boss 05:35 — app Shop must match Gemini's Shop): 8th weapon Antares'
    Dragon Blade Rank #1, 1500 Gold, ATK +5000 (Gemini shop-wp-8 photo); re-ranked
    Fangs #2 (1000 Gold — like Gemini; 1200 was boss's own price, reverted v5.7.7), Kamish #3, Longsword #4,
@@ -1309,6 +1312,7 @@ function claimDueLevelRewards(queuePopup){
    Kasaka's Collar name kept (Gemini calls it Gatekeeper's Necklace); helmet
    Phys Dmg -20% kept (Gemini says -15%); Skills set unchanged (boss's Lv 10/20/30).
    v5.7.7 (boss 05:51 — ALL weapons exactly like Gemini, add nothing, reduce nothing): Antares' Fangs price 1200 -> 1000 Gold (weapons total 5,300; all 15 items 7,300).
+   v5.7.8 (boss 06:08 + 06:12 + 06:15 — Weapon Store fixes ONLY): Antares' Fangs ATK ? -> +3000; weapon photos object-fit:contain + blue radial-gradient + 8px padding (never cropped); weapon cards flex-column so BUY buttons align at the bottom; BUY -> EQUIP -> EQUIPPED manual equip for WEAPONS (ATK bonus applies on equip, one weapon at a time); 06:15 DELETE Antares' Dragon Blade entirely (boss tapped "Delete one Antares") — 7 weapons left, Fangs re-ranked #1 (1000 Gold, ATK +3000), all re-ranked #7 -> #1; Fangs image = boss's Shadow Fangs crop (64380_6_ofdy.jpg, tight crop of the Pinterest triple-blade artwork); weapons total 3,800, all 14 items 5,800.
    v5.7.2 (boss 20:59): Antares' Fangs price 1000 -> 1200 Gold (weapons total 4,000); reverted to 1000 Gold in v5.7.7 (shop must match Gemini exactly).
    Antares photo replaced with the red dragon-fang daggers he sent (64245_66_hd2h.jpg).
    Kasaka's Collar equips to a new NECK slot in the §1 big body. Two
@@ -1321,6 +1325,7 @@ function claimDueLevelRewards(queuePopup){
    AUTO-EQUIP (boss 18:58): buying an item equips it BY ITSELF in its slot —
    no manual equip step. Helmet->head, Chestplate->chest, Gauntlets->hands,
    Boots->feet, Ring->finger, weapons->weapon hand. Owned = equipped.
+   v5.7.8: weapons now use manual BUY -> EQUIP -> EQUIPPED (boss 06:08); clothes stay auto-equip (owned = equipped).
    EQUIPMENT DIAGRAM (boss 20:13, v5.7.1): §9 REMOVED — the §1 body IS the Equipment
    display: BIG Jinwoo body + LARGE slots, thin lines like the Sung Jinwoo reference.
    Equipped items show ITEM PHOTO + name + stats; empty slots are dashed boxes (auto-equip).
@@ -1338,14 +1343,13 @@ var SHOP_CLOTHES = [
   {id:"collar",     name:"Kasaka's Collar",               sub:"AGI +20 · PER +20", price:300, photo:"item-collar.webp", slot:"neck"}
 ];
 var SHOP_WEAPONS = [
-  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:8, price:200,  photo:"item-kasaka.jpg", atk:25},
-  {id:"knightkiller", name:"Knight Killer",        rank:7, price:300,  photo:"item-knightkiller.jpg", atk:75},
-  {id:"baruka",     name:"Baruka's Dagger",        rank:6, price:400,  photo:"item-baruka.jpg", atk:110},
-  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:5, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
-  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:4, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
-  {id:"kamish",     name:"Kamish's Wrath",         rank:3, price:800,  photo:"item-kamish.jpg", atk:1500},
-  {id:"antares",    name:"Antares' Fangs",         rank:2, price:1000, photo:"item-antares.jpg", atk:null},
-  {id:"shop-wp-8",  name:"Antares' Dragon Blade",  rank:1, price:1500, photo:"item-dragonblade.jpg", atk:5000}
+  {id:"kasaka",     name:"Kasaka's Venom Fang",    rank:7, price:200,  photo:"item-kasaka.jpg", atk:25},
+  {id:"knightkiller", name:"Knight Killer",        rank:6, price:300,  photo:"item-knightkiller.jpg", atk:75},
+  {id:"baruka",     name:"Baruka's Dagger",        rank:5, price:400,  photo:"item-baruka.jpg", atk:110},
+  {id:"demonkingdaggers", name:"Demon King's Daggers", rank:4, price:500, photo:"item-demonkingdaggers.jpg", atk:220},
+  {id:"demonkinglongsword", name:"Demon King's Longsword", rank:3, price:600, photo:"item-demonkinglongsword.jpg", atk:350},
+  {id:"kamish",     name:"Kamish's Wrath",         rank:2, price:800,  photo:"item-kamish.jpg", atk:1500},
+  {id:"antares",    name:"Antares' Fangs",         rank:1, price:1000, photo:"item-antares.jpg", atk:3000}
 ];
 var SKILLS = [
   {id:"sprint",      name:"Sprint",      type:"Active Skill",  level:10, desc:"Move faster for a short burst."},
@@ -1377,7 +1381,7 @@ var state = {
   statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
   unlocked:{}, claimedRewards:{},
   goalToggle:{push:false,sit:false,squat:false,run:false}, goalDayXp:0, // v5.6.6: §1 GOAL row toggles (±2 XP each, reset daily)
-  gold:0, owned:{}, ownedOrder:[] // v5.7.0: Gold balance + owned shop items (persist in soloLevelingSaveV4); v5.7.1: ownedOrder = purchase order (last-bought wins a shared slot, e.g. HANDS)
+  gold:0, owned:{}, ownedOrder:[], equippedWeapon:null // v5.7.0: Gold balance + owned shop items (persist in soloLevelingSaveV4); v5.7.1: ownedOrder = purchase order (last-bought wins a shared slot, e.g. HANDS); v5.7.8: equippedWeapon = manually equipped weapon id (BUY -> EQUIP -> EQUIPPED)
 };
 var quests = BASE_QUESTS.slice();
 var forgeCounter = 0;
@@ -1410,6 +1414,17 @@ function ensureOwnedOrder(){
     if(state.owned && state.owned[it.id] && !have[it.id]){ state.ownedOrder.push(it.id); have[it.id]=true; }
   });
 }
+// v5.7.8: weapons use manual EQUIP. Saves from v5.7.0-v5.7.7 (auto-equip) that own
+// weapons but record no manual equip keep the old behaviour: the highest-rank
+// owned weapon counts as equipped.
+function ensureEquippedWeapon(){
+  if(state.equippedWeapon) return;
+  var ownedW = [];
+  SHOP_WEAPONS.forEach(function(w){ if(state.owned && state.owned[w.id]) ownedW.push(w); });
+  if(!ownedW.length) return;
+  ownedW.sort(function(a,b){ return a.rank-b.rank; }); // strongest (rank #1) first
+  state.equippedWeapon = ownedW[0].id;
+}
 function loadGame(){
   try{
     var raw = localStorage.getItem(SAVE_KEY);
@@ -1425,7 +1440,8 @@ function loadGame(){
       state.claimedRewards=data.state.claimedRewards||{};
       state.bonusAP=data.state.bonusAP||0; state.rewardLevel=data.state.rewardLevel||0;
       state.gold=data.state.gold||0; state.owned=data.state.owned||{}; // v5.7.0: Gold + owned items persist across days
-      state.ownedOrder=data.state.ownedOrder||[]; ensureOwnedOrder(); // v5.7.1
+      state.equippedWeapon=data.state.equippedWeapon||null; // v5.7.8: equipped weapon persists across days
+      state.ownedOrder=data.state.ownedOrder||[]; ensureOwnedOrder(); ensureEquippedWeapon(); // v5.7.1 + v5.7.8: pre-v5.7.8 saves (auto-equip) keep highest-rank owned weapon equipped
       state.v48Healed=!!data.state.v48Healed;
       fixMistakenLevelV570(); // v5.7.0: correct mistaken Level 2 (XP < 100) -> Level 1
       resetDailyState();
@@ -1437,9 +1453,9 @@ function loadGame(){
       return;
     }
     var s = data.state;
-    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp","gold","owned","ownedOrder"];
+    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp","gold","owned","ownedOrder","equippedWeapon"];
     keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
-    ensureOwnedOrder(); // v5.7.1: rebuild purchase order for pre-v5.7.1 saves
+    ensureOwnedOrder(); ensureEquippedWeapon(); // v5.7.1: rebuild purchase order for pre-v5.7.1 saves; v5.7.8: pre-v5.7.8 saves keep highest-rank owned weapon equipped
     if(data.quests && data.quests.length){
       quests = data.quests;
       var byId = {};
@@ -1911,14 +1927,27 @@ function renderGold(){
   var a = $("goldVal"); if(a) a.textContent = g;
   var b = $("shopGoldVal"); if(b) b.textContent = g;
 }
-function shopCubeHtml(item){
+function shopCubeHtml(item, isWeapon){
   var owned = !!(state.owned && state.owned[item.id]);
   var sub = item.sub ? esc(item.sub) : ("Rank #"+item.rank+" · ATK "+(item.atk===null?"?":"+"+item.atk));
-  var btn = owned
-    ? '<button class="cube-btn owned-btn" onclick="buyItem(\''+item.id+'\')">✓ OWNED</button>'
-    : '<button class="cube-btn" onclick="buyItem(\''+item.id+'\')">BUY · '+item.price+' Gold</button>';
-  return '<div class="shop-cube'+(owned?" owned":"")+'">' +
-    '<img class="cube-photo'+(item.photo.slice(-5)===".webp"?" icon":"")+'" src="'+item.photo+'" alt="">' +
+  var btn;
+  if(isWeapon){
+    // v5.7.8 (boss 06:08): weapons use manual BUY -> EQUIP -> EQUIPPED (clothes stay auto-equip).
+    if(owned){
+      var eq = (state.equippedWeapon === item.id);
+      btn = eq
+        ? '<button class="cube-btn owned-btn" onclick="equipItem(\''+item.id+'\')">✓ EQUIPPED</button>'
+        : '<button class="cube-btn" onclick="equipItem(\''+item.id+'\')">EQUIP</button>';
+    } else {
+      btn = '<button class="cube-btn" onclick="buyItem(\''+item.id+'\')">BUY · '+item.price+' Gold</button>';
+    }
+  } else {
+    btn = owned
+      ? '<button class="cube-btn owned-btn" onclick="buyItem(\''+item.id+'\')">✓ OWNED</button>'
+      : '<button class="cube-btn" onclick="buyItem(\''+item.id+'\')">BUY · '+item.price+' Gold</button>';
+  }
+  return '<div class="shop-cube'+(isWeapon?" weapon-card":"")+(owned?" owned":"")+'">' +
+    '<img class="cube-photo'+(item.photo.slice(-5)===".webp"?" icon":(isWeapon?" weapon-photo":""))+'" src="'+item.photo+'" alt="">' +
     '<div class="cube-name">'+esc(item.name)+'</div>' +
     '<div class="cube-sub">'+sub+'</div>' +
     '<div class="cube-price">'+item.price+' Gold</div>' + btn + '</div>';
@@ -1933,7 +1962,7 @@ function renderShop(){
   var w = $("shopWeaponsGrid");
   if(w){
     var h2 = "";
-    SHOP_WEAPONS.forEach(function(it){ h2 += shopCubeHtml(it); });
+    SHOP_WEAPONS.forEach(function(it){ h2 += shopCubeHtml(it, true); });
     w.innerHTML = h2;
   }
 }
@@ -1941,7 +1970,8 @@ function buyItem(id){
   var item = shopItemById(id);
   if(!item) return;
   ensureFreshDay();
-  if(state.owned && state.owned[id]){ showSystemToast("✅ "+item.name+" is already yours — EQUIPPED"); return; }
+  var isWeapon = SHOP_WEAPONS.indexOf(item) !== -1; // v5.7.8: weapons use manual EQUIP (clothes stay auto-equip)
+  if(state.owned && state.owned[id]){ showSystemToast(isWeapon ? "✅ "+item.name+" is already yours — tap EQUIP to wield it" : "✅ "+item.name+" is already yours — EQUIPPED"); return; }
   var gold = state.gold||0;
   if(gold < item.price){ showSystemToast("⚠ Not enough Gold — "+item.name+" costs "+item.price+" Gold"); return; } // deducts nothing
   state.gold = gold - item.price;
@@ -1950,9 +1980,23 @@ function buyItem(id){
   if(!state.ownedOrder) state.ownedOrder = []; // v5.7.1: last-bought wins a shared slot
   if(state.ownedOrder.indexOf(id) === -1) state.ownedOrder.push(id);
   saveGame(); renderGold(); renderShop(); renderEquipment();
-  showSystemToast("🛒 "+item.name+" bought for "+item.price+" Gold — EQUIPPED");
+  showSystemToast(isWeapon ? "🛒 "+item.name+" bought for "+item.price+" Gold — tap EQUIP to wield it" : "🛒 "+item.name+" bought for "+item.price+" Gold — EQUIPPED");
 }
 window.buyItem = buyItem;
+// v5.7.8 (boss 06:08): weapons use manual BUY -> EQUIP -> EQUIPPED. Only one
+// weapon equipped at a time; equipping another reverts the previous to EQUIP.
+// The equipped weapon's ATK bonus shows in the §1 WEAPON slot (equipOverlayForSlot).
+function equipItem(id){
+  var item = shopItemById(id);
+  if(!item) return;
+  ensureFreshDay();
+  if(!state.owned || !state.owned[id]){ showSystemToast("⚠ Buy "+item.name+" first"); return; }
+  if(state.equippedWeapon === id){ showSystemToast("⚔️ "+item.name+" is already equipped — ATK +"+(item.atk||0)); return; }
+  state.equippedWeapon = id;
+  saveGame(); renderShop(); renderEquipment();
+  showSystemToast("⚔️ "+item.name+" equipped — ATK +"+(item.atk||0));
+}
+window.equipItem = equipItem;
 function equipSlotByKey(k){
   for(var i=0;i<EQUIP_SLOTS.length;i++) if(EQUIP_SLOTS[i].slot===k) return EQUIP_SLOTS[i];
   return null;
@@ -1987,20 +2031,29 @@ var EQUIP_BOX_POS = {
 function equipOverlayForSlot(slotKey){
   var s = equipSlotByKey(slotKey);
   if(!s) return "";
-  var name = null, icon = "";
+  var name = null, icon = "", atk = 0;
   if(slotKey !== "weapon"){
     var it = lastOwnedForSlot(slotKey);
     if(it){ name = it.name; icon = it.photo || ""; }
   } else {
-    var ownedW = [];
-    SHOP_WEAPONS.forEach(function(w){ if(state.owned && state.owned[w.id]) ownedW.push(w); });
-    ownedW.sort(function(a,b){ return a.rank-b.rank; }); // strongest (rank #1) first
-    if(ownedW.length){ var w0 = ownedW[0]; name = w0.name; icon = w0.photo || ""; }
+    // v5.7.8: WEAPON slot follows the MANUALLY equipped weapon (BUY -> EQUIP -> EQUIPPED).
+    // Pre-v5.7.8 saves (auto-equip, no manual equip recorded) are migrated at load
+    // (ensureEquippedWeapon: highest-rank owned weapon counts as equipped).
+    var w = null;
+    if(state.equippedWeapon){ w = shopItemById(state.equippedWeapon); if(w && !(state.owned && state.owned[w.id])) w = null; }
+    if(w){ name = w.name; icon = w.photo || ""; atk = w.atk || 0; }
   }
   if(!name || !icon) return ""; // empty baked box stays empty — nothing drawn
   var p = EQUIP_BOX_POS[slotKey];
-  return '<div class="equip-ov" style="left:'+p.left+';top:'+p.top+';width:'+p.width+';height:'+p.height+'">'+
+  var out = '<div class="equip-ov" style="left:'+p.left+';top:'+p.top+';width:'+p.width+';height:'+p.height+'">'+
     '<img src="'+icon+'" alt="'+esc(name)+'"'+(icon.slice(-5)===".webp"?' class="icon"':'')+'></div>';
+  if(slotKey === "weapon" && atk){ // v5.7.8: equipped weapon's ATK bonus shows under its slot box
+    var topPct = parseFloat(p.top) + parseFloat(p.height) + 1;
+    var leftPct = parseFloat(p.left) - 6;
+    var widthPct = parseFloat(p.width) + 12;
+    out += '<div class="equip-atk" style="left:'+leftPct+'%;top:'+topPct+'%;width:'+widthPct+'%">ATK +'+atk+'</div>';
+  }
+  return out;
 }
 function renderEquipment(){
   var el = $("statusEquipBody"); // v5.7.5: whole panel image as-is; overlays only for owned items

@@ -53,11 +53,11 @@ if (equipPanelB64File.exists()) {
 
 // v5.7.1: real item photos for the Shop cubes + §1 Equipment slots
 // (boss: REAL PHOTOS, no emoji). Same base64-decode pattern as above.
-// v5.7.6: weapons stay JPG photos (now incl. Antares' Dragon Blade);
+// v5.7.6: weapons stay JPG photos (Dragon Blade deleted v5.7.8 — no longer decoded);
 // the 7 clothes use Gemini's white line icons (webp) — decoded below.
 def itemPhotos = [
     "item-antares", "item-kamish", "item-demonkinglongsword", "item-demonkingdaggers",
-    "item-baruka", "item-knightkiller", "item-kasaka", "item-dragonblade"
+    "item-baruka", "item-knightkiller", "item-kasaka"
 ]
 itemPhotos.each { name ->
     def b64File = file("../photos/${name}.jpg.b64")
@@ -92,8 +92,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 58
-        versionName '5.7.7'
+        versionCode 59
+        versionName '5.7.8'
     }
 
     signingConfigs {
