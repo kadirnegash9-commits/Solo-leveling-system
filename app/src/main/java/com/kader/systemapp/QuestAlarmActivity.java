@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -46,6 +51,24 @@ import org.json.JSONObject;
  * the "Notifications allowed" confirmation (and the test notification)
  * instead of posting a small system banner: the board typewrites the
  * message itself, and ACCEPT/DECLINE only dismiss it.
+ *
+ * v5.7.15 (boss, 2026-11-11 — "the board was in the middle, no sound,
+ * no replay animation, no anime writing, not like Gemini"):
+ * - The board now sits at the TOP of the screen and slides down from
+ *   above, full-width and BIG (alarm-board.html) — never in the middle.
+ * - SOUND: the board's sounds were silent in v5.7.13/14 because the
+ *   board script never declared `audioEnabled`, so every sound call
+ *   threw ReferenceError — which also killed the typewriter (it ran
+ *   after the sound call) and killed ACCEPT/DECLINE (the decide call
+ *   came after the sound call). Fixed in the board script AND made
+ *   reliable here: the 5 board MP3 clips + the typing tick now play
+ *   NATIVELY through SoundPool (same reliable path as the WAKEY loop
+ *   and the System ding), with the WebView audio only as fallback.
+ * - The REPLAY ANIMATION / SOUND: ON pills below the board are deleted;
+ *   tapping the board itself replays the animation, sound is always on.
+ * - The old 900ms JS auto-open fallback is deleted: it raced
+ *   onPageFinished and showed the WRONG habit (Fajr) at noon. A Java
+ *   1500ms safety re-call of showBoard() with the REAL quest replaces it.
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -60,6 +83,15 @@ public class QuestAlarmActivity extends Activity {
 
     private WebView webView;
     private boolean boardShown = false;
+    // v5.7.15: native board sounds (SoundPool) — the 5 Gemini board MP3
+    // clips bundled in assets/board-*.mp3, plus the typing tick (the
+    // short click clip). SoundPool is the reliable path: WebView audio
+    // was silent for two versions. USAGE_ALARM so the sounds play
+    // over the alarm loop and through Do Not Disturb, like the ding.
+    private SoundPool boardSounds;
+    private final java.util.Map<String, Integer> boardSoundIds = new java.util.HashMap<>();
+    private final java.util.Map<String, Boolean> boardSoundLoaded = new java.util.HashMap<>();
+    private final Handler boardSoundHandler = new Handler(Looper.getMainLooper());
     // v5.7.14: message mode — the board is a plain notification message
     // (e.g. the "Notifications allowed" confirmation), not a quest alarm.
     // ACCEPT/DECLINE then only dismiss the board (and stop any alarm loop
@@ -155,12 +187,80 @@ public class QuestAlarmActivity extends Activity {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        initBoardSounds();
         webView.loadUrl("file:///android_asset/alarm-board.html");
+        // v5.7.15 safety net: if onPageFinished is ever missed, re-open
+        // the board with the REAL quest after 1500ms (showBoard() is a
+        // no-op once the board is shown — it can never show a wrong
+        // habit, unlike the old JS fallback).
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override public void run() { showBoard(); }
+        }, 1500);
+    }
+
+    // v5.7.15: load the board's own MP3 clips into a SoundPool so the
+    // board's sounds actually play (WebView audio was silent in
+    // v5.7.13/14). Loading is async — playBoardSound() retries once
+    // shortly if a clip is not loaded yet when the board opens.
+    private void initBoardSounds() {
+        try {
+            AudioAttributes attrs = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            boardSounds = new SoundPool.Builder()
+                    .setMaxStreams(4)
+                    .setAudioAttributes(attrs)
+                    .build();
+            final String[] clips = {"open", "accept", "click", "whoosh", "close"};
+            for (String clip : clips) {
+                try {
+                    AssetFileDescriptor afd = getAssets().openFd("board-" + clip + ".mp3");
+                    int id = boardSounds.load(afd, 1);
+                    afd.close();
+                    boardSoundIds.put(clip, id);
+                    boardSoundLoaded.put(clip, false);
+                } catch (Exception ignored) {}
+            }
+            // The typing tick reuses the short click clip.
+            if (boardSoundIds.containsKey("click")) {
+                boardSoundIds.put("tick", boardSoundIds.get("click"));
+                boardSoundLoaded.put("tick", false);
+            }
+            boardSounds.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+                @Override public void onLoadComplete(SoundPool sp, int sampleId, int status) {
+                    for (java.util.Map.Entry<String, Integer> e : boardSoundIds.entrySet()) {
+                        if (e.getValue() == sampleId) boardSoundLoaded.put(e.getKey(), status == 0);
+                    }
+                }
+            });
+        } catch (Exception ignored) {}
+    }
+
+    private void playBoardSoundImpl(final String clip) {
+        if (boardSounds == null || clip == null) return;
+        final Integer id = boardSoundIds.get(clip);
+        if (id == null) return;
+        Boolean loaded = boardSoundLoaded.get(clip);
+        if (loaded != null && loaded) {
+            try { boardSounds.play(id, 1.0f, 1.0f, 1, 0, 1.0f); } catch (Exception ignored) {}
+        } else {
+            // Clip still loading (board opened fast) — retry once shortly.
+            boardSoundHandler.postDelayed(new Runnable() {
+                @Override public void run() {
+                    Integer retryId = boardSoundIds.get(clip);
+                    Boolean retryLoaded = boardSoundLoaded.get(clip);
+                    if (boardSounds != null && retryId != null && retryLoaded != null && retryLoaded) {
+                        try { boardSounds.play(retryId, 1.0f, 1.0f, 1, 0, 1.0f); } catch (Exception ignored) {}
+                    }
+                }
+            }, 200);
+        }
     }
 
     // Open the board with this alarm's habit (once — onPageFinished can
-    // fire again on a reload; the board's own 900ms fallback covers a
-    // missed call, so a second call here is harmless but skipped).
+    // fire again on a reload; the 1500ms safety re-call in onCreate
+    // covers a missed call, so a second call here is harmless but skipped).
     private void showBoard() {
         if (boardShown || webView == null) return;
         boardShown = true;
@@ -183,6 +283,12 @@ public class QuestAlarmActivity extends Activity {
     // the web app (quest_decision extra). One tap only — decideQuest in
     // the web app ignores a second decision for the same quest today.
     private class AlarmBridge {
+        // v5.7.15: the board's sounds, played natively (SoundPool).
+        @JavascriptInterface
+        public void playBoardSound(final String clip) {
+            playBoardSoundImpl(clip);
+        }
+
         @JavascriptInterface
         public void decide(final String act) {
             runOnUiThread(new Runnable() {
@@ -228,6 +334,11 @@ public class QuestAlarmActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        boardSoundHandler.removeCallbacksAndMessages(null);
+        if (boardSounds != null) {
+            try { boardSounds.release(); } catch (Exception ignored) {}
+            boardSounds = null;
+        }
         if (webView != null) {
             try {
                 webView.stopLoading();

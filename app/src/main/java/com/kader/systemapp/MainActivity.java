@@ -272,7 +272,7 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showNotificationBoard("Test notification — don't forget your quests! Arise!");
+                    showNotificationBoard("notification test"); // v5.7.15: boss — "since now it is a notification test, write notification test"
                 }
             });
         }

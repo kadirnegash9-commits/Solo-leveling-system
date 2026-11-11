@@ -258,7 +258,7 @@ public class QuestReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, QuestReceiver.class);
         intent.setAction(ACTION_QUEST);
         intent.putExtra("quest_id", "alarmtest");
-        intent.putExtra("quest_title", "⏰ Test alarm — 2 minutes is up! Arise!");
+        intent.putExtra("quest_title", "notification test"); // v5.7.15: boss — the test board must typewrite "notification test"
         PendingIntent pi = PendingIntent.getBroadcast(context, 999, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         long when = System.currentTimeMillis() + 120_000;

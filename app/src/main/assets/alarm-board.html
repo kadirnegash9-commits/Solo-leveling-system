@@ -32,8 +32,10 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 12px;
+    /* v5.7.15: the board comes from ABOVE like a notification arriving
+       from above — it must NOT sit in the middle of the screen. */
+    justify-content: flex-start;
+    padding: 0 6px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
@@ -61,7 +63,8 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
   .kader-board-frame {
     position: relative;
     width: 100%;
-    max-width: 420px;
+    /* v5.7.15: full-width, BIG — 420px was the "too small" complaint. */
+    max-width: 100%;
     aspect-ratio: 420 / 375;
     background-image: url('board-frame.jpg');
     background-size: 100% 100%;
@@ -76,13 +79,13 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    transform: perspective(900px) scaleY(0.008) scaleX(0.5);
+    transform: perspective(900px) translateY(-45vh) scaleY(0.006) scaleX(0.35);
     filter: brightness(2.5) drop-shadow(0 0 28px #00e5ff);
   }
 
   /* Entry Animation: unfolds vertically like the Solo Leveling anime */
   .kader-notif-overlay.open:not(.closing) .kader-board-frame {
-    animation: holoBoardMaterialize 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards, holoBoardPulse 3.2s ease-in-out 0.52s infinite alternate;
+    animation: holoBoardMaterialize 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   /* Exit Animation: collapses into a glowing horizontal line & vanishes */
@@ -92,17 +95,17 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
 
   @keyframes holoBoardMaterialize {
     0% {
-      transform: perspective(900px) scaleY(0.006) scaleX(0.35);
+      transform: perspective(900px) translateY(-45vh) scaleY(0.006) scaleX(0.35);
       filter: brightness(3.8) drop-shadow(0 0 40px #00ffff);
       opacity: 0.3;
     }
     35% {
-      transform: perspective(900px) scaleY(0.045) scaleX(1.03);
+      transform: perspective(900px) translateY(-8vh) scaleY(0.045) scaleX(1.03);
       filter: brightness(2.6) drop-shadow(0 0 32px #00e5ff);
       opacity: 1;
     }
     75% {
-      transform: perspective(900px) scaleY(1.03) scaleX(1.0);
+      transform: perspective(900px) translateY(0) scaleY(1.03) scaleX(1.0);
       filter: brightness(1.25) drop-shadow(0 0 22px #00a2ff);
     }
     100% {
@@ -130,10 +133,6 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     }
   }
 
-  @keyframes holoBoardPulse {
-    0% { transform: perspective(900px) translateY(0px); }
-    100% { transform: perspective(900px) translateY(-3px); }
-  }
 
   /* Right Vertical Player Name in Sung Jinwoo Anime Font (smaller, crisp, letter-spaced like 64549.webp) */
   .kader-right-vertical-name {
@@ -147,9 +146,9 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     align-items: center;
     justify-content: center;
     font-family: 'Montserrat', 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 8.5px;
+    font-size: 2vw;
     font-weight: 700;
-    letter-spacing: 2.1px;
+    letter-spacing: 0.5vw;
     color: #e6f9ff;
     text-shadow:
       0 0 5px #00e5ff,
@@ -182,7 +181,7 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 7px;
+    gap: 1.6vw;
     padding-left: 2px;
   }
 
@@ -192,14 +191,14 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     align-items: center;
     gap: 7px;
     font-family: 'Montserrat', 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 11.5px;
+    font-size: 2.7vw;
     font-weight: 600;
     color: #eaf9ff;
     letter-spacing: 0.35px;
     text-shadow:
       0 0 6px rgba(0, 229, 255, 0.95),
       0 0 12px rgba(0, 140, 255, 0.75);
-    min-height: 18px;
+    min-height: 4.2vw;
   }
 
   .kader-habit-title-bold {
@@ -216,12 +215,12 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 11px;
-    height: 11px;
+    width: 2.6vw;
+    height: 2.6vw;
     border: 1.3px solid rgba(205, 242, 255, 0.9);
     border-radius: 2px;
     box-shadow: 0 0 6px rgba(0, 229, 255, 0.65);
-    font-size: 9px;
+    font-size: 2.1vw;
     font-weight: 900;
     color: #00ffcc;
     opacity: 0;
@@ -236,17 +235,17 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     width: 100%;
     border-left: 1.8px solid rgba(0, 229, 255, 0.85);
     background: linear-gradient(90deg, rgba(0, 140, 255, 0.12) 0%, rgba(0, 40, 95, 0.02) 100%);
-    padding: 5px 8px 5px 9px;
+    padding: 1.2vw 2vw;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-height: 48px;
+    gap: 1vw;
+    min-height: 11vw;
     box-shadow: -3px 0 10px -2px rgba(0, 229, 255, 0.45);
   }
 
   .kader-anime-line {
     font-family: 'Montserrat', 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 10.5px;
+    font-size: 2.5vw;
     font-weight: 700;
     font-style: italic;
     color: #effbff;
@@ -257,7 +256,7 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
       0 0 6px #00e5ff,
       0 0 13px #0088ff,
       0 0 20px rgba(0, 136, 255, 0.65);
-    min-height: 13px;
+    min-height: 3vw;
   }
 
   /* Glowing typing cursor during auto-write */
@@ -266,7 +265,7 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     display: inline-block;
     margin-left: 2px;
     font-style: normal;
-    font-size: 9.5px;
+    font-size: 2.2vw;
     color: #00ffff;
     text-shadow: 0 0 8px #00ffff;
     animation: cursorBlink 0.45s infinite alternate;
@@ -281,22 +280,22 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 3vw;
     width: 100%;
     margin-top: 2px;
   }
 
   .kader-btn-accept {
     flex: 1;
-    max-width: 102px;
+    max-width: 24vw;
     font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
+    font-size: 2.1vw;
     font-weight: 800;
     letter-spacing: 1.1px;
     color: #00f0ff;
     background: rgba(0, 75, 165, 0.32);
     border: 1.3px solid #00e5ff;
-    padding: 5px 8px;
+    padding: 1.2vw 2vw;
     border-radius: 3px;
     cursor: pointer;
     display: flex;
@@ -316,15 +315,15 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
 
   .kader-btn-decline {
     flex: 1;
-    max-width: 102px;
+    max-width: 24vw;
     font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
+    font-size: 2.1vw;
     font-weight: 800;
     letter-spacing: 1.1px;
     color: #ff3b6b;
     background: rgba(110, 10, 35, 0.28);
     border: 1.3px solid rgba(255, 59, 107, 0.85);
-    padding: 5px 8px;
+    padding: 1.2vw 2vw;
     border-radius: 3px;
     cursor: pointer;
     display: flex;
@@ -341,46 +340,11 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     color: #ffffff;
     box-shadow: 0 0 20px #ff3b6b;
   }
-
-  /* Bottom Control Row matching 64572.jpg: REPLAY ANIMATION & SOUND: ON */
-  .kader-bottom-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    max-width: 420px;
-  }
-
-  .kader-ctrl-btn {
-    flex: 1;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    color: #d8f3ff;
-    background: rgba(4, 38, 88, 0.55);
-    border: 1px solid rgba(0, 195, 255, 0.55);
-    border-radius: 5px;
-    padding: 8px 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-shadow: 0 0 6px rgba(0, 195, 255, 0.7);
-    box-shadow: 0 0 14px rgba(0, 140, 255, 0.25), inset 0 0 8px rgba(0, 180, 255, 0.12);
-    transition: all 0.15s ease;
-  }
-  .kader-ctrl-btn:hover, .kader-ctrl-btn:active {
-    background: rgba(0, 150, 255, 0.35);
-    border-color: #00e5ff;
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
-  }</style>
+</style>
 </head>
 <body>
 <div class="kader-notif-overlay" id="kaderNotifOverlay">
-  <div class="kader-board-frame" id="kaderBoardFrame">
+  <div class="kader-board-frame" id="kaderBoardFrame" onclick="kaderBoardTap(event)">
     <!-- Right vertical player label in crisp Sung Jinwoo font -->
     <div class="kader-right-vertical-name" id="kaderRightName">PLAYER: KADER NEGASH</div>
 
@@ -410,12 +374,14 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
       </div>
     </div>
   </div>
-  <div class="kader-bottom-controls">
-    <button class="kader-ctrl-btn" onclick="replayKaderBoardAnimation()">&#8635; REPLAY ANIMATION</button>
-    <button class="kader-ctrl-btn" id="audioToggle" onclick="toggleKaderModalSound()">&#128266; SOUND: ON</button>
-  </div>
 </div>
 <script>
+  // v5.7.15: sound is ALWAYS ON (no toggle anymore — the SOUND: ON pill
+  // below the board is deleted). This flag was never declared in
+  // v5.7.13/14, so every sound call threw ReferenceError: the board was
+  // silent, the typewriter never started, and ACCEPT/DECLINE never
+  // reached the app at all. It must stay declared.
+  let audioEnabled = true;
   let audioCtx = null;
   function getAudioCtx() {
     if (!audioCtx) {
@@ -491,6 +457,15 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
   });
   function playAuthenticMp3(clipName) {
     if (!audioEnabled) return;
+    // Native bridge first: SoundPool in QuestAlarmActivity plays the
+    // bundled board MP3s (reliable — same path as the WAKEY loop and
+    // the System ding). WebView audio is only the fallback.
+    try {
+      if (window.AndroidAlarm && AndroidAlarm.playBoardSound) {
+        AndroidAlarm.playBoardSound(clipName);
+        return;
+      }
+    } catch (e) {}
     try {
       const sound = soloAudioClips[clipName];
       if (sound) {
@@ -506,6 +481,15 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
   }
   function playTypeTick() {
     if (!audioEnabled) return;
+    // Native tick first: the WebAudio oscillator needs a user gesture
+    // to start, and the board opens from an alarm with no gesture yet,
+    // so the tick was silent in v5.7.13/14 even when it ran.
+    try {
+      if (window.AndroidAlarm && AndroidAlarm.playBoardSound) {
+        AndroidAlarm.playBoardSound('tick');
+        return;
+      }
+    } catch (e) {}
     try {
       const ctx = getAudioCtx();
       if (ctx.state === 'suspended') return;
@@ -535,12 +519,6 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
       origPlaySystemSound(type);
     }
   };
-  function toggleKaderModalSound() {
-    audioEnabled = !audioEnabled;
-    const topBtn = document.getElementById('audioToggle');
-    if (topBtn) topBtn.innerText = audioEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
-    if (audioEnabled) playAuthenticMp3('click');
-  }
   const kaderHabitsList = [
     {
       id: 'task-1',
@@ -734,12 +712,22 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     frame.style.animation = '';
     overlay.classList.add('open');
 
-    // Play the authentic Solo Leveling System Window Open MP3 sound & start anime auto-writing!
-    playAuthenticMp3('open');
+    // v5.7.15: start the anime auto-writing FIRST, then the sound — a
+    // sound failure must never block the typing again.
     startAnimeAutoWrite(h);
+    try { playAuthenticMp3('open'); } catch (e) {}
   }
   function replayKaderBoardAnimation() {
     openKaderNotification(currentKaderHabitIdx);
+  }
+  // v5.7.15: tapping the board itself replays the animation (the
+  // REPLAY ANIMATION pill below the board is deleted). Taps on
+  // ACCEPT / DECLINE must NOT replay — they decide the quest.
+  function kaderBoardTap(e) {
+    try {
+      if (e && e.target && e.target.closest && e.target.closest('button')) return;
+    } catch (err) {}
+    replayKaderBoardAnimation();
   }
   function closeKaderNotification(soundKey) {
     const overlay = document.getElementById('kaderNotifOverlay');
@@ -761,7 +749,7 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     const chk = document.getElementById('kaderCheckBoxIcon');
     chk.classList.add('visible');
     if (decision === 'accept') { chk.innerText = '✓'; }
-    playSystemSound(decision === 'accept' ? 'accept' : 'decline');
+    try { playSystemSound(decision === 'accept' ? 'accept' : 'decline'); } catch (e) {}
     const overlay = document.getElementById('kaderNotifOverlay');
     overlay.classList.add('closing');
     setTimeout(() => {
@@ -784,18 +772,17 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
       void frame.offsetWidth;
       frame.style.animation = '';
       overlay.classList.add('open');
-      playAuthenticMp3('open');
       startAnimeAutoWrite(h);
+      try { playAuthenticMp3('open'); } catch (e) {}
       return;
     }
     openKaderNotification(idx);
   };
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const overlay = document.getElementById('kaderNotifOverlay');
-      if (!overlay.classList.contains('open')) { window.showAlarmBoard(0); }
-    }, 900);
-  });
+  /* v5.7.15: NO auto-open fallback here anymore. The old 900ms
+     DOMContentLoaded fallback called showAlarmBoard(0) — Fajr — whenever
+     it raced ahead of onPageFinished, so the board showed the wrong
+     task at noon. QuestAlarmActivity re-calls showBoard() with the
+     REAL quest if the board is still not shown after 1500ms. */
 </script>
 </body>
 </html>
