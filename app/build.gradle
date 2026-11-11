@@ -93,6 +93,29 @@ if (dingB64File.exists()) {
     java.nio.file.Files.write(dingMp3File.toPath(), java.util.Base64.getDecoder().decode(dingB64))
 }
 
+// v5.7.13: Gemini notification board frame + board sounds for the quest
+// alarm window (alarm-board.html). The board frame is the 760x437
+// landscape anime window from the Gemini file; the 5 MP3 clips are the
+// board's own open/accept/click/whoosh/close sounds (SoloLevelX).
+// Same base64-decode pattern — decoded on every build.
+def boardFrameB64File = file("../photos/board-frame.jpg.b64")
+def boardFrameJpgFile = file("src/main/assets/board-frame.jpg")
+if (boardFrameB64File.exists()) {
+    String boardFrameB64 = new String(java.nio.file.Files.readAllBytes(boardFrameB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(boardFrameJpgFile.toPath(), java.util.Base64.getDecoder().decode(boardFrameB64))
+}
+def boardSounds = [
+    "board-open", "board-accept", "board-click", "board-whoosh", "board-close"
+]
+boardSounds.each { name ->
+    def b64File = file("../sounds/${name}.mp3.b64")
+    def mp3File = file("src/main/assets/${name}.mp3")
+    if (b64File.exists()) {
+        String b64 = new String(java.nio.file.Files.readAllBytes(b64File.toPath()), "UTF-8").replaceAll("\\s", "")
+        java.nio.file.Files.write(mp3File.toPath(), java.util.Base64.getDecoder().decode(b64))
+    }
+}
+
 android {
     namespace 'com.kader.systemapp'
     compileSdk 34
@@ -101,8 +124,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 63
-        versionName '5.7.12'
+        versionCode 64
+        versionName '5.7.13'
     }
 
     signingConfigs {
