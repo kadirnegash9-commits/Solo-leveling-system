@@ -28,7 +28,7 @@ import org.json.JSONObject;
  * board when an alarm notification arrives, exactly as in the zip file,
  * nothing else touched").
  *
- * The window is a WebView hosting app/src/main/assets/alarm-board-v18.html:
+ * The window is a WebView hosting app/src/main/assets/alarm-board-v19.html:
  * the kader-notif-overlay copied from the Gemini file (index_9) — the
  * horizontal Solo Leveling board frame (board-frame.jpg), "!"
  * + NOTIFICATION horizontal at the top, "PLAYER: KADER NEGASH"
@@ -98,6 +98,18 @@ import org.json.JSONObject;
  * showing the Fajr habit on replay / ACCEPT / DECLINE — showAlarmBoard
  * set currentKaderHabitIdx = 0 for title-only boards; replay and
  * decide now use the habit object actually on the board.
+ *
+ * v5.7.19 (boss, 2026-11-11 — he INSTALLED v5.7.18, "just now" APK,
+ * and the board was STILL at the top, but the "v5.7.18" marker showed
+ * bottom-right, so the new file IS loading — the cache is beaten):
+ * the flex centering does NOT take effect on his phone even though
+ * the CSS is correct. Fix: the frame is wrapped in a
+ * .kader-board-wrap div pinned to the middle by ABSOLUTE positioning
+ * (top:50% + left:50% + translate(-50%,-50%)); the overlay also gets
+ * height:100% alongside 100vh so it is full-height without relying
+ * on the vh unit. The board asset is RENAMED again
+ * (alarm-board-v19.html) — the per-version filename that beat the
+ * cache. Marker updated to "v5.7.19".
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -207,7 +219,7 @@ public class QuestAlarmActivity extends Activity {
         // v5.7.18: CACHE FIX (v5.7.17's ?v= query did NOT bust the
         // cache — a query on a file:// URL is not a fresh cache key,
         // and clearCache(true) is async). The board asset is RENAMED
-        // each version now (alarm-board-v18.html) — a new filename
+        // each version now (alarm-board-v19.html) — a new filename
         // cannot be served from any cache. clearCache + LOAD_NO_CACHE
         // stay as belt-and-braces; the board must always be the
         // CURRENT assets, never a stale copy.
@@ -226,9 +238,9 @@ public class QuestAlarmActivity extends Activity {
                 FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(root);
         initBoardSounds();
-        // v5.7.18: new filename = fresh cache key (see above — the
+        // v5.7.19: new filename = fresh cache key (see above — the
         // ?v= query on the old filename did not bust the cache).
-        webView.loadUrl("file:///android_asset/alarm-board-v18.html");
+        webView.loadUrl("file:///android_asset/alarm-board-v19.html");
         // v5.7.15 safety net: if onPageFinished is ever missed, re-open
         // the board with the REAL quest after 1500ms (showBoard() is a
         // no-op once the board is shown — it can never show a wrong
