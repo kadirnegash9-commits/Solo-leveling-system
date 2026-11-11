@@ -1123,6 +1123,10 @@
       <div class="alarm-btn-grid">
         <button class="btn-notif-solid" id="notifAllowBtn">🔔 Allow notifications</button>
         <button class="btn-notif-outline" id="alarmTestBtn">⏰ Alarm Test (2 min)</button>
+        <!-- v5.7.23: Goal Test — pops the goal board in 1 minute as a
+             preview (test mode: writes no state), so the boss can see
+             it now instead of waiting for the Thu 05:30 Saitama alarm. -->
+        <button class="btn-notif-outline" id="goalTestBtn">🎯 Goal Test (1 min)</button>
       </div>
     </div>
 
@@ -2320,7 +2324,7 @@ window.showDashboard = showDashboard;
 
 /* ---------- Notifications + alarm (Android bridge) ---------- */
 (function(){
-  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), soundBtn = $("soundChangeBtn"), overlayBtn = $("overlayAllowBtn");
+  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), goalTestBtn = $("goalTestBtn"), soundBtn = $("soundChangeBtn"), overlayBtn = $("overlayAllowBtn");
   // v5.7.21: "Display over other apps" — opens the phone Settings
   // page so the board can pop up when an alarm fires.
   if(overlayBtn) overlayBtn.addEventListener("click", function(){
@@ -2348,6 +2352,16 @@ window.showDashboard = showDashboard;
         showSystemToast("⏰ The alarm comes in 2 minutes — lock your phone and wait");
       } else { showSystemToast("⚠ The alarm works only in the app (APK)"); }
     }catch(e){ showSystemToast("⚠ Alarm test did not start"); }
+  });
+  // v5.7.23: Goal Test — pops the goal board in 1 minute as a
+  // preview (test mode: writes no state).
+  if(goalTestBtn) goalTestBtn.addEventListener("click", function(){
+    try{
+      if(hasBridge() && window.AndroidBridge.testGoalAlarm){
+        window.AndroidBridge.testGoalAlarm();
+        showSystemToast("🎯 The goal board comes in 1 minute — wait");
+      } else { showSystemToast("⚠ The goal test works only in the app (APK)"); }
+    }catch(e){ showSystemToast("⚠ Goal test did not start"); }
   });
   if(soundBtn) soundBtn.addEventListener("click", function(){
     try{

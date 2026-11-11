@@ -277,6 +277,27 @@ public class QuestReceiver extends BroadcastReceiver {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
+    /** v5.7.23: one-off GOAL test alarm, 60s from now — the same code
+     * path as the real Saitama alarms (setAlarmClock), but quest_id
+     * "goaltest": the goal board opens in TEST mode (a preview — it
+     * writes NO state). The boss taps "Goal Test (1 min)" in §6 to
+     * see the goal board now instead of waiting for Thu 05:30. */
+    public static void scheduleGoalTestAlarm(Context context) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        Intent intent = new Intent(context, QuestReceiver.class);
+        intent.setAction(ACTION_QUEST);
+        intent.putExtra("quest_id", "goaltest");
+        intent.putExtra("quest_title", "Goal test");
+        PendingIntent pi = PendingIntent.getBroadcast(context, 998, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        long when = System.currentTimeMillis() + 60_000;
+        PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
+    }
+
     // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
     // 14:22 — "no running, no gym on Saturday"; Fajr added 14:36). All other
     // quests are excused on Saturday — no alarm that day.
@@ -414,8 +435,13 @@ public class QuestReceiver extends BroadcastReceiver {
             open.putExtra("quest_id", questId);
             open.putExtra("quest_title", title);
             open.putExtra("quest_time", questTimeFor(questId));
-            if ("saitamaRun".equals(questId) || "saitamaEx".equals(questId)) {
+            if (isGoalQuest(questId)) {
                 open.putExtra("show_quest_info", true);
+            }
+            // v5.7.23: the goal test opens the board in TEST mode (a
+            // preview — it writes no state).
+            if ("goaltest".equals(questId)) {
+                open.putExtra("goal_test", true);
             }
             context.startActivity(open);
         } catch (Exception ignored) {
@@ -453,6 +479,14 @@ public class QuestReceiver extends BroadcastReceiver {
         startAlarmLoop(context, tag, title);
     }
 
+    // v5.7.23: quests that open the GOAL notification — the two real
+    // Saitama quests plus the 1-minute goal test ("goaltest"), which
+    // is a preview of the same board.
+    private static boolean isGoalQuest(String questId) {
+        return "saitamaRun".equals(questId) || "saitamaEx".equals(questId)
+                || "goaltest".equals(questId);
+    }
+
     // v5.7.12: the quest's HH:MM for the full-screen System window.
     // "alarmtest" has no entry — the window shows no time line.
     private static String questTimeFor(String questId) {
@@ -474,13 +508,15 @@ public class QuestReceiver extends BroadcastReceiver {
         // the notification tap uses 1, so nothing can clobber this
         // via FLAG_UPDATE_CURRENT. The loop keeps ringing (no stop
         // extra) until ACCEPT/DECLINE or a notification tap/swipe.
-        boolean saitama = "saitamaRun".equals(questId) || "saitamaEx".equals(questId);
+        boolean saitama = isGoalQuest(questId);
         Intent open = new Intent(context, QuestAlarmActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         open.putExtra("quest_id", questId);
         open.putExtra("quest_title", title);
         open.putExtra("quest_time", questTimeFor(questId));
         if (saitama) open.putExtra("show_quest_info", true);
+        // v5.7.23: the goal test opens the board in TEST mode (preview).
+        if ("goaltest".equals(questId)) open.putExtra("goal_test", true);
         PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 6 : 5, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but

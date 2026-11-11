@@ -448,6 +448,20 @@ public class MainActivity extends Activity {
             });
         }
 
+        // v5.7.23: "Goal Test (1 min)" (§6) — schedules the goal test
+        // alarm, which pops the goal board as a preview (test mode:
+        // writes no state). The boss taps it to see the goal board now
+        // instead of waiting for the Thu 05:30 Saitama alarm.
+        @JavascriptInterface
+        public void testGoalAlarm() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    QuestReceiver.scheduleGoalTestAlarm(MainActivity.this);
+                }
+            });
+        }
+
         // Called by the web app when a quest is ACCEPTED or DECLINED —
         // tapping a quest dismisses the alarm, so the looping sound stops.
         @JavascriptInterface

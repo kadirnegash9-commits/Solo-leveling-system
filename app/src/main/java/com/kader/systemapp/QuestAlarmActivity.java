@@ -189,6 +189,13 @@ public class QuestAlarmActivity extends Activity {
     // Goal board) instead of the task board. Every other quest keeps
     // the task board exactly as before.
     private boolean goalMode = false;
+    // v5.7.23: TEST mode — the "Goal Test (1 min)" button schedules a
+    // "goaltest" alarm that opens the SAME goal board as a preview.
+    // In test mode the board writes NOTHING (no row toggles, no quest
+    // decisions, no XP/Gold/HP): the bridge drops every write, and
+    // the board JS never calls the bridge at all. The test runs on a
+    // non-Saitama day and must not complete his real goals.
+    private boolean testMode = false;
     // v5.7.22: SharedPreferences keys for the goal board's pending
     // state. The board records every row tap (toggleGoalRow) and
     // every completed quest (goalQuestComplete) here, as JSON
@@ -239,11 +246,15 @@ public class QuestAlarmActivity extends Activity {
             }
             saitama = intent.getBooleanExtra("show_quest_info", false);
             messageMode = intent.getBooleanExtra("board_message", false);
+            testMode = intent.getBooleanExtra("goal_test", false);
         }
         // v5.7.22: Saitama alarms open the separate GOAL notification;
         // message boards and every other quest keep the task board.
+        // v5.7.23: the "goaltest" alarm opens the same goal board as a
+        // preview (testMode — writes nothing).
         goalMode = !messageMode
-                && ("saitamaEx".equals(questId) || "saitamaRun".equals(questId));
+                && ("saitamaEx".equals(questId) || "saitamaRun".equals(questId)
+                || "goaltest".equals(questId));
         // Show over the lock screen and turn the screen on, like a clock alarm.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
@@ -314,8 +325,12 @@ public class QuestAlarmActivity extends Activity {
         // v5.7.22: goal mode loads the separate goal board asset
         // (alarm-goal-board-v22.html) — a new filename, so no stale
         // task board can ever serve in its place.
+        // v5.7.23: goal board RENAMED again (alarm-goal-board-v23.html)
+        // — the test-mode flag is a real behavior change, and a stale
+        // cached v22 (which ignores the flag) would let preview taps
+        // write real state. Same rename-each-version rule as v5.7.18-22.
         webView.loadUrl(goalMode
-                ? "file:///android_asset/alarm-goal-board-v22.html"
+                ? "file:///android_asset/alarm-goal-board-v23.html"
                 : "file:///android_asset/alarm-board-v21.html");
         // v5.7.15 safety net: if onPageFinished is ever missed, re-open
         // the board with the REAL quest after 1500ms (showBoard() is a
@@ -394,11 +409,17 @@ public class QuestAlarmActivity extends Activity {
         // v5.7.22: goal mode opens the goal board with this alarm's
         // quest id (saitamaEx / saitamaRun) — the board seeds its 4
         // rows from the app state and shows itself.
+        // v5.7.23: the goal test opens the board for "saitamaEx" (the
+        // exercises are the triggered quest — push/sit/squat close
+        // it) with testMode=true, so the preview writes no state.
+        // A real Saitama alarm passes its own id, testMode=false.
         if (goalMode) {
-            final String qid = questId == null ? "saitamaEx" : questId;
+            final String qid = "goaltest".equals(questId) ? "saitamaEx"
+                    : (questId == null ? "saitamaEx" : questId);
             final String js;
             try {
-                js = "window.showGoalBoard(" + JSONObject.quote(qid) + ");";
+                js = "window.showGoalBoard(" + JSONObject.quote(qid)
+                        + ", " + (testMode ? "true" : "false") + ");";
             } catch (Exception e) {
                 return;
             }
@@ -513,6 +534,10 @@ public class QuestAlarmActivity extends Activity {
         // had been tapped in §3. The board's own UI already flipped.
         @JavascriptInterface
         public void toggleGoalRow(final String kind) {
+            // v5.7.23: TEST mode writes nothing — a preview tap must
+            // never reach the app state (defense in depth: the board
+            // JS already skips the call, this is the second layer).
+            if (testMode) return;
             if (kind == null) return;
             if (!"push".equals(kind) && !"sit".equals(kind)
                     && !"squat".equals(kind) && !"run".equals(kind)) return;
@@ -524,6 +549,9 @@ public class QuestAlarmActivity extends Activity {
         // the existing quest-decision path (+10 XP, +10 Gold, +2 HP).
         @JavascriptInterface
         public void goalQuestComplete(final String qid) {
+            // v5.7.23: TEST mode writes nothing (second layer — the
+            // board JS already skips the call in test mode).
+            if (testMode) return;
             if (!"saitamaEx".equals(qid) && !"saitamaRun".equals(qid)) return;
             appendPendingGoal(GOAL_PENDING_DECISIONS, "quests", qid);
         }
@@ -562,13 +590,20 @@ public class QuestAlarmActivity extends Activity {
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 if (nm != null) nm.cancel(questId, 1);
             } catch (Exception ignored) {}
-            Intent open = new Intent(this, MainActivity.class);
-            open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            open.putExtra("ringing_quest", questId);
-            open.putExtra("show_quest_info", true);
-            startActivity(open);
+            // v5.7.23: TEST mode — just stop the loop and close. The
+            // user is already in the app (they tapped the test button
+            // there); re-launching MainActivity with a "goaltest"
+            // ringing_quest would be noise, and there is no pending
+            // state to apply (the preview wrote nothing).
+            if (!testMode) {
+                Intent open = new Intent(this, MainActivity.class);
+                open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                open.putExtra("ringing_quest", questId);
+                open.putExtra("show_quest_info", true);
+                startActivity(open);
+            }
         }
         finish();
     }
