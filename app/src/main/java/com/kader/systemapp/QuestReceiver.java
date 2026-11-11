@@ -397,6 +397,16 @@ public class QuestReceiver extends BroadcastReceiver {
     // STILL posted as a fallback — if this launch is blocked, the user
     // taps the notification to open the board. Never throws: a failed
     // launch must not break the alarm (ding + loop + notification).
+    // v5.7.21 CORRECTION (boss, 2026-11-11): he INSTALLED v5.7.20
+    // and tested it (Alarm Test) — NO CHANGE, only the pill. The
+    // setAlarmClock exemption did NOT let the startActivity through
+    // on his phone (Android 16 / HiOS background-activity-launch
+    // rules — the block is swallowed by the try/catch below, so the
+    // alarm looks normal except the board never opens). The direct
+    // launch now relies on SYSTEM_ALERT_WINDOW ("Display over other
+    // apps"), granted once via the MainActivity prompt — that IS a
+    // background-launch exemption. Until it is granted, this launch
+    // keeps being blocked and the notification stays the only path.
     private static void launchBoardDirectly(Context context, String questId, String title) {
         try {
             Intent open = new Intent(context, QuestAlarmActivity.class);
@@ -760,3 +770,4 @@ public class QuestReceiver extends BroadcastReceiver {
         nm.createNotificationChannel(silent);
     }
 }
+

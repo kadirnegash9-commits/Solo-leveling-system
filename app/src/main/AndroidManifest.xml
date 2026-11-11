@@ -3,6 +3,15 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- v5.7.21: SYSTEM_ALERT_WINDOW ("Display over other apps") — the
+         board's direct launch from an alarm (QuestReceiver, v5.7.20)
+         is BLOCKED by Android/HiOS background-activity-launch rules:
+         the setAlarmClock exemption did NOT let it through on his
+         phone (Alarm Test on v5.7.20: no change, only the pill).
+         SYSTEM_ALERT_WINDOW is a background-launch exemption — once
+         the boss grants it (MainActivity prompts him once), the
+         direct launch works and the board pops up on every alarm. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -51,3 +60,4 @@
     </application>
 
 </manifest>
+

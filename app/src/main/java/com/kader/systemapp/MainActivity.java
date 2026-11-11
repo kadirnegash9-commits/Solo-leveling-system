@@ -2,6 +2,7 @@ package com.kader.systemapp;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -123,6 +124,47 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         QuestReceiver.scheduleAll(this);
+        // v5.7.21: the board can only pop up on an alarm once
+        // "Display over other apps" is granted (see below).
+        askOverlayPermission();
+    }
+
+    // v5.7.21 (boss, 2026-11-11): he INSTALLED v5.7.20 and tested it
+    // (Alarm Test) — NO CHANGE, only the small notification pill.
+    // The v5.7.20 direct launch (QuestReceiver.startActivity) is
+    // BLOCKED by Android/HiOS background-activity-launch rules: the
+    // setAlarmClock exemption did NOT let it through on his phone.
+    // SYSTEM_ALERT_WINDOW ("Display over other apps") IS a
+    // background-launch exemption — once he grants it, the direct
+    // launch works and the board pops up on every alarm, even when
+    // the phone is unlocked. Shown on every app open until granted
+    // (it is a one-time grant); "Later" just dismisses it for now.
+    private void askOverlayPermission() {
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+            if (Settings.canDrawOverlays(this)) return;
+            new AlertDialog.Builder(this)
+                    .setTitle("Board pop-up needs permission")
+                    .setMessage("For the quest board to pop up when an alarm fires, allow Solo Leveling System to \"Display over other apps\". Without it, an alarm only shows a small notification — the board will not open. Allow it once in Settings.")
+                    .setPositiveButton("Allow", new android.content.DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(android.content.DialogInterface dialog, int which) {
+                            openOverlaySettings();
+                        }
+                    })
+                    .setNegativeButton("Later", null)
+                    .show();
+        } catch (Exception ignored) {}
+    }
+
+    private void openOverlaySettings() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Open Settings → Apps → Solo Leveling → Display over other apps", Toast.LENGTH_LONG).show();
+        }
     }
 
     // One-time system prompt: "Allow Solo Leveling System to run in the
@@ -281,6 +323,29 @@ public class MainActivity extends Activity {
         public boolean notificationsEnabled() {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             return manager != null && manager.areNotificationsEnabled();
+        }
+
+        // v5.7.21: "Display over other apps" — the board's direct
+        // launch from an alarm only works once this is granted (the
+        // setAlarmClock exemption did not let it through on his
+        // phone). The §6 banner in the web app reads this so the
+        // boss can see the state and grant it from the alarm section.
+        @JavascriptInterface
+        public boolean overlayPermissionGranted() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return Settings.canDrawOverlays(MainActivity.this);
+            }
+            return true;
+        }
+
+        @JavascriptInterface
+        public void requestOverlayPermission() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    openOverlaySettings();
+                }
+            });
         }
 
         @JavascriptInterface

@@ -1105,6 +1105,16 @@
         <span id="alarmStatus">Rings like a clock alarm — sound + vibration on time.</span>
       </div>
 
+      <!-- v5.7.21: board pop-up permission ("Display over other apps").
+           The v5.7.20 direct launch is BLOCKED without it — an alarm
+           then only shows a small notification and the board never
+           opens. The button opens the phone Settings page to allow it
+           once; the line updates itself in renderNotif(). -->
+      <div class="sound-name-row">
+        <div>🖼️ <strong>Board pop-up:</strong> <span id="overlayStatus">Checking…</span></div>
+        <div class="btn-sound-change" id="overlayAllowBtn">[ Allow ]</div>
+      </div>
+
       <div class="sound-name-row">
         <div>🔔 <strong>Sound:</strong> <span id="alarmSoundName">WAKEY WAKEYYYYYYY #lockin</span></div>
         <div class="btn-sound-change" id="soundChangeBtn">[ Change ]</div>
@@ -1897,6 +1907,26 @@ function renderNotif(){
       var el = $("alarmSoundName"); if(el && nm) el.textContent = nm;
     }
   }catch(e){}
+  // v5.7.21: board pop-up permission state ("Display over other
+  // apps"). Granted = the board opens when an alarm fires; OFF =
+  // alarms only show a small notification.
+  try{
+    var ov = $("overlayStatus"), ob = $("overlayAllowBtn");
+    if(ov){
+      if(hasBridge() && window.AndroidBridge.overlayPermissionGranted){
+        if(window.AndroidBridge.overlayPermissionGranted()){
+          ov.textContent = "Allowed — the board opens when an alarm fires.";
+          if(ob) ob.style.display = "none";
+        } else {
+          ov.textContent = "OFF — alarms only show a small notification.";
+          if(ob) ob.style.display = "";
+        }
+      } else {
+        ov.textContent = "Works only in the app (APK) — not on the website.";
+        if(ob) ob.style.display = "none";
+      }
+    }
+  }catch(e){}
 }
 function renderReward(){
   var box = $("rewardBox"); if(!box) return;
@@ -2290,7 +2320,18 @@ window.showDashboard = showDashboard;
 
 /* ---------- Notifications + alarm (Android bridge) ---------- */
 (function(){
-  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), soundBtn = $("soundChangeBtn");
+  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), soundBtn = $("soundChangeBtn"), overlayBtn = $("overlayAllowBtn");
+  // v5.7.21: "Display over other apps" — opens the phone Settings
+  // page so the board can pop up when an alarm fires.
+  if(overlayBtn) overlayBtn.addEventListener("click", function(){
+    try{
+      if(hasBridge() && window.AndroidBridge.requestOverlayPermission){
+        window.AndroidBridge.requestOverlayPermission();
+        setTimeout(renderNotif, 800);
+        showSystemToast("🖼️ Allow 'Display over other apps' in Settings");
+      } else { showSystemToast("⚠ Board pop-up works only in the app (APK)"); }
+    }catch(e){ showSystemToast("⚠ Could not open Settings"); }
+  });
   if(allowBtn) allowBtn.addEventListener("click", function(){
     try{
       if(hasBridge() && window.AndroidBridge.requestNotificationPermission){
