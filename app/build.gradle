@@ -104,6 +104,15 @@ if (boardFrameB64File.exists()) {
     String boardFrameB64 = new String(java.nio.file.Files.readAllBytes(boardFrameB64File.toPath()), "UTF-8").replaceAll("\\s", "")
     java.nio.file.Files.write(boardFrameJpgFile.toPath(), java.util.Base64.getDecoder().decode(boardFrameB64))
 }
+// v5.7.22: Gemini goal board frame (63202.png, 520x890) for the
+// Saitama goal notification (alarm-goal-board-v22.html). Same
+// base64-decode pattern — decoded on every build.
+def goalFrameB64File = file("../photos/goal-frame.jpg.b64")
+def goalFrameJpgFile = file("src/main/assets/goal-frame.jpg")
+if (goalFrameB64File.exists()) {
+    String goalFrameB64 = new String(java.nio.file.Files.readAllBytes(goalFrameB64File.toPath()), "UTF-8").replaceAll("\\s", "")
+    java.nio.file.Files.write(goalFrameJpgFile.toPath(), java.util.Base64.getDecoder().decode(goalFrameB64))
+}
 def boardSounds = [
     "board-open", "board-accept", "board-click", "board-whoosh", "board-close", "board-tick"
 ]
@@ -124,8 +133,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 72
-        versionName '5.7.21'
+        versionCode 73
+        versionName '5.7.22'
     }
 
     signingConfigs {

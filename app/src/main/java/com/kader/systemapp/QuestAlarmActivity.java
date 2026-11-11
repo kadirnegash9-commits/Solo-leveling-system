@@ -134,6 +134,27 @@ import org.json.JSONObject;
  * SYSTEM_ALERT_WINDOW ("Display over other apps") — a background-
  * launch exemption — and then the direct launch works. The board
  * asset is RENAMED again (alarm-board-v21.html). Marker "v5.7.21".
+ *
+ * v5.7.22 (boss, 2026-11-11) — the overlay permission WORKED and the
+ * board pops up. New request: a SECOND, SEPARATE notification for
+ * the 4 Saitama goals, built the way Gemini made it in
+ * index_0_5zor.html — the Quest Info / Goal board (63202.png) with
+ * the 4 tappable rows (Push-ups / Sit-ups / Squats / Running).
+ * His corrections, kept exactly: it is a NOTIFICATION, not a board;
+ * Gemini's design has NO accept / decline and NOTHING extra is
+ * added; it is for the notification (alarm popup), NOT for the app
+ * board — §3 Quest Info & Goals is untouched, and the OTHER
+ * notification board (the task board, alarm-board-v21.html) stays
+ * exactly as before. So: a Saitama alarm (saitamaEx 05:30,
+ * saitamaRun 06:00) opens alarm-goal-board-v22.html; every other
+ * quest opens the task board as before. The goal board's rows wire
+ * to the app's own toggleGoal(kind) (±2 XP) and the Saitama quests
+ * are decided through the existing quest-decision path (+10 XP,
+ * +10 Gold, +2 HP) — both applied by MainActivity, which stays the
+ * single writer of the app state. The goal board only READS the
+ * shared localStorage to seed its rows; every tap is recorded in
+ * SharedPreferences (pending toggles / decisions) so nothing is
+ * lost if the board is closed with Back or the process dies.
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -163,6 +184,23 @@ public class QuestAlarmActivity extends Activity {
     // that happens to be running) — no quest decision is applied and
     // MainActivity is not re-launched, because the user is already in it.
     private boolean messageMode = false;
+    // v5.7.22: goal mode — a Saitama alarm opens the SEPARATE goal
+    // notification (alarm-goal-board-v22.html, Gemini's Quest Info /
+    // Goal board) instead of the task board. Every other quest keeps
+    // the task board exactly as before.
+    private boolean goalMode = false;
+    // v5.7.22: SharedPreferences keys for the goal board's pending
+    // state. The board records every row tap (toggleGoalRow) and
+    // every completed quest (goalQuestComplete) here, as JSON
+    // {"date":"yyyy-MM-dd","kinds":[...]} / {"date":...,"quests":[...]},
+    // so a tap is never lost if the board is closed with Back, the
+    // overlay is tapped away, or the process dies. MainActivity
+    // consumes them (toggles first, then decisions) on its next
+    // page load / new intent / resume, and drops them if the date
+    // is not today. Same prefs file MainActivity already uses.
+    private static final String GOAL_PREFS = "solo_leveling_prefs";
+    private static final String GOAL_PENDING_TOGGLES = "goal_pending_toggles";
+    private static final String GOAL_PENDING_DECISIONS = "goal_pending_decisions";
 
     // Gemini kaderHabitsList order (index_9): the triggered quest's task.
     // -1 = no habit for this quest (e.g. the 2-minute test alarm) — the
@@ -202,6 +240,10 @@ public class QuestAlarmActivity extends Activity {
             saitama = intent.getBooleanExtra("show_quest_info", false);
             messageMode = intent.getBooleanExtra("board_message", false);
         }
+        // v5.7.22: Saitama alarms open the separate GOAL notification;
+        // message boards and every other quest keep the task board.
+        goalMode = !messageMode
+                && ("saitamaEx".equals(questId) || "saitamaRun".equals(questId));
         // Show over the lock screen and turn the screen on, like a clock alarm.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
@@ -230,6 +272,11 @@ public class QuestAlarmActivity extends Activity {
         webView.setHorizontalScrollBarEnabled(false);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
+        // v5.7.22: the goal board seeds its 4 rows by READING the
+        // app's shared localStorage (soloLevelingSaveV4) — DOM storage
+        // must be on for that read. Harmless for the task board (it
+        // never touches localStorage).
+        settings.setDomStorageEnabled(true);
         // The board plays its open MP3 + typing tick as soon as it
         // appears — no user gesture has happened yet at alarm time.
         settings.setMediaPlaybackRequiresUserGesture(false);
@@ -264,7 +311,12 @@ public class QuestAlarmActivity extends Activity {
         initBoardSounds();
         // v5.7.21: new filename = fresh cache key (see above — the
         // ?v= query on the old filename did not bust the cache).
-        webView.loadUrl("file:///android_asset/alarm-board-v21.html");
+        // v5.7.22: goal mode loads the separate goal board asset
+        // (alarm-goal-board-v22.html) — a new filename, so no stale
+        // task board can ever serve in its place.
+        webView.loadUrl(goalMode
+                ? "file:///android_asset/alarm-goal-board-v22.html"
+                : "file:///android_asset/alarm-board-v21.html");
         // v5.7.15 safety net: if onPageFinished is ever missed, re-open
         // the board with the REAL quest after 1500ms (showBoard() is a
         // no-op once the board is shown — it can never show a wrong
@@ -339,6 +391,22 @@ public class QuestAlarmActivity extends Activity {
     private void showBoard() {
         if (boardShown || webView == null) return;
         boardShown = true;
+        // v5.7.22: goal mode opens the goal board with this alarm's
+        // quest id (saitamaEx / saitamaRun) — the board seeds its 4
+        // rows from the app state and shows itself.
+        if (goalMode) {
+            final String qid = questId == null ? "saitamaEx" : questId;
+            final String js;
+            try {
+                js = "window.showGoalBoard(" + JSONObject.quote(qid) + ");";
+            } catch (Exception e) {
+                return;
+            }
+            try {
+                webView.evaluateJavascript(js, null);
+            } catch (Exception ignored) {}
+            return;
+        }
         final int idx = habitIndexForQuest(questId);
         final String title = questTitle == null ? "" : questTitle;
         final String js;
@@ -350,6 +418,72 @@ public class QuestAlarmActivity extends Activity {
         try {
             webView.evaluateJavascript(js, null);
         } catch (Exception ignored) {}
+    }
+
+    // v5.7.22: today's date (device local time) for the pending goal
+    // state — MainActivity drops pending toggles/decisions whose date
+    // is not today, so a tap can never land on the wrong day.
+    private static String todayKey() {
+        try {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd",
+                    java.util.Locale.US).format(new java.util.Date());
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private void appendPendingGoal(String prefsKey, String arrayKey, String value) {
+        try {
+            android.content.SharedPreferences prefs =
+                    getSharedPreferences(GOAL_PREFS, MODE_PRIVATE);
+            String raw = prefs.getString(prefsKey, null);
+            JSONObject obj;
+            org.json.JSONArray arr;
+            String today = todayKey();
+            if (raw != null) {
+                obj = new JSONObject(raw);
+                if (!today.equals(obj.optString("date", ""))) {
+                    obj = new JSONObject();
+                    obj.put("date", today);
+                    arr = new org.json.JSONArray();
+                } else {
+                    arr = obj.optJSONArray(arrayKey);
+                    if (arr == null) arr = new org.json.JSONArray();
+                }
+            } else {
+                obj = new JSONObject();
+                obj.put("date", today);
+                arr = new org.json.JSONArray();
+            }
+            // Decisions are recorded once per quest (a quest can only
+            // complete once a day); toggles keep every tap in order —
+            // tap on then off must net to zero, so duplicates stay.
+            if ("quests".equals(arrayKey)) {
+                boolean seen = false;
+                for (int i = 0; i < arr.length(); i++) {
+                    if (value.equals(arr.optString(i))) { seen = true; break; }
+                }
+                if (seen) return;
+            }
+            arr.put(value);
+            obj.put(arrayKey, arr);
+            prefs.edit().putString(prefsKey, obj.toString()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private String pendingGoalTogglesJson() {
+        try {
+            android.content.SharedPreferences prefs =
+                    getSharedPreferences(GOAL_PREFS, MODE_PRIVATE);
+            String raw = prefs.getString(GOAL_PENDING_TOGGLES, null);
+            if (raw == null) return "[]";
+            JSONObject obj = new JSONObject(raw);
+            if (!todayKey().equals(obj.optString("date", ""))) return "[]";
+            org.json.JSONArray arr = obj.optJSONArray("kinds");
+            return arr == null ? "[]" : arr.toString();
+        } catch (Exception e) {
+            return "[]";
+        }
     }
 
     // Called from the board's ACCEPT / DECLINE buttons (after the
@@ -372,6 +506,71 @@ public class QuestAlarmActivity extends Activity {
                 }
             });
         }
+
+        // v5.7.22: goal board — a row was tapped. Record the tap in
+        // SharedPreferences (in order) so MainActivity can apply the
+        // app's own toggleGoal(kind) (±2 XP) exactly as if the row
+        // had been tapped in §3. The board's own UI already flipped.
+        @JavascriptInterface
+        public void toggleGoalRow(final String kind) {
+            if (kind == null) return;
+            if (!"push".equals(kind) && !"sit".equals(kind)
+                    && !"squat".equals(kind) && !"run".equals(kind)) return;
+            appendPendingGoal(GOAL_PENDING_TOGGLES, "kinds", kind);
+        }
+
+        // v5.7.22: goal board — a Saitama quest's goals are all done.
+        // Recorded once (deduped); MainActivity decides it through
+        // the existing quest-decision path (+10 XP, +10 Gold, +2 HP).
+        @JavascriptInterface
+        public void goalQuestComplete(final String qid) {
+            if (!"saitamaEx".equals(qid) && !"saitamaRun".equals(qid)) return;
+            appendPendingGoal(GOAL_PENDING_DECISIONS, "quests", qid);
+        }
+
+        // v5.7.22: goal board — the pending toggles recorded so far,
+        // so the board can seed its rows with the true current state
+        // (localStorage + taps from an earlier board open that was
+        // closed before MainActivity applied them).
+        @JavascriptInterface
+        public String pendingGoalToggles() {
+            return pendingGoalTogglesJson();
+        }
+
+        // v5.7.22: goal board — close the window. "dismiss": a quest
+        // is done — stop the alarm loop and open the app, which
+        // applies the pending toggles + decisions. "keep": tap
+        // outside / Back — close the window only, the alarm keeps
+        // ringing (like the task board's Back); the pending state
+        // waits for the next app open.
+        @JavascriptInterface
+        public void closeGoalBoard(final String mode) {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    closeGoalBoardWindow(mode);
+                }
+            });
+        }
+    }
+
+    // v5.7.22: close the goal board window (see the bridge above).
+    private void closeGoalBoardWindow(String mode) {
+        if ("dismiss".equals(mode)) {
+            QuestReceiver.dismissAlarm();
+            try {
+                NotificationManager nm =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (nm != null) nm.cancel(questId, 1);
+            } catch (Exception ignored) {}
+            Intent open = new Intent(this, MainActivity.class);
+            open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            open.putExtra("ringing_quest", questId);
+            open.putExtra("show_quest_info", true);
+            startActivity(open);
+        }
+        finish();
     }
 
     private void decideQuest(String act) {

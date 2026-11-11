@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SYSTEM NOTIFICATION — GOAL</title>
+<style>
+/* v5.7.22: the GOAL notification — Gemini's Quest Info / Goal board
+   (63202.png, from index_0_5zor.html) as a SEPARATE notification,
+   ONLY for the 4 Saitama goals (boss, 2026-11-11 — "it's ONLY for
+   the 4 goals; the other one stays as before, the notification
+   board"). It is a NOTIFICATION (the alarm popup), NOT an app
+   board — the app's §3 Quest Info & Goals dashboard is untouched.
+   Gemini's rule, kept verbatim: zero accept / decline, zero extra
+   buttons, zero extra tabs — the ONLY interactive things are the 4
+   goal rows. The frame image (goal-frame.jpg) + sounds
+   (board-open/accept/click/close.mp3) are asset files, decoded at
+   build time. Sounds reuse the task board's clean Solo Leveling
+   clips — no new sounds. The board stands still after opening
+   (no idle float — the boss's settled rule). */
+html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
+.goal-notif-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* v5.7.19 lesson (task board): the overlay's height collapsed to
+     its content in this WebView (100vh did not fill the viewport),
+     so the board sat at the top. height:100% resolves against the
+     viewport for a fixed element, chained from html/body height:100%. */
+  height: 100%;
+  min-height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 14, 36, 0.82) 0%, rgba(0, 2, 8, 0.94) 100%);
+  backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.goal-notif-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* v5.7.19: DO NOT rely on flex centering — three versions of correct
+   centered CSS still rendered the task board at the top. The frame is
+   pinned to the middle by ABSOLUTE positioning (top:50% + left:50% +
+   translate(-50%,-50%)). Flex centering stays as a fallback. */
+.goal-board-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 12px);
+  max-width: 100%;
+}
+
+/* v5.7.18: tiny diagnostic version marker — proves WHICH board file
+   is actually rendering on the phone. Small, grey, bottom-right,
+   never tappable. (Not a button — the "no extra buttons" rule stands.) */
+.board-version {
+  position: fixed;
+  bottom: 6px;
+  right: 10px;
+  font-family: monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  z-index: 10001;
+  pointer-events: none;
+}
+
+/* Gemini's quest-goal-frame (63202.png), verbatim except the image is
+   the bundled asset goal-frame.jpg instead of an embedded data URI. */
+.goal-board-frame {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  aspect-ratio: 520 / 890;
+  max-height: 92vh;
+  margin: auto;
+  background-image: url('goal-frame.jpg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 8px;
+  box-shadow:
+    0 0 35px rgba(0, 150, 255, 0.8),
+    0 0 80px rgba(0, 85, 255, 0.4);
+  overflow: hidden;
+  transform: perspective(950px) scaleY(0.008) scaleX(0.5);
+  filter: brightness(2.5) drop-shadow(0 0 30px #00e5ff);
+}
+
+.goal-notif-overlay.open:not(.closing) .goal-board-frame {
+  animation: goalBoardOpen 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.goal-notif-overlay.closing .goal-board-frame {
+  animation: goalBoardClose 0.42s cubic-bezier(0.55, 0.05, 0.67, 0.19) forwards;
+}
+
+@keyframes goalBoardOpen {
+  0% {
+    transform: perspective(950px) scaleY(0.006) scaleX(0.35);
+    filter: brightness(3.8) drop-shadow(0 0 42px #00ffff);
+    opacity: 0.3;
+  }
+  35% {
+    transform: perspective(950px) scaleY(0.05) scaleX(1.03);
+    filter: brightness(2.6) drop-shadow(0 0 32px #00e5ff);
+    opacity: 1;
+  }
+  75% {
+    transform: perspective(950px) scaleY(1.03) scaleX(1.0);
+    filter: brightness(1.3) drop-shadow(0 0 22px #00a2ff);
+  }
+  100% {
+    transform: perspective(950px) scaleY(1) scaleX(1);
+    filter: brightness(1.02) drop-shadow(0 0 16px #0088ff);
+    opacity: 1;
+  }
+}
+
+@keyframes goalBoardClose {
+  0% {
+    transform: perspective(950px) scaleY(1) scaleX(1);
+    filter: brightness(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: perspective(950px) scaleY(0.03) scaleX(1.04);
+    filter: brightness(3.2) drop-shadow(0 0 35px #00ffff);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(950px) scaleY(0.002) scaleX(0.15);
+    filter: brightness(4.0);
+    opacity: 0;
+  }
+}
+
+/* Right vertical edge PLAYER: KADER NEGASH — Gemini, verbatim. */
+.goal-player-vertical {
+  position: absolute;
+  right: 6.2%;
+  top: 26%;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  color: #e6f9ff;
+  text-shadow: 0 0 7px #00d4ff, 0 0 14px #0077ff;
+  opacity: 0.9;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Interactive Clickable Row Hitbox aligned 100% with Push-ups,
+   Sit-ups, Squats, Running in 63202.png — Gemini, verbatim. */
+.jinwoo-goal-hitbox {
+  position: absolute;
+  left: 24%;
+  width: 56%;
+  height: 4.4%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+.jinwoo-goal-hitbox:hover {
+  background: rgba(0, 170, 255, 0.08);
+}
+
+/* Progress text ([0/100], [0/10km]) matching 63202.png — Gemini. */
+.jinwoo-goal-count {
+  position: absolute;
+  right: 21.5%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(11.5px, 3.25vw, 13.5px);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #e8f8ff;
+  text-shadow:
+    0 0 6px rgba(0, 195, 255, 0.95),
+    0 0 14px rgba(0, 120, 255, 0.75);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.jinwoo-goal-hitbox.completed .jinwoo-goal-count {
+  color: #ffffff;
+  text-shadow:
+    0 0 8px #00ffff,
+    0 0 18px #00a2ff;
+}
+
+/* Open-corner checkbox matching 63202.png's exact [ ] icon — Gemini. */
+.jinwoo-goal-box {
+  position: absolute;
+  right: 2.2%;
+  width: clamp(12px, 3.3vw, 14px);
+  height: clamp(12px, 3.3vw, 14px);
+  border: 1.4px solid #d8f4ff;
+  border-radius: 1.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: transparent;
+  background: rgba(0, 18, 45, 0.35);
+  box-shadow: 0 0 6px rgba(0, 195, 255, 0.75);
+  transition: all 0.18s ease;
+}
+
+.jinwoo-goal-hitbox.completed .jinwoo-goal-box {
+  border-color: #ffffff;
+  background: rgba(0, 210, 255, 0.28);
+  color: #ffffff;
+  box-shadow: 0 0 12px #00e5ff, inset 0 0 6px rgba(0, 229, 255, 0.5);
+  text-shadow: 0 0 6px #00ffff;
+}
+
+/* Gemini's all-4-done toast ("DAILY QUEST COMPLETED! (+25 XP)") —
+   display text only; no extra XP is awarded on top of the goal
+   (±2 XP each) and quest (+10 XP) rules. */
+.goal-toast {
+  position: fixed;
+  top: 11%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10002;
+  display: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #e6f9ff;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 8px #00e5ff, 0 0 18px #0077ff;
+  pointer-events: none;
+}
+.goal-toast.show { display: block; }
+</style>
+</head>
+<body>
+<div class="goal-notif-overlay" id="goalNotifOverlay">
+  <div class="goal-board-wrap">
+  <div class="goal-board-frame" id="goalBoardFrame">
+    <div class="goal-player-vertical">PLAYER: KADER NEGASH</div>
+
+    <!-- Row 1: Push-ups (cy = 46.01%) -->
+    <div class="jinwoo-goal-hitbox" id="goalHitbox0" style="top: 46.01%;" onclick="toggleStrengthGoalItem(0)">
+      <span class="jinwoo-goal-count" id="goalCount0">[0/100]</span>
+      <span class="jinwoo-goal-box" id="goalBox0"></span>
+    </div>
+
+    <!-- Row 2: Sit-ups (cy = 50.67%) -->
+    <div class="jinwoo-goal-hitbox" id="goalHitbox1" style="top: 50.67%;" onclick="toggleStrengthGoalItem(1)">
+      <span class="jinwoo-goal-count" id="goalCount1">[0/100]</span>
+      <span class="jinwoo-goal-box" id="goalBox1"></span>
+    </div>
+
+    <!-- Row 3: Squats (cy = 55.45%) -->
+    <div class="jinwoo-goal-hitbox" id="goalHitbox2" style="top: 55.45%;" onclick="toggleStrengthGoalItem(2)">
+      <span class="jinwoo-goal-count" id="goalCount2">[0/100]</span>
+      <span class="jinwoo-goal-box" id="goalBox2"></span>
+    </div>
+
+    <!-- Row 4: Running (cy = 60.22%) -->
+    <div class="jinwoo-goal-hitbox" id="goalHitbox3" style="top: 60.22%;" onclick="toggleStrengthGoalItem(3)">
+      <span class="jinwoo-goal-count" id="goalCount3">[0/10km]</span>
+      <span class="jinwoo-goal-box" id="goalBox3"></span>
+    </div>
+  </div>
+  </div>
+  <div class="goal-toast" id="goalToast"></div>
+  <div class="board-version">v5.7.22</div>
+</div>
+<script>
+// v5.7.22: the GOAL notification for Saitama alarms only. Same
+// bridge as the task board (AndroidAlarm.playBoardSound — native
+// SoundPool; WebView audio only as fallback). `audioEnabled` MUST
+// stay declared (v5.7.15 lesson: an undeclared variable threw
+// ReferenceError and killed the board's sounds + typing + decide).
+let audioEnabled = true;
+
+const soloAudioClips = {
+  open: new Audio('board-open.mp3'),
+  accept: new Audio('board-accept.mp3'),
+  click: new Audio('board-click.mp3'),
+  close: new Audio('board-close.mp3')
+};
+Object.values(soloAudioClips).forEach(a => {
+  a.preload = 'auto';
+  a.volume = 0.95;
+});
+function playGoalSound(clipName) {
+  if (!audioEnabled) return;
+  // Native bridge first: SoundPool in QuestAlarmActivity plays the
+  // bundled board MP3s (reliable — same path as the WAKEY loop and
+  // the System ding). WebView audio is only the fallback.
+  try {
+    if (window.AndroidAlarm && AndroidAlarm.playBoardSound) {
+      AndroidAlarm.playBoardSound(clipName);
+      return;
+    }
+  } catch (e) {}
+  try {
+    const sound = soloAudioClips[clipName];
+    if (sound) {
+      sound.currentTime = 0;
+      const p = sound.play();
+      if (p !== undefined) { p.catch(() => {}); }
+    }
+  } catch (e) {}
+}
+
+// Gemini's strengthGoalData (index_0_5zor.html), verbatim.
+const strengthGoalData = [
+  { id: 'sg-pushups', name: 'Push-ups', incomplete: '[0/100]', complete: '[100/100]', done: false },
+  { id: 'sg-situps', name: 'Sit-ups', incomplete: '[0/100]', complete: '[100/100]', done: false },
+  { id: 'sg-squats', name: 'Squats', incomplete: '[0/100]', complete: '[100/100]', done: false },
+  { id: 'sg-running', name: 'Running', incomplete: '[0/10km]', complete: '[10/10km]', done: false }
+];
+// The app's §3 goal kinds, in the same order as the 4 rows.
+const GOAL_KINDS = ['push', 'sit', 'squat', 'run'];
+// The quest whose alarm opened this board ('saitamaEx' 05:30 or
+// 'saitamaRun' 06:00). Set by showGoalBoard, from Java.
+let triggeredQuest = 'saitamaEx';
+// Which quests this board has already recorded as complete (so a
+// quest is recorded once even if rows are tapped on/off/on again).
+let exRecorded = false;
+let runRecorded = false;
+let boardClosing = false;
+
+// Gemini's renderGoalBoardChecklist, verbatim.
+function renderGoalBoardChecklist() {
+  strengthGoalData.forEach((item, i) => {
+    const hitbox = document.getElementById('goalHitbox' + i);
+    const countEl = document.getElementById('goalCount' + i);
+    const boxEl = document.getElementById('goalBox' + i);
+    if (!hitbox || !countEl || !boxEl) return;
+
+    if (item.done) {
+      hitbox.classList.add('completed');
+      countEl.innerText = item.complete;
+      boxEl.innerText = '✓';
+    } else {
+      hitbox.classList.remove('completed');
+      countEl.innerText = item.incomplete;
+      boxEl.innerText = '';
+    }
+  });
+}
+
+// Seed the 4 rows from the app's LIVE state: the goal board and the
+// main app share this app's WebView localStorage (same origin,
+// file://), so the rows show the §3 goalToggle state as it is right
+// now — a row already checked in the app shows checked here. The
+// board only READS localStorage; every change goes through the
+// Java bridge so MainActivity stays the single writer (its
+// in-memory state would otherwise clobber a direct localStorage
+// write when it next saves). If the read fails, rows start unchecked.
+function seedFromSave() {
+  try {
+    const raw = window.localStorage.getItem('soloLevelingSaveV4');
+    if (!raw) return;
+    const save = JSON.parse(raw);
+    const g = (save && save.goalToggle) || {};
+    strengthGoalData[0].done = !!g.push;
+    strengthGoalData[1].done = !!g.sit;
+    strengthGoalData[2].done = !!g.squat;
+    strengthGoalData[3].done = !!g.run;
+  } catch (e) {}
+  // Rows already recorded as pending in Java (tapped in an earlier
+  // board open that was closed with Back before MainActivity
+  // applied them) flip the seeded state to the true current state.
+  try {
+    if (window.AndroidAlarm && AndroidAlarm.pendingGoalToggles) {
+      const pending = JSON.parse(AndroidAlarm.pendingGoalToggles() || '[]');
+      pending.forEach(function(kind) {
+        const idx = GOAL_KINDS.indexOf(kind);
+        if (idx >= 0) strengthGoalData[idx].done = !strengthGoalData[idx].done;
+      });
+    }
+  } catch (e) {}
+}
+
+// Gemini's toggleStrengthGoalItem, adapted: the dashboard-sync part
+// is gone (there is no dashboard in this window — the app's §3 is
+// untouched); instead the tap is recorded through the Java bridge
+// so MainActivity applies the app's own toggleGoal(kind) (±2 XP).
+function toggleStrengthGoalItem(idx) {
+  if (boardClosing) return;
+  const item = strengthGoalData[idx];
+  if (!item) return;
+  item.done = !item.done;
+  playGoalSound(item.done ? 'click' : 'close');
+  renderGoalBoardChecklist();
+  try {
+    if (window.AndroidAlarm && AndroidAlarm.toggleGoalRow) {
+      AndroidAlarm.toggleGoalRow(GOAL_KINDS[idx]);
+    }
+  } catch (e) {}
+  checkCompletions();
+}
+
+// After every tap: a Saitama quest is done when ITS goals are all
+// done — saitamaEx = push + sit + squat, saitamaRun = run. The
+// board closes (accept sound, alarm dismissed, MainActivity applies
+// the toggles + the quest decision) only when the TRIGGERED quest
+// is done, or when all 4 are done. A non-triggered quest completing
+// early (e.g. the run at 05:30) is recorded but does NOT close the
+// board — the exercises are still the alarm that is ringing.
+function checkCompletions() {
+  const exDone = strengthGoalData[0].done && strengthGoalData[1].done && strengthGoalData[2].done;
+  const runDone = strengthGoalData[3].done;
+  const allDone = exDone && runDone;
+  if (exDone && !exRecorded) {
+    exRecorded = true;
+    try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('saitamaEx'); } catch (e) {}
+  }
+  if (runDone && !runRecorded) {
+    runRecorded = true;
+    try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('saitamaRun'); } catch (e) {}
+  }
+  if (allDone) {
+    // Gemini: all 4 checked → toast + vanish with the accept sound.
+    showGoalToast('DAILY QUEST COMPLETED! (+25 XP)');
+    playGoalSound('accept');
+    setTimeout(function() { closeGoalBoard(true); }, 750);
+    return;
+  }
+  const triggeredDone = (triggeredQuest === 'saitamaEx' && exDone) ||
+                        (triggeredQuest === 'saitamaRun' && runDone);
+  if (triggeredDone) {
+    playGoalSound('accept');
+    setTimeout(function() { closeGoalBoard(true); }, 500);
+  }
+}
+
+function showGoalToast(msg) {
+  const el = document.getElementById('goalToast');
+  if (!el) return;
+  el.innerText = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+// Close the board window. dismiss=true (a quest is done): stop the
+// alarm loop and open the app, which applies the pending toggles +
+// decisions. dismiss=false (tap outside / Back): close the window
+// only — the alarm keeps ringing, like the task board's Back, and
+// the pending toggles/decisions wait in Java for the next app open.
+function closeGoalBoard(dismiss) {
+  if (boardClosing) return;
+  boardClosing = true;
+  const overlay = document.getElementById('goalNotifOverlay');
+  overlay.classList.add('closing');
+  setTimeout(function() {
+    overlay.classList.remove('open');
+    overlay.classList.remove('closing');
+    try {
+      if (window.AndroidAlarm && AndroidAlarm.closeGoalBoard) {
+        AndroidAlarm.closeGoalBoard(dismiss ? 'dismiss' : 'keep');
+      }
+    } catch (e) {}
+  }, 400);
+}
+
+// Clicking outside the frame closes the window (Gemini) — the alarm
+// keeps ringing until stopped, and the taps stay recorded in Java.
+document.getElementById('goalNotifOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'goalNotifOverlay') {
+    closeGoalBoard(false);
+  }
+});
+
+// Opened by QuestAlarmActivity (onPageFinished + the 1500ms safety
+// re-call), exactly like showAlarmBoard on the task board. NO
+// DOMContentLoaded auto-open: the old 900ms fallback once showed the
+// WRONG habit (Fajr) at noon, and this board must only open for its
+// own Saitama alarm.
+window.showGoalBoard = function(questId) {
+  triggeredQuest = (questId === 'saitamaRun') ? 'saitamaRun' : 'saitamaEx';
+  exRecorded = false;
+  runRecorded = false;
+  boardClosing = false;
+  seedFromSave();
+  renderGoalBoardChecklist();
+  const overlay = document.getElementById('goalNotifOverlay');
+  const frame = document.getElementById('goalBoardFrame');
+  overlay.classList.remove('closing');
+  frame.style.animation = 'none';
+  void frame.offsetWidth;
+  frame.style.animation = '';
+  overlay.classList.add('open');
+  try { playGoalSound('open'); } catch (e) {}
+};
+</script>
+</body>
+</html>

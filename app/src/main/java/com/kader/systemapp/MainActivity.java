@@ -41,6 +41,9 @@ public class MainActivity extends Activity {
     // on page load (decideQuest guards one-tap-only, so a repeated
     // call is a no-op).
     private String questDecisionOnLoad = null;
+    // v5.7.22: true once index.html has loaded (onPageFinished) —
+    // consumePendingGoalState() only runs against a loaded page.
+    private boolean pageLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,12 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
+                pageLoaded = true;
+                // v5.7.22: apply the goal board's pending state first
+                // (row taps, then completed Saitama quests), before
+                // any intent decision below — toggles first so the
+                // quest decision sees the finished goals.
+                consumePendingGoalState();
                 // v4.8: opened from a Saitama alarm — show the full QUEST
                 // INFO screen once the page (and its script) is ready.
                 if (showQuestInfoOnLoad) {
@@ -127,6 +136,11 @@ public class MainActivity extends Activity {
         // v5.7.21: the board can only pop up on an alarm once
         // "Display over other apps" is granted (see below).
         askOverlayPermission();
+        // v5.7.22: a goal board closed with Back (or tapped away)
+        // leaves its taps recorded — apply them now that the app is
+        // in front and the page is loaded. (On a fresh launch the
+        // page is not loaded yet here, so onPageFinished does it.)
+        if (pageLoaded) consumePendingGoalState();
     }
 
     // v5.7.21 (boss, 2026-11-11): he INSTALLED v5.7.20 and tested it
@@ -193,6 +207,9 @@ public class MainActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         checkStopAlarm(intent);
+        // v5.7.22: apply the goal board's pending state first (the
+        // page is already loaded when a new intent arrives).
+        consumePendingGoalState();
         // v4.8: a Saitama alarm tap opens the full QUEST INFO screen
         // (the page is already loaded, so show it right away).
         if (intent != null && intent.getBooleanExtra("show_quest_info", false)) {
@@ -236,6 +253,72 @@ public class MainActivity extends Activity {
                         "window.showRingingQuest && window.showRingingQuest('" + safeId + "')", null);
             }
         });
+    }
+
+    // v5.7.22: apply the goal board's pending state, recorded in
+    // SharedPreferences by QuestAlarmActivity while the goal board
+    // was up: row taps first (window.toggleGoal — the app's own
+    // §3 rule, ±2 XP each), then completed Saitama quests
+    // (applyQuestDecision 'done' — the existing +10 XP / +10 Gold /
+    // +2 HP path; decideQuest guards one-tap-only, so a repeated
+    // call is a no-op). Read + clear atomically BEFORE applying,
+    // so a second consumption (page load + new intent + resume)
+    // can never double-apply a toggle. Entries whose date is not
+    // today are dropped, never applied — a tap can never land on
+    // the wrong day.
+    private void consumePendingGoalState() {
+        if (webView == null) return;
+        try {
+            SharedPreferences prefs = getSharedPreferences("solo_leveling_prefs", MODE_PRIVATE);
+            String today = new java.text.SimpleDateFormat("yyyy-MM-dd",
+                    java.util.Locale.US).format(new java.util.Date());
+            final java.util.List<String> kinds = new java.util.ArrayList<>();
+            final java.util.List<String> quests = new java.util.ArrayList<>();
+            String rawToggles = prefs.getString("goal_pending_toggles", null);
+            if (rawToggles != null) {
+                JSONObject o = new JSONObject(rawToggles);
+                if (today.equals(o.optString("date", ""))) {
+                    org.json.JSONArray a = o.optJSONArray("kinds");
+                    if (a != null) {
+                        for (int i = 0; i < a.length(); i++) kinds.add(a.optString(i));
+                    }
+                }
+            }
+            String rawDecisions = prefs.getString("goal_pending_decisions", null);
+            if (rawDecisions != null) {
+                JSONObject o = new JSONObject(rawDecisions);
+                if (today.equals(o.optString("date", ""))) {
+                    org.json.JSONArray a = o.optJSONArray("quests");
+                    if (a != null) {
+                        for (int i = 0; i < a.length(); i++) quests.add(a.optString(i));
+                    }
+                }
+            }
+            if (kinds.isEmpty() && quests.isEmpty()) {
+                // Still clear stale entries so they can never apply later.
+                if (rawToggles != null || rawDecisions != null) {
+                    prefs.edit().remove("goal_pending_toggles")
+                            .remove("goal_pending_decisions").apply();
+                }
+                return;
+            }
+            prefs.edit().remove("goal_pending_toggles")
+                    .remove("goal_pending_decisions").apply();
+            for (final String kind : kinds) {
+                if (!"push".equals(kind) && !"sit".equals(kind)
+                        && !"squat".equals(kind) && !"run".equals(kind)) continue;
+                final String safeKind = kind.replace("'", "");
+                webView.post(new Runnable() {
+                    @Override public void run() {
+                        webView.evaluateJavascript(
+                                "window.toggleGoal && window.toggleGoal('" + safeKind + "')", null);
+                    }
+                });
+            }
+            for (final String qid : quests) {
+                applyQuestDecision(qid, "done");
+            }
+        } catch (Exception ignored) {}
     }
 
     // v5.7.12: apply an ACCEPT ("done") / DECLINE ("missed") decision
