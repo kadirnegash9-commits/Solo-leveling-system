@@ -51,6 +51,15 @@ import java.util.Locale;
  * Saitama rule (boss, confirmed 2026-11-07; times swapped 2026-11-08):
  * Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00 sport
  * quest; Mon/Wed/Fri gym only; Saturday: no Saitama.
+ * v5.7.20 (boss, 2026-11-11): the v5.7.19 middle fix is CONFIRMED
+ * WORKING (his video shows the board in the middle with the v5.7.19
+ * marker), but a REAL quest alarm (Asr 15:35) did NOT pop the board
+ * up — only the small notification pill showed, because a
+ * full-screen-intent notification only takes over a LOCKED screen;
+ * unlocked, it is just a heads-up pill. Now notifyQuest() launches
+ * QuestAlarmActivity DIRECTLY (startActivity, NEW_TASK — the
+ * setAlarmClock exemption allows it when the alarm fires), with the
+ * notification kept as fallback. Board, sounds, XP, arming unchanged.
  */
 public class QuestReceiver extends BroadcastReceiver {
 
@@ -375,6 +384,35 @@ public class QuestReceiver extends BroadcastReceiver {
         scheduleWatchdog(context);
     }
 
+    // v5.7.20 (boss, 2026-11-11): launch the board DIRECTLY when a
+    // quest alarm fires. A full-screen-intent notification only takes
+    // over the screen when the device is LOCKED / screen off; when the
+    // phone is UNLOCKED and in use it shows as a heads-up pill and the
+    // board only opens if he taps it — that is why the Asr 15:35 alarm
+    // showed only the "Asr Prayer + Quran" pill and the board never
+    // popped up. The quest alarms are set with setAlarmClock, which
+    // grants a temporary exemption from Android's background-activity-
+    // launch restrictions when the alarm fires, so this direct launch
+    // is allowed. The notification (with its full-screen intent) is
+    // STILL posted as a fallback — if this launch is blocked, the user
+    // taps the notification to open the board. Never throws: a failed
+    // launch must not break the alarm (ding + loop + notification).
+    private static void launchBoardDirectly(Context context, String questId, String title) {
+        try {
+            Intent open = new Intent(context, QuestAlarmActivity.class);
+            open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            open.putExtra("quest_id", questId);
+            open.putExtra("quest_title", title);
+            open.putExtra("quest_time", questTimeFor(questId));
+            if ("saitamaRun".equals(questId) || "saitamaEx".equals(questId)) {
+                open.putExtra("show_quest_info", true);
+            }
+            context.startActivity(open);
+        } catch (Exception ignored) {
+            // Fallback: the notification (posted right after) opens the board on tap.
+        }
+    }
+
     public static void notifyQuest(Context context, String tag, String title) {
         ensureChannel(context);
         NotificationManager nm =
@@ -382,6 +420,9 @@ public class QuestReceiver extends BroadcastReceiver {
         if (nm == null) return;
         // A fresh alarm delivery: not dismissed, loop not started yet.
         alarmDismissed = false;
+        // v5.7.20: pop the board up immediately, even when the phone is
+        // unlocked — the notification below is the fallback.
+        launchBoardDirectly(context, tag, title);
         nm.notify(tag, 1, buildQuestNotification(context, tag, title, SILENT_CHANNEL_ID));
         // v5.7.12: the Solo Leveling System ding, once, when the alarm
         // fires — in ADDITION to the WAKEY loop (which keeps ringing
