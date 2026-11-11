@@ -41,6 +41,11 @@ import org.json.JSONObject;
  * the web app guards one-tap-only, so a repeated call is a no-op).
  * 100% English, zero Amharic — the app rule. Back closes the window
  * only — the alarm keeps ringing until stopped.
+ *
+ * v5.7.14: message mode — MainActivity now opens this same board for
+ * the "Notifications allowed" confirmation (and the test notification)
+ * instead of posting a small system banner: the board typewrites the
+ * message itself, and ACCEPT/DECLINE only dismiss it.
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -55,6 +60,12 @@ public class QuestAlarmActivity extends Activity {
 
     private WebView webView;
     private boolean boardShown = false;
+    // v5.7.14: message mode — the board is a plain notification message
+    // (e.g. the "Notifications allowed" confirmation), not a quest alarm.
+    // ACCEPT/DECLINE then only dismiss the board (and stop any alarm loop
+    // that happens to be running) — no quest decision is applied and
+    // MainActivity is not re-launched, because the user is already in it.
+    private boolean messageMode = false;
 
     // Gemini kaderHabitsList order (index_9): the triggered quest's task.
     // -1 = no habit for this quest (e.g. the 2-minute test alarm) — the
@@ -92,6 +103,7 @@ public class QuestAlarmActivity extends Activity {
                 questTime = intent.getStringExtra("quest_time");
             }
             saitama = intent.getBooleanExtra("show_quest_info", false);
+            messageMode = intent.getBooleanExtra("board_message", false);
         }
         // Show over the lock screen and turn the screen on, like a clock alarm.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -182,6 +194,14 @@ public class QuestAlarmActivity extends Activity {
     }
 
     private void decideQuest(String act) {
+        // Message mode: just dismiss (and stop any alarm loop that is
+        // running) and close the window — the user is already in
+        // MainActivity, so there is no quest decision to apply.
+        if (messageMode) {
+            QuestReceiver.dismissAlarm();
+            finish();
+            return;
+        }
         QuestReceiver.dismissAlarm();
         try {
             NotificationManager nm =

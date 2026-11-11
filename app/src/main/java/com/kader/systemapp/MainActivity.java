@@ -227,30 +227,22 @@ public class MainActivity extends Activity {
         QuestReceiver.ensureChannel(this);
     }
 
-    private void postNotification(String title, String text) {
-        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (manager == null) return;
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pending = PendingIntent.getActivity(
-                this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        android.app.Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new android.app.Notification.Builder(this, QuestReceiver.currentChannelId(this));
-        } else {
-            builder = new android.app.Notification.Builder(this);
-        }
-        builder.setContentTitle(title)
-                .setContentText(text)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentIntent(pending)
-                .setCategory(android.app.Notification.CATEGORY_ALARM)
-                .setSound(QuestReceiver.alarmSound(this))
-                .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000})
-                .setPriority(android.app.Notification.PRIORITY_HIGH)
-                .setAutoCancel(true);
-        manager.notify(1, builder.build());
+    // v5.7.14 (boss, 2026-11-11 — "the notification isn't right, it's too
+    // small. The one that comes from above doesn't come like the zip file"):
+    // the "notification" the boss sees must be the BIG Gemini board, not
+    // the small system banner sliding down from above. The old helper that
+    // posted exactly that small banner for the "Notifications allowed"
+    // confirmation is deleted; these flows now open the same full-screen
+    // Gemini board the quest alarms use (QuestAlarmActivity +
+    // alarm-board.html), with the message typewritten inside it. No system
+    // notification is posted for them anymore — nothing slides down
+    // from above.
+    private void showNotificationBoard(String message) {
+        Intent board = new Intent(this, QuestAlarmActivity.class);
+        board.putExtra("quest_id", "notif-allowed");
+        board.putExtra("quest_title", message);
+        board.putExtra("board_message", true);
+        startActivity(board);
     }
 
     public class SystemBridge {
@@ -266,10 +258,10 @@ public class MainActivity extends Activity {
                                     new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
                                     NOTIF_PERMISSION_CODE);
                         } else {
-                            postNotification("⚔️ The System", "Notifications allowed — Arise!");
+                            showNotificationBoard("Notifications allowed — Arise!");
                         }
                     } else {
-                        postNotification("⚔️ The System", "Notifications allowed — Arise!");
+                        showNotificationBoard("Notifications allowed — Arise!");
                     }
                 }
             });
@@ -280,7 +272,7 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    postNotification("⚔️ The System", "Test notification — don't forget your quests! Arise!");
+                    showNotificationBoard("Test notification — don't forget your quests! Arise!");
                 }
             });
         }
@@ -370,7 +362,7 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIF_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                postNotification("⚔️ The System", "Notifications allowed — Arise!");
+                showNotificationBoard("Notifications allowed — Arise!");
             } else {
                 Toast.makeText(this, "Notifications denied — Settings → Notifications", Toast.LENGTH_LONG).show();
             }
