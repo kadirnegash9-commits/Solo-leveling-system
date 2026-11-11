@@ -212,7 +212,11 @@ public class QuestAlarmActivity extends Activity {
                     .setMaxStreams(4)
                     .setAudioAttributes(attrs)
                     .build();
-            final String[] clips = {"open", "accept", "click", "whoosh", "close"};
+            // v5.7.16: the typing tick is its own clip now — a clean,
+            // crisp 80ms slice of the chime attack (board-tick.mp3),
+            // NOT the 0.5s low click thump (that was muddy when fired
+            // ~43x during typewriting). Sound is always on, no toggle.
+            final String[] clips = {"open", "accept", "click", "whoosh", "close", "tick"};
             for (String clip : clips) {
                 try {
                     AssetFileDescriptor afd = getAssets().openFd("board-" + clip + ".mp3");
@@ -221,11 +225,6 @@ public class QuestAlarmActivity extends Activity {
                     boardSoundIds.put(clip, id);
                     boardSoundLoaded.put(clip, false);
                 } catch (Exception ignored) {}
-            }
-            // The typing tick reuses the short click clip.
-            if (boardSoundIds.containsKey("click")) {
-                boardSoundIds.put("tick", boardSoundIds.get("click"));
-                boardSoundLoaded.put("tick", false);
             }
             boardSounds.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
                 @Override public void onLoadComplete(SoundPool sp, int sampleId, int status) {

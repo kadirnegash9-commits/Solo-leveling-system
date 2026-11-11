@@ -301,25 +301,21 @@ public class QuestReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
-        // v5.4.1: three quests removed (hand/trading/homework). Removing
-        // entries shifts every request code (100+i), so the old list's
-        // codes 100-115 no longer line up — codes the new list never
-        // re-arms would keep firing as duplicates, and codes reused by
-        // a different quest are only overwritten if re-armed. Cancel
-        // EVERY old quest alarm first (FLAG_NO_CREATE: only existing
-        // ones are touched), then arm the new list. Runs on every
-        // scheduleAll call (app open, boot, each delivery), so it is
-        // idempotent and a removed quest can never fire again.
-        for (int code = 100; code < 100 + 32; code++) {
-            Intent old = new Intent(context, QuestReceiver.class);
-            old.setAction(ACTION_QUEST);
-            PendingIntent oldPi = PendingIntent.getBroadcast(context, code, old,
-                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
-            if (oldPi != null) {
-                am.cancel(oldPi);
-                oldPi.cancel();
-            }
-        }
+        // v5.7.16 (2026-11-11): ARM FIRST, cancel stale codes AFTER.
+        // v5.4.1-v5.7.15 cancelled EVERY old quest alarm first and then
+        // re-armed — if the process was killed mid-way (exactly what an
+        // app update does: the system kills the app, and HiOS may never
+        // deliver MY_PACKAGE_REPLACED), the alarms were left CANCELLED
+        // with no re-arm, and the chain stayed dead until the app was
+        // opened. That is how the Zuhr 12:35 alarm was lost on Wed
+        // 2026-11-11 minutes after the v5.7.15 install. Arming first
+        // (FLAG_UPDATE_CURRENT overwrites each code's PendingIntent in
+        // place) means there is NEVER a window with no alarms armed —
+        // a kill mid-way leaves the old (or new) alarms standing, never
+        // nothing. Stale codes are cancelled only after the new list is
+        // armed (see below). Runs on every scheduleAll call (app open,
+        // boot, each delivery), so it is idempotent and a removed quest
+        // can never fire again.
         for (int i = 0; i < QUESTS.length; i++) {
             String[] q = QUESTS[i];
             int hour = Integer.parseInt(q[1].substring(0, 2));
@@ -359,6 +355,20 @@ public class QuestReceiver extends BroadcastReceiver {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             am.setAlarmClock(
                     new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
+        }
+        // v5.7.16: NOW cancel stale codes only (100 + QUESTS.length ..
+        // 131 — leftovers from the old 16-quest list, v5.4.1). Codes
+        // 100..100+QUESTS.length-1 were just armed above and must NOT
+        // be touched. FLAG_NO_CREATE: only existing ones are touched.
+        for (int code = 100 + QUESTS.length; code < 100 + 32; code++) {
+            Intent old = new Intent(context, QuestReceiver.class);
+            old.setAction(ACTION_QUEST);
+            PendingIntent oldPi = PendingIntent.getBroadcast(context, code, old,
+                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+            if (oldPi != null) {
+                am.cancel(oldPi);
+                oldPi.cancel();
+            }
         }
         // v5.6.4: always arm the watchdog with the quest alarms, so the
         // chain repairs itself without any app open.

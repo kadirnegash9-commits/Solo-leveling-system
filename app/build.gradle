@@ -105,7 +105,7 @@ if (boardFrameB64File.exists()) {
     java.nio.file.Files.write(boardFrameJpgFile.toPath(), java.util.Base64.getDecoder().decode(boardFrameB64))
 }
 def boardSounds = [
-    "board-open", "board-accept", "board-click", "board-whoosh", "board-close"
+    "board-open", "board-accept", "board-click", "board-whoosh", "board-close", "board-tick"
 ]
 boardSounds.each { name ->
     def b64File = file("../sounds/${name}.mp3.b64")
@@ -124,8 +124,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 66
-        versionName '5.7.15'
+        versionCode 67
+        versionName '5.7.16'
     }
 
     signingConfigs {
