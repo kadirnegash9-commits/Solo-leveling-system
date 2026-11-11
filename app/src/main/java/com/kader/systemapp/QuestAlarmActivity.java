@@ -69,6 +69,23 @@ import org.json.JSONObject;
  * - The old 900ms JS auto-open fallback is deleted: it raced
  *   onPageFinished and showed the WRONG habit (Fajr) at noon. A Java
  *   1500ms safety re-call of showBoard() with the REAL quest replaces it.
+ *
+ * v5.7.16 (boss, 2026-11-11 — board back to the MIDDLE): the overlay
+ * is justify-content:center again (like the Gemini zip file), the
+ * sounds were re-cut CLEAN from the SoloLevelX MP3 chime segments,
+ * and scheduleAll now arms new alarms FIRST (so an update can never
+ * leave alarms cancelled — Zuhr 12:35 was lost minutes after the
+ * v5.7.15 install).
+ *
+ * v5.7.17 (boss, 2026-11-11 — he INSTALLED v5.7.16 but the board
+ * was STILL at the top): the remote v5.7.16 board was verified correct
+ * (justify-content:center), so the cause was the WebView serving a
+ * CACHED copy of the v5.7.15 board — file:///android_asset/ pages are
+ * cached in the app's cache dir, which SURVIVES app updates. Fix: the
+ * WebView now clears its cache and never loads from it, and the board
+ * loads with a version query, so every version has its own cache key.
+ * Board look/position/sounds are UNCHANGED (middle, full-width, clean
+ * sounds) — this build is the cache fix only.
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -175,6 +192,15 @@ public class QuestAlarmActivity extends Activity {
         settings.setAllowFileAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
+        // v5.7.17: CACHE FIX — the boss installed v5.7.16 but the board
+        // STILL showed at the TOP: the WebView was serving a CACHED copy
+        // of the v5.7.15 board (file:///android_asset/ pages are cached
+        // in the app's cache dir, which SURVIVES app updates). Clear the
+        // cache, never load from it, and load with a version query so
+        // each version has its own cache key — the board must always be
+        // the CURRENT assets, never a stale copy.
+        webView.clearCache(true);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(new AlarmBridge(), "AndroidAlarm");
         webView.setWebViewClient(new WebViewClient() {
@@ -188,7 +214,9 @@ public class QuestAlarmActivity extends Activity {
                 FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(root);
         initBoardSounds();
-        webView.loadUrl("file:///android_asset/alarm-board.html");
+        // v5.7.17: version query — the cache key includes the version,
+        // so a stale cached copy of an older board can never match.
+        webView.loadUrl("file:///android_asset/alarm-board.html?v=5.7.17");
         // v5.7.15 safety net: if onPageFinished is ever missed, re-open
         // the board with the REAL quest after 1500ms (showBoard() is a
         // no-op once the board is shown — it can never show a wrong

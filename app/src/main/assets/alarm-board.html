@@ -26,6 +26,11 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     left: 0;
     width: 100vw;
     height: 100vh;
+    /* v5.7.17: min-height fallback — if the WebView ever reports a
+       wrong 100vh, the overlay still fills the body (html,body are
+       height:100%), so the board can never be stranded at the top
+       of a short container. */
+    min-height: 100%;
     background: #000000;
     backdrop-filter: blur(4px);
     z-index: 10000;
@@ -67,6 +72,13 @@ html,body{background:#000;margin:0;padding:0;height:100%;overflow:hidden;}
     width: 100%;
     /* v5.7.15: full-width, BIG — 420px was the "too small" complaint. */
     max-width: 100%;
+    /* v5.7.17: margin:auto — a flex item's auto margin centers it
+       even if justify-content/align-items are ever overridden (stale
+       rule, WebView quirk). The centered CSS was verified correct in
+       v5.7.16, yet the board still rendered at the top on his phone
+       after a cache clear — so the centering is now redundant:
+       overlay justify-content:center AND this auto margin. */
+    margin: auto;
     aspect-ratio: 420 / 375;
     background-image: url('board-frame.jpg');
     background-size: 100% 100%;
