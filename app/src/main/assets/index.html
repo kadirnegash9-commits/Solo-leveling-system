@@ -1127,6 +1127,11 @@
              preview (test mode: writes no state), so the boss can see
              it now instead of waiting for the Thu 05:30 Saitama alarm. -->
         <button class="btn-notif-outline" id="goalTestBtn">🎯 Goal Test (1 min)</button>
+        <!-- v5.7.25: Level Up Test — pops the level-up board in 1 minute as a
+             preview (test mode: sample deed "You done your Goal", writes no
+             state), so the boss can see it now instead of waiting for his
+             next real level-up. -->
+        <button class="btn-notif-outline" id="levelUpTestBtn">⬆ Level Up Test (1 min)</button>
       </div>
     </div>
 
@@ -1412,12 +1417,23 @@ function saveGame(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({day:todayKey(), state:state, quests:quests, forgeCounter:forgeCounter}));
   }catch(e){}
 }
-// v5.7.0 one-time migration (boss 2026-11-09 19:03): his save shows Level 2 with
-// XP 86 — a mistake, since Level 1 needs XP >= 1*100 to level up. gainXp was
-// audited: it only levels up when xp >= level*100 (while loop), so this corrects
-// the saved level ONLY. XP, HP, stats, titles, owned items stay exactly as saved.
-function fixMistakenLevelV570(){
-  if(state.level === 2 && (state.xp||0) < 100){ state.level = 1; return true; }
+// v5.7.25: the v5.7.0 "one-time migration" fixMistakenLevelV570() is
+// DELETED (function + both calls below). It ran on EVERY loadGame()
+// and forced Level 2 + XP<100 back to Level 1 — but a legitimate fresh
+// Level 2 ALWAYS has XP<100 (the leftover after gainXp subtracts 100),
+// so it reverted EVERY earned Level 2 on the next load. The boss earned
+// Level 2 twice (Nov 9, and today 97+10=107 XP) and lost it twice.
+// gainXp is audited correct (levels only when xp >= level*100), so no
+// migration is needed at all.
+// v5.7.25: restore the stolen Level 2 (one-time, idempotent). Proof he
+// reached Level 2: gainXp sets state.rewardLevel = state.level on every
+// level-up (cleared only when he claims/declines the +5 AP box), and
+// state.totalXp counts all XP ever earned, net of declines. Either
+// signal is enough. XP untouched. Once level is 2 again, false.
+function restoreStolenLevelV5725(){
+  if(state.level===1 && ((state.rewardLevel||0)>=2 || (state.totalXp||0)>=100)){
+    state.level=2; return true;
+  }
   return false;
 }
 // v5.7.9: the v5.7.8 "antares" item (purple Shadow Fangs crop, 1000 Gold) is now
@@ -1468,7 +1484,7 @@ function loadGame(){
       state.equippedWeapon=data.state.equippedWeapon||null; // v5.7.8: equipped weapon persists across days
       state.ownedOrder=data.state.ownedOrder||[]; ensureOwnedOrder(); ensureEquippedWeapon(); // v5.7.1 + v5.7.8: pre-v5.7.8 saves (auto-equip) keep highest-rank owned weapon equipped
       state.v48Healed=!!data.state.v48Healed;
-      fixMistakenLevelV570(); // v5.7.0: correct mistaken Level 2 (XP < 100) -> Level 1
+      restoreStolenLevelV5725(); // v5.7.25: give back the Level 2 the deleted v5.7.0 migration stole (no-op once level is 2)
       resetDailyState();
       quests = BASE_QUESTS.slice();
       var fc=0;
@@ -1497,7 +1513,7 @@ function loadGame(){
     healPreV48Save();
     pruneStaleQuestState();
     if(data.forgeCounter) forgeCounter = data.forgeCounter;
-    if(fixMistakenLevelV570()) saveGame(); // v5.7.0: correct mistaken Level 2 (XP < 100) -> Level 1, persist
+    if(restoreStolenLevelV5725()) saveGame(); // v5.7.25: give back the Level 2 the deleted v5.7.0 migration stole (no-op once level is 2)
   }catch(e){}
 }
 loadGame();
@@ -1717,7 +1733,7 @@ function toggleGoal(kind){
   }
   playSystemSound(on?"accept":"decline");
   renderAll(); checkAch(); renderAll(); saveGame();
-  if(lv){ showLevelUp(); showPendingLevelRewards(); }
+  if(lv){ if(!showLevelUpBoard(names[kind]+" "+vals[kind])) showLevelUp(); showPendingLevelRewards(); }
   else showSystemToast("["+(on?"COMPLETED":"PENDING")+": "+names[kind]+" "+vals[kind]+" · "+(on?"+2 XP":"-2 XP")+"]");
 }
 /* v5.6.6: §3 GOAL checkmarks on the artwork — the RIGHT boxes are driven
@@ -2152,6 +2168,24 @@ function showLevelUp(){
   var rk = rankFor(state.level);
   showSystemToast("⬆ LEVEL UP! You reached Level " + state.level + " · " + rk.t);
 }
+// v5.7.25: level-up board — the Solo Leveling anime board: the deed
+// first ("You have defeated the Master of the Dungeon!"), then
+// "Leveled up!". MainActivity launches QuestAlarmActivity in levelup
+// mode (foreground startActivity, no overlay permission needed). The
+// board has no ACCEPT/DECLINE and writes no state. Returns true when
+// the board was launched; the caller keeps the showLevelUp() toast as
+// fallback when there is no bridge (website mode). The board never
+// blocks or delays the quest decision itself — call it AFTER saveGame().
+function showLevelUpBoard(deed){
+  try{
+    if(hasBridge() && window.AndroidBridge.showLevelUpBoard){
+      window.AndroidBridge.showLevelUpBoard(deed || "");
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+window.showLevelUpBoard = showLevelUpBoard;
 function xpLossFor(id){
   return (id==="sport"||id==="saitamaRun"||id==="saitamaEx") ? 10 : 5;
 }
@@ -2202,8 +2236,8 @@ function decideQuest(id, act){
     playSystemSound("accept");
     var lv = applyDone(q);
     renderAll(); checkAch(); renderAll(); saveGame();
-    if(lv) showLevelUp(); else showSystemToast("✅ +"+q.xp+" XP · +"+goldFor(q)+" Gold · "+q.title);
-    if(lv) showPendingLevelRewards();
+    if(lv){ if(!showLevelUpBoard(q.title)) showLevelUp(); showPendingLevelRewards(); }
+    else showSystemToast("✅ +"+q.xp+" XP · +"+goldFor(q)+" Gold · "+q.title);
   } else {
     playSystemSound("decline");
     var loss = applyMissed(q);
@@ -2236,7 +2270,8 @@ function acceptAllRoutines(){
   playSystemSound("accept");
   stopAlarmBridge(); hideStopBar();
   renderAll(); checkAch(); renderAll(); saveGame();
-  if(leveled) showLevelUp(); else showSystemToast("✅ " + count + " quests accepted — Arise!");
+  if(leveled){ if(!showLevelUpBoard("Daily quests complete")) showLevelUp(); }
+  else showSystemToast("✅ " + count + " quests accepted — Arise!");
 }
 function resetAllRoutines(){ resetDay(); }
 function resetDay(){
@@ -2325,7 +2360,7 @@ window.showDashboard = showDashboard;
 
 /* ---------- Notifications + alarm (Android bridge) ---------- */
 (function(){
-  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), goalTestBtn = $("goalTestBtn"), soundBtn = $("soundChangeBtn"), overlayBtn = $("overlayAllowBtn");
+  var allowBtn = $("notifAllowBtn"), alarmBtn = $("alarmTestBtn"), goalTestBtn = $("goalTestBtn"), levelUpTestBtn = $("levelUpTestBtn"), soundBtn = $("soundChangeBtn"), overlayBtn = $("overlayAllowBtn");
   // v5.7.21: "Display over other apps" — opens the phone Settings
   // page so the board can pop up when an alarm fires.
   if(overlayBtn) overlayBtn.addEventListener("click", function(){
@@ -2363,6 +2398,16 @@ window.showDashboard = showDashboard;
         showSystemToast("🎯 The goal board comes in 1 minute — wait");
       } else { showSystemToast("⚠ The goal test works only in the app (APK)"); }
     }catch(e){ showSystemToast("⚠ Goal test did not start"); }
+  });
+  // v5.7.25: Level Up Test — pops the level-up board in 1 minute as a
+  // preview (test mode: sample deed, writes no state).
+  if(levelUpTestBtn) levelUpTestBtn.addEventListener("click", function(){
+    try{
+      if(hasBridge() && window.AndroidBridge.testLevelUpAlarm){
+        window.AndroidBridge.testLevelUpAlarm();
+        showSystemToast("⬆ The level-up board comes in 1 minute — wait");
+      } else { showSystemToast("⚠ The level-up test works only in the app (APK)"); }
+    }catch(e){ showSystemToast("⚠ Level-up test did not start"); }
   });
   if(soundBtn) soundBtn.addEventListener("click", function(){
     try{

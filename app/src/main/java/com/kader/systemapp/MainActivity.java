@@ -462,6 +462,39 @@ public class MainActivity extends Activity {
             });
         }
 
+        // v5.7.25: level-up board — the web app calls this when a
+        // level-up happens (decideQuest / toggleGoal / acceptAllRoutines,
+        // AFTER the decision is saved). Foreground startActivity, so no
+        // overlay permission is needed: the boss is already in the app.
+        // The board shows the deed first ("You have defeated the Master
+        // of the Dungeon!"), then "Leveled up!"; no ACCEPT/DECLINE,
+        // no state writes.
+        @JavascriptInterface
+        public void showLevelUpBoard(final String deed) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent board = new Intent(MainActivity.this, QuestAlarmActivity.class);
+                    board.putExtra("board_mode", "levelup");
+                    board.putExtra("deed", deed == null ? "" : deed);
+                    startActivity(board);
+                }
+            });
+        }
+
+        // v5.7.25: "Level Up Test (1 min)" (§6) — schedules the
+        // level-up test alarm, which pops the level-up board as a
+        // preview (test mode: sample deed, writes no state).
+        @JavascriptInterface
+        public void testLevelUpAlarm() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    QuestReceiver.scheduleLevelUpTestAlarm(MainActivity.this);
+                }
+            });
+        }
+
         // Called by the web app when a quest is ACCEPTED or DECLINED —
         // tapping a quest dismisses the alarm, so the looping sound stops.
         @JavascriptInterface

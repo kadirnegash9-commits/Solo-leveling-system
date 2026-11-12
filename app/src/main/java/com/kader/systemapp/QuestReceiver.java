@@ -298,6 +298,28 @@ public class QuestReceiver extends BroadcastReceiver {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
+    /** v5.7.25: one-off LEVEL-UP test alarm, 60s from now — the same
+     * code path as the real quest alarms (setAlarmClock), but quest_id
+     * "leveluptest": the level-up board opens in TEST mode (a preview
+     * with the sample deed "You done your Goal" — it writes NO state).
+     * The boss taps "Level Up Test (1 min)" in §6 to see the level-up
+     * board now instead of waiting for his next real level-up. */
+    public static void scheduleLevelUpTestAlarm(Context context) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        Intent intent = new Intent(context, QuestReceiver.class);
+        intent.setAction(ACTION_QUEST);
+        intent.putExtra("quest_id", "leveluptest");
+        intent.putExtra("quest_title", "Level up test");
+        PendingIntent pi = PendingIntent.getBroadcast(context, 997, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        long when = System.currentTimeMillis() + 60_000;
+        PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
+    }
+
     // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
     // 14:22 — "no running, no gym on Saturday"; Fajr added 14:36). All other
     // quests are excused on Saturday — no alarm that day.
@@ -443,6 +465,13 @@ public class QuestReceiver extends BroadcastReceiver {
             if ("goaltest".equals(questId)) {
                 open.putExtra("goal_test", true);
             }
+            // v5.7.25: the level-up test opens the level-up board in
+            // TEST mode (sample deed, writes no state).
+            if ("leveluptest".equals(questId)) {
+                open.putExtra("board_mode", "levelup");
+                open.putExtra("levelup_test", true);
+                open.putExtra("deed", "You done your Goal");
+            }
             context.startActivity(open);
         } catch (Exception ignored) {
             // Fallback: the notification (posted right after) opens the board on tap.
@@ -517,6 +546,12 @@ public class QuestReceiver extends BroadcastReceiver {
         if (saitama) open.putExtra("show_quest_info", true);
         // v5.7.23: the goal test opens the board in TEST mode (preview).
         if ("goaltest".equals(questId)) open.putExtra("goal_test", true);
+        // v5.7.25: the level-up test opens the level-up board in TEST mode.
+        if ("leveluptest".equals(questId)) {
+            open.putExtra("board_mode", "levelup");
+            open.putExtra("levelup_test", true);
+            open.putExtra("deed", "You done your Goal");
+        }
         PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 6 : 5, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but

@@ -196,6 +196,13 @@ public class QuestAlarmActivity extends Activity {
     // the board JS never calls the bridge at all. The test runs on a
     // non-Saitama day and must not complete his real goals.
     private boolean testMode = false;
+    // v5.7.25: LEVEL-UP mode — a level-up (from MainActivity, or the
+    // "Level Up Test (1 min)" alarm) opens the SEPARATE level-up board
+    // (alarm-board-levelup-v25.html): the deed first, then
+    // "Leveled up!". NO accept/decline, NO state writes, NO quest
+    // decision — tap or Back just dismisses it.
+    private boolean levelUpMode = false;
+    private String levelUpDeed = "";
     // v5.7.22: SharedPreferences keys for the goal board's pending
     // state. The board records every row tap (toggleGoalRow) and
     // every completed quest (goalQuestComplete) here, as JSON
@@ -246,13 +253,24 @@ public class QuestAlarmActivity extends Activity {
             }
             saitama = intent.getBooleanExtra("show_quest_info", false);
             messageMode = intent.getBooleanExtra("board_message", false);
-            testMode = intent.getBooleanExtra("goal_test", false);
+            testMode = intent.getBooleanExtra("goal_test", false)
+                    || intent.getBooleanExtra("levelup_test", false);
+            // v5.7.25: level-up mode — the deed to show first, then
+            // "Leveled up!". MainActivity passes the real deed (the
+            // quest/goal that leveled him up); the test alarm passes
+            // the sample deed "You done your Goal".
+            levelUpMode = "levelup".equals(intent.getStringExtra("board_mode"));
+            if (intent.getStringExtra("deed") != null) {
+                levelUpDeed = intent.getStringExtra("deed");
+            }
         }
         // v5.7.22: Saitama alarms open the separate GOAL notification;
         // message boards and every other quest keep the task board.
         // v5.7.23: the "goaltest" alarm opens the same goal board as a
         // preview (testMode — writes nothing).
-        goalMode = !messageMode
+        // v5.7.25: level-up mode opens the separate LEVEL-UP board, not
+        // the goal board and not the task board.
+        goalMode = !messageMode && !levelUpMode
                 && ("saitamaEx".equals(questId) || "saitamaRun".equals(questId)
                 || "goaltest".equals(questId));
         // Show over the lock screen and turn the screen on, like a clock alarm.
@@ -329,7 +347,12 @@ public class QuestAlarmActivity extends Activity {
         // — the test-mode flag is a real behavior change, and a stale
         // cached v22 (which ignores the flag) would let preview taps
         // write real state. Same rename-each-version rule as v5.7.18-22.
-        webView.loadUrl(goalMode
+        // v5.7.25: level-up mode loads its own board asset
+        // (alarm-board-levelup-v25.html) — a new filename, so no stale
+        // task board can ever serve in its place.
+        webView.loadUrl(levelUpMode
+                ? "file:///android_asset/alarm-board-levelup-v25.html"
+                : goalMode
                 ? "file:///android_asset/alarm-goal-board-v23.html"
                 : "file:///android_asset/alarm-board-v21.html");
         // v5.7.15 safety net: if onPageFinished is ever missed, re-open
@@ -406,6 +429,22 @@ public class QuestAlarmActivity extends Activity {
     private void showBoard() {
         if (boardShown || webView == null) return;
         boardShown = true;
+        // v5.7.25: level-up mode — the level-up board gets the deed
+        // first, then "Leveled up!". In test mode the deed is the
+        // sample ("You done your Goal"); nothing is written either way.
+        if (levelUpMode) {
+            final String js;
+            try {
+                js = "window.showLevelUpBoard(" + JSONObject.quote(levelUpDeed)
+                        + ", " + (testMode ? "true" : "false") + ");";
+            } catch (Exception e) {
+                return;
+            }
+            try {
+                webView.evaluateJavascript(js, null);
+            } catch (Exception ignored) {}
+            return;
+        }
         // v5.7.22: goal mode opens the goal board with this alarm's
         // quest id (saitamaEx / saitamaRun) — the board seeds its 4
         // rows from the app state and shows itself.
@@ -579,6 +618,20 @@ public class QuestAlarmActivity extends Activity {
                 }
             });
         }
+
+        // v5.7.25: the level-up board has no ACCEPT/DECLINE and no
+        // decision — tapping the board (or Back) just dismisses it.
+        // If an alarm loop were running it stops here too (none is
+        // expected for a level-up, but the call is safe either way).
+        @JavascriptInterface
+        public void dismissLevelUpBoard() {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    QuestReceiver.dismissAlarm();
+                    finish();
+                }
+            });
+        }
     }
 
     // v5.7.22: close the goal board window (see the bridge above).
@@ -636,6 +689,13 @@ public class QuestAlarmActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        // v5.7.25: the level-up board has no decision at all — Back
+        // just dismisses it (and stops any alarm loop, none expected).
+        if (levelUpMode) {
+            QuestReceiver.dismissAlarm();
+            finish();
+            return;
+        }
         // Close the window only — the alarm keeps ringing until it is
         // stopped (notification tap/swipe, or ACCEPT/DECLINE).
         finish();
