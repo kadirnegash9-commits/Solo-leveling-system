@@ -2179,6 +2179,7 @@ function applyMissed(q){
   var xpLoss = xpLossFor(q.id);
   state.xp = Math.max(0, state.xp-xpLoss);
   state.totalXp = Math.max(0, state.totalXp-xpLoss);
+  state.gold = Math.max(0, (state.gold||0)-xpLoss); // v5.7.24: DECLINE also loses Gold like XP (5 normal, 10 gym/run), never below 0
   state.hp = Math.max(0, state.hp-10);
   state.perfectDay=false;
   return xpLoss;
@@ -2208,7 +2209,7 @@ function decideQuest(id, act){
     var loss = applyMissed(q);
     renderAll(); checkAch(); renderAll(); saveGame();
     if(state.hp<=0){ showSystemToast("☠ Penalty Zone! HP hit 0 — don't miss the next quest!"); }
-    else showSystemToast("❌ Penalty: −10 HP · −"+loss+" XP · don't miss the next one");
+    else showSystemToast("❌ Penalty: −10 HP · −"+loss+" XP · −"+loss+" Gold · don't miss the next one");
   }
 }
 $("routineStack").addEventListener("click", function(e){
