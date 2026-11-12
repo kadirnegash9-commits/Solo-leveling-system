@@ -231,17 +231,18 @@ public class QuestReceiver extends BroadcastReceiver {
         } catch (Exception e) { handler.post(finish); }
     }
 
-    // v5.6.4 watchdog (boss: "make it auto, so I don't need to enter
-    // the app"): a repeating 30-min check that re-arms any missing quest
-    // alarm — no app open needed. It fires on its own, calls
+    // v5.7.26 watchdog (boss, 2026-11-12): Thu 2026-11-12 the English
+    // 14:30 alarm rang but the Asr 15:35 alarm never fired — and NO new
+    // version was installed. The watchdog is the only self-repair, and
+    // it used setExactAndAllowWhileIdle, which needs the exact-alarm
+    // permission and can be deferred in Doze — so a lost alarm stayed
+    // lost until the app opened. Now the watchdog uses setAlarmClock,
+    // the same mechanism as the quest alarms (exact even in Doze, needs
+    // no exact-alarm permission). It fires on its own, calls
     // scheduleAll (which re-arms the quest alarms AND this watchdog),
-    // so the chain repairs itself within 30 minutes of any break
-    // (update, force-stop, system clearing alarms). Uses
-    // setExactAndAllowWhileIdle so it fires even in Doze; falls back
-    // to setAndAllowWhileIdle if the exact-alarm permission was
-    // revoked (the quest alarms themselves use setAlarmClock, which
-    // needs no exact-alarm permission). Request code 900, outside the
-    // cancel sweep (100-131), so the sweep never kills the watchdog.
+    // so the chain repairs itself within 30 minutes of any break.
+    // Request code 900, outside the cancel sweep (100-131), so the
+    // sweep never kills the watchdog.
     public static void scheduleWatchdog(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
@@ -250,13 +251,10 @@ public class QuestReceiver extends BroadcastReceiver {
         PendingIntent pi = PendingIntent.getBroadcast(context, WATCHDOG_CODE, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         long when = System.currentTimeMillis() + WATCHDOG_INTERVAL_MS;
-        try {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
-        } catch (Exception e) {
-            try {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
-            } catch (Exception ignored) {}
-        }
+        PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
     /** One-off test alarm, 120s from now, through the exact same code path

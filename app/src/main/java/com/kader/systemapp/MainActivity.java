@@ -181,19 +181,22 @@ public class MainActivity extends Activity {
         }
     }
 
-    // One-time system prompt: "Allow Solo Leveling System to run in the
-    // background without battery optimization?" — the user taps Allow.
-    // If he declines (or the phone does not offer it), never ask again.
+    // v5.7.26 (boss, 2026-11-12): the battery-optimization whitelist
+    // prompt used to be asked ONCE — the flag was set BEFORE the system
+    // dialog showed, so if he dismissed it the app stayed un-whitelisted
+    // forever and HiOS could freeze/defer even setAlarmClock alarms
+    // (Thu 2026-11-12 Asr 15:35 never fired, no update installed).
+    // Now the prompt shows on EVERY app open until the whitelist is
+    // granted; the flag is only set once isIgnoringBatteryOptimizations
+    // returns true.
     private void askBatteryOptimizationOnce() {
         try {
             SharedPreferences prefs = getSharedPreferences("solo_leveling_prefs", MODE_PRIVATE);
-            if (prefs.getBoolean("battery_opt_asked", false)) return;
             PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
             if (pm != null && pm.isIgnoringBatteryOptimizations(getPackageName())) {
                 prefs.edit().putBoolean("battery_opt_asked", true).apply();
                 return;
             }
-            prefs.edit().putBoolean("battery_opt_asked", true).apply();
             Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
             intent.setData(Uri.parse("package:" + getPackageName()));
             startActivity(intent);
