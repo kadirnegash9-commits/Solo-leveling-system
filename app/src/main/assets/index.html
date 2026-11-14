@@ -1444,7 +1444,7 @@ function shopItemById(id){
   for(var i=0;i<all.length;i++) if(all[i].id===id) return all[i];
   return null;
 }
-function goldFor(q){ return q.xp||0; } // Gold mirrors XP: normal 5, gym/run 10
+function goldFor(q){ return Math.round((q.xp||0) * shadowGoldMult()); } // Gold mirrors XP: normal 5, gym/run 10 — v5.7.28: Iron (Lv 50) +20% Gold
 
 /* ---------- State (saved on this device) ---------- */
 var state = {
@@ -1528,7 +1528,7 @@ function loadGame(){
     if(!data || !data.state) return;
     if(data.day !== todayKey()){
       state.level=data.state.level||1; state.xp=data.state.xp||0; state.totalXp=data.state.totalXp||0;
-      state.hp=100; state.streak=0;
+      state.hp=hpMax(); state.streak=0; // v5.7.28: full HP = hpMax() (Tank +25)
       state.bestStreak=data.state.bestStreak||0; state.forged=data.state.forged||0;
       state.statBonus=data.state.statBonus||{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0};
       state.unlocked=data.state.unlocked||{};
@@ -1591,7 +1591,7 @@ function recomputeDaily(){
   Object.keys(state.questState).forEach(function(id){
     var st=state.questState[id], q=byId[id];
     if(!q) return;
-    if(st==="done"){ done++; dayXp+=q.xp; if(cat[q.cat]!==undefined) cat[q.cat]++; }
+    if(st==="done"){ done++; dayXp+=xpFor(q); if(cat[q.cat]!==undefined) cat[q.cat]++; } // v5.7.28: shadow-boosted XP
     else if(st==="missed"){ missed++; }
   });
   state.doneCount=done; state.missedCount=missed; state.dayXp=dayXp+(state.goalDayXp||0); // v5.6.6: goal-toggle XP counts toward Day XP
@@ -1632,7 +1632,7 @@ function healPreV48Save(){
 }
 function ensureFreshDay(){
   if(todayKey()===loadedDay) return;
-  state.hp=100; state.streak=0;
+  state.hp=hpMax(); state.streak=0; // v5.7.28: full HP = hpMax() (Tank +25)
   resetDailyState();
   var forged = quests.filter(function(q){ return q && q.id && q.id.indexOf("forge")===0; });
   quests = BASE_QUESTS.slice().concat(forged);
@@ -1657,7 +1657,7 @@ function rankFor(level){
 function statVal(key){
   var base = 0;
   STATS.forEach(function(st){ if(st.key===key) base = st.base; });
-  return base + (state.statBonus[key]||0);
+  return base + (state.statBonus[key]||0) + shadowStatBonus(key); // v5.7.28: Shadow Army unlock bonuses
 }
 function mpMax(){ return 50 + 5*statVal("int"); }
 function abilityString(){
@@ -1779,7 +1779,7 @@ function showRankToast(){
   showSystemToast("RANK: " + rk.r + "-Rank Daily System Player · " + rk.t);
 }
 function showVitalsToast(){
-  showSystemToast("VITALS: HP " + state.hp + "/100 | MP " + mpMax() + "/" + mpMax() + " | XP " + state.xp + "/" + xpNeeded(state.level));
+  showSystemToast("VITALS: HP " + state.hp + "/" + hpMax() + " | MP " + mpMax() + "/" + mpMax() + " | XP " + state.xp + "/" + xpNeeded(state.level));
 }
 function showAbilitiesToast(){
   playSystemSound("upgrade");
@@ -1868,7 +1868,7 @@ function renderSchedule(){
     row.className = "routine-card" + (q.id.indexOf("forge")===0 ? " forged-card" : "") + (st==="done" ? " accepted" : st==="missed" ? " declined" : "") + (q.id===cur && !st ? " current" : "");
     row.setAttribute("data-id", q.id);
     var note = "";
-    if(st==="done") note = '<div class="routine-state good">Done · +'+q.xp+' XP</div>';
+    if(st==="done") note = '<div class="routine-state good">Done · +'+xpFor(q)+' XP</div>';
     if(st==="missed") note = '<div class="penalty-badge">⚠ PENALTY QUEST</div><div class="routine-state bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+xpLossFor(q.id)+' XP</div>';
     /* v5.7.27: Saitama counters — track reps/km through the day (boss,
        2026-11-14). Buttons disabled once the quest is decided. */
@@ -1890,7 +1890,7 @@ function renderSchedule(){
       '<div class="routine-info-col">' +
         '<div class="routine-time-title"><span class="routine-time-badge">'+fmt12(q.time)+'</span><span>'+esc(q.title)+'</span></div>' +
         '<div class="routine-desc">'+esc(q.desc)+'</div>' +
-        '<div class="routine-rewards"><span class="reward-xp"'+(q.id.indexOf("forge")===0?' style="color:var(--gold);"':'')+'>+'+q.xp+' XP</span><span class="reward-attr">'+esc(q.label)+'</span></div>' +
+        '<div class="routine-rewards"><span class="reward-xp"'+(q.id.indexOf("forge")===0?' style="color:var(--gold);"':'')+'>+'+xpFor(q)+' XP</span><span class="reward-attr">'+esc(q.label)+'</span></div>' +
         note + counters +
       '</div>' +
       '<div class="routine-buttons-col">' +
@@ -1951,18 +1951,18 @@ function applyTheme(){
 }
 function renderLiveStrip(){
   var hp=$("lsHp"), mp=$("lsMp"), xp=$("lsXp"), lv=$("lsLv"), ab=$("lsAbilities");
-  if(hp) hp.textContent = state.hp + "/100";
+  if(hp) hp.textContent = state.hp + "/" + hpMax();
   if(mp) mp.textContent = mpMax() + "/" + mpMax();
   if(xp) xp.textContent = state.xp + "/" + xpNeeded(state.level);
   /* v5.6.1: same live values ON the §1 bars */
   var bh=$("barHp"), bm=$("barMp"), bx=$("barXp");
-  if(bh) bh.textContent = state.hp + "/100";
+  if(bh) bh.textContent = state.hp + "/" + hpMax();
   if(bm) bm.textContent = mpMax() + "/" + mpMax();
   if(bx) bx.textContent = state.xp + "/" + xpNeeded(state.level);
   /* v5.6.7: BAR FILLS on the STATUS photo (track interior x351-936 of 1143 = 51.18% of photo width) */
   var TRACK_W = 51.18;
   var fh=$("fillHp"), fm=$("fillMp"), fx=$("fillXp");
-  if(fh) fh.style.width = (Math.min(100, state.hp)/100*TRACK_W).toFixed(2) + "%";
+  if(fh) fh.style.width = (Math.min(hpMax(), state.hp)/hpMax()*TRACK_W).toFixed(2) + "%";
   if(fm) fm.style.width = TRACK_W + "%";
   if(fx) fx.style.width = (Math.min(1, state.xp/xpNeeded(state.level))*TRACK_W).toFixed(2) + "%";
   if(lv) lv.textContent = state.level;
@@ -2251,12 +2251,42 @@ function renderEquipment(){
    Tank 45, Iron 50, Beru 80, Bellion 100. Locked = dimmed, unlocked =
    ACTIVE. Same colors/design; display only, no combat mechanics. */
 var SHADOWS = [
-  {name:"IGRIS", title:"Blood-Red Commander", level:30, desc:"Elite knight swordsman — the first and most loyal shadow. His crimson blade never misses."},
-  {name:"TANK", title:"Giant Shadow Bear", level:45, desc:"A massive bear of darkness — crushes enemies with brute strength and guards the Monarch."},
-  {name:"IRON", title:"Orc Warrior", level:50, desc:"A towering orc with a giant axe — smashes through enemy lines without fear."},
-  {name:"BERU", title:"The Ant King", level:80, desc:"The Ant King — blinding speed and terrifying power. Heals the Monarch's wounds in battle."},
-  {name:"BELLION", title:"Grand Marshal", level:100, desc:"The strongest shadow — Grand Marshal of the army. He commands all shadows into battle."}
+  {name:"IGRIS", title:"Blood-Red Commander", level:30, desc:"Elite knight swordsman — the first and most loyal shadow. His crimson blade never misses. +10 STR. +15% XP on Faith & Mind quests."},
+  {name:"TANK", title:"Giant Shadow Bear", level:45, desc:"A massive bear of darkness — crushes enemies with brute strength and guards the Monarch. +20 VIT, +15 STR, +25 Max HP."},
+  {name:"IRON", title:"Orc Warrior", level:50, desc:"A towering orc with a giant axe — smashes through enemy lines without fear. +20 VIT, +15 TRADE, +20% Gold from quests."},
+  {name:"BERU", title:"The Ant King", level:80, desc:"The Ant King — blinding speed and terrifying power. Heals the Monarch's wounds in battle. +30 INT, +30 AGI, +25% XP on Mind quests."},
+  {name:"BELLION", title:"Grand Marshal", level:100, desc:"The strongest shadow — Grand Marshal of the army. He commands all shadows into battle. +50 ALL stats, +50% XP on everything."}
 ];
+/* ---------- v5.7.28: Shadow Army bonuses (boss spec 2026-11-14) ----------
+   Passive unlocks, computed from state.level — no saved fields, so they
+   apply the moment the level threshold is crossed, and retroactively
+   if the save is already past it. Faith = prayer quests (cat "faith"),
+   Mind = study quests (cat "int": School, English, Home Study).
+   Multipliers stack multiplicatively, rounded once at the end. */
+function shadowUnlocked(lv){ return state.level >= lv; }
+function shadowStatBonus(key){
+  var b = 0;
+  if(shadowUnlocked(30) && key==="str") b += 10;   // Igris
+  if(shadowUnlocked(45) && key==="vit") b += 20;   // Tank
+  if(shadowUnlocked(45) && key==="str") b += 15;   // Tank
+  if(shadowUnlocked(50) && key==="vit") b += 20;   // Iron
+  if(shadowUnlocked(50) && key==="trade") b += 15; // Iron
+  if(shadowUnlocked(80) && key==="int") b += 30;   // Beru
+  if(shadowUnlocked(80) && key==="agi") b += 30;   // Beru
+  if(shadowUnlocked(100)) b += 50;                 // Bellion: all 9 stats
+  return b;
+}
+function hpMax(){ return 100 + (shadowUnlocked(45) ? 25 : 0); } // Tank: +25 Max HP
+function shadowXpMult(q){
+  var m = 1;
+  if(!q) return m;
+  if(shadowUnlocked(30) && (q.cat==="faith" || q.cat==="int")) m *= 1.15; // Igris
+  if(shadowUnlocked(80) && q.cat==="int") m *= 1.25;                      // Beru
+  if(shadowUnlocked(100)) m *= 1.5;                                       // Bellion
+  return m;
+}
+function shadowGoldMult(){ return shadowUnlocked(50) ? 1.2 : 1; } // Iron: +20% Gold
+function xpFor(q){ return Math.max(1, Math.round((q.xp||0) * shadowXpMult(q))); }
 function renderShadowArmy(){
   var el = $("shadowArmyGrid");
   if(!el) return;
@@ -2339,15 +2369,15 @@ function xpLossFor(id){
 function applyDone(q){
   state.questState[q.id]="done";
   state.questDay[q.id]=todayKey();
-  state.doneCount++; state.dayXp+=q.xp;
+  state.doneCount++; state.dayXp+=xpFor(q); // v5.7.28: Day XP counts the real (shadow-boosted) XP
   if(state.catDone[q.cat]!==undefined) state.catDone[q.cat]++;
   if(state.statBonus[q.cat]!==undefined) state.statBonus[q.cat]++;
   if(q.cat==="str"){ state.statBonus.vit=(state.statBonus.vit||0)+1; state.statBonus.agi=(state.statBonus.agi||0)+1; }
   if(q.cat==="trade"||q.cat==="int"){ state.statBonus.per=(state.statBonus.per||0)+1; }
   state.streak++; if(state.streak>state.bestStreak) state.bestStreak=state.streak;
-  state.hp = Math.min(100, state.hp+2);
-  var lv = gainXp(q.xp);
-  state.gold = (state.gold||0) + goldFor(q); // v5.7.0: Gold mirrors XP (normal 5, gym/run 10)
+  state.hp = Math.min(hpMax(), state.hp+2);
+  var lv = gainXp(xpFor(q)); // v5.7.28: Shadow Army XP multipliers (Igris/Beru/Bellion)
+  state.gold = (state.gold||0) + goldFor(q); // v5.7.0: Gold mirrors XP (normal 5, gym/run 10) — v5.7.28: Iron +20%
   var list = todayQuests();
   state.perfectDay = list.every(function(x){ return state.questState[x.id]==="done"; });
   return lv;
@@ -2384,7 +2414,7 @@ function decideQuest(id, act){
     var lv = applyDone(q);
     renderAll(); checkAch(); renderAll(); saveGame();
     if(lv){ if(!showLevelUpBoard(q.title)) showLevelUp(); showPendingLevelRewards(); }
-    else showSystemToast("✅ +"+q.xp+" XP · +"+goldFor(q)+" Gold · "+q.title);
+    else showSystemToast("✅ +"+xpFor(q)+" XP · +"+goldFor(q)+" Gold · "+q.title);
   } else {
     playSystemSound("decline");
     var loss = applyMissed(q);
@@ -2425,7 +2455,7 @@ function acceptAllRoutines(){
 function resetAllRoutines(){ resetDay(); }
 function resetDay(){
   state.questState={}; state.questDay={}; state.doneCount=0; state.missedCount=0; state.dayXp=0;
-  state.streak=0; state.perfectDay=false; state.hp=100;
+  state.streak=0; state.perfectDay=false; state.hp=hpMax(); // v5.7.28: Tank +25 Max HP
   state.goalToggle={push:false,sit:false,squat:false,run:false}; state.goalDayXp=0; // v5.7.27: manual new day also resets goals + counters
   state.goalProgress={push:0,sit:0,squat:0,run:0};
   state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
