@@ -38,7 +38,7 @@
     color: #e0f4ff;
     font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
-    padding: 6px 0 40px;
+    padding: 6px 0 100px; /* v5.7.27: room for the fixed bottom tab bar */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -856,6 +856,33 @@
 .skill-desc { font-size:13px; color:#cfeaff; margin-top:4px; }
 .skill-state { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; margin-top:6px; color:var(--neon-cyan); }
 .skill-card.locked .skill-state { color:#7fa8c9; }
+/* v5.7.27 (boss, 2026-11-14): + buttons on STR/INT/VIT/AGI to spend
+   Available Points; bottom navigation tabs; Shadow Army (§10); red
+   PENALTY QUEST badge on missed quests; Saitama counters; design fixes
+   (sound-name wrap, locked trophies dimmed). Same colors/design. */
+.stat-plus-btn{position:absolute; transform:translate(-50%,-50%); z-index:30; width:5.4%; min-width:22px; aspect-ratio:1/1; background:rgba(0,20,50,.92); border:1.5px solid var(--neon-cyan); color:#00f5ff; font-family:'Orbitron',sans-serif; font-size:14px; font-size:3.6cqw; font-weight:900; line-height:1; cursor:pointer; box-shadow:0 0 8px rgba(0,242,254,.55); padding:0;}
+.tabbar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; display:flex; background:rgba(1,10,28,.97); border-top:1px solid rgba(0,242,254,.6); box-shadow:0 -2px 12px rgba(0,242,254,.25); z-index:60;}
+.tabbar button{flex:1; background:none; border:none; border-right:1px solid rgba(0,242,254,.25); color:#9adfff; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; padding:12px 0 13px; cursor:pointer;}
+.tabbar button:last-child{border-right:none;}
+.tabbar button.active{color:#00f5ff; background:rgba(0,242,254,.12); text-shadow:0 0 8px rgba(0,242,254,.8);}
+.shadow-card{border:1.5px solid rgba(0,242,254,.5); background:rgba(2,12,32,.9); backdrop-filter:blur(8px); box-shadow:0 0 10px rgba(0,242,254,.25), inset 0 0 10px rgba(0,168,255,.18); padding:10px; margin-bottom:8px; border-radius:0;}
+.shadow-card.locked{opacity:.45; border-color:rgba(127,168,201,.4); box-shadow:none;}
+.shadow-name{font-family:'Orbitron',sans-serif; font-size:14px; font-weight:900; color:#fff; letter-spacing:1.5px; text-shadow:0 0 10px rgba(0,242,254,.8);}
+.shadow-title{font-size:11px; font-weight:700; color:var(--gold); letter-spacing:.5px; margin-top:2px;}
+.shadow-desc{font-size:11px; color:#cfeeff; margin-top:4px; line-height:1.35;}
+.shadow-state{font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; letter-spacing:1px; margin-top:6px; color:var(--neon-cyan);}
+.shadow-card.locked .shadow-state{color:#9aa8b8;}
+.shadow-army-sub{text-align:center; font-size:10px; color:#9adfff; letter-spacing:1px; margin:-4px 0 8px;}
+.penalty-badge{display:inline-block; background:#8b0000; border:1px solid #ff2b2b; color:#fff; font-size:10px; font-weight:900; letter-spacing:1px; padding:2px 6px; margin-top:4px; box-shadow:0 0 8px rgba(255,43,43,.5);}
+.counter-panel{margin-top:6px; border-top:1px dashed rgba(0,242,254,.3); padding-top:2px;}
+.counter-row{display:flex; align-items:center; gap:6px; margin-top:4px; font-size:11px;}
+.counter-row span{flex:1; color:#cfeeff;}
+.counter-row b{color:#00f5ff;}
+.counter-btn{background:rgba(0,20,50,.9); border:1px solid var(--neon-cyan); color:#00f5ff; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; padding:4px 8px; cursor:pointer; border-radius:0;}
+.counter-btn.minus{border-color:rgba(255,120,120,.6); color:#ff9a9a;}
+.trophy-card:not(.unlocked){opacity:.5;}
+.sound-name-row > div:first-child{min-width:0; overflow-wrap:anywhere; word-break:break-word;}
+#alarmSoundName{overflow-wrap:anywhere; word-break:break-word;}
 </style>
 </head>
 <body>
@@ -882,7 +909,7 @@
   <button class="audio-toggle-btn" id="audioToggle">🔊 ON</button>
 </div>
 
-<div class="top-section-label">◆ 1. STATUS DASHBOARD &amp; BODY ◆</div>
+<div class="top-section-label" id="sec-status">◆ 1. STATUS DASHBOARD &amp; BODY ◆</div>
 <div class="gold-line">🪙 GOLD: <span id="goldVal">0</span></div>
 
 <!-- =========================================================================
@@ -959,6 +986,16 @@
     <!-- Abilities 3x3 Hotspots -->
     <div class="hotspot" style="top: 73.14%; left: 22%; width: 62%; height: 22.62%;" onclick="showAbilitiesToast()"></div>
 
+    <!-- v5.7.27: + buttons to spend Available Points on STR/INT/VIT/AGI.
+         Placed AFTER the abilities hotspot in the DOM (z-index 30 > 25)
+         so taps reach the buttons, not the toast hotspot. Shown only
+         when bonusAP > 0 (renderLiveStrip). Positions sit in the gaps
+         right of each live value on the STATUS photo. -->
+    <button class="stat-plus-btn" data-stat="str" style="left:39.8%; top:73.93%;" onclick="spendPoint('str')">+</button>
+    <button class="stat-plus-btn" data-stat="int" style="left:63.8%; top:73.93%;" onclick="spendPoint('int')">+</button>
+    <button class="stat-plus-btn" data-stat="vit" style="left:39.8%; top:81.23%;" onclick="spendPoint('vit')">+</button>
+    <button class="stat-plus-btn" data-stat="agi" style="left:63.8%; top:81.23%;" onclick="spendPoint('agi')">+</button>
+
 
     <!-- Notification Leveled Up Hotspot (v5.6.6: moved to the real NOTIFICATION bar, y 843-879) -->
     <div class="hotspot" style="top: 18.1%; left: 45%; width: 10%; height: 9.05%;" onclick="showLevelToast()"></div>
@@ -980,7 +1017,7 @@
     <div class="now-sub" id="nowSub">—</div>
     <div class="now-next" id="nowNext">—</div>
   </div>
-    <div class="inner-section-divider" style="margin-top:0;">◆ 2. DAILY ROUTINE SCHEDULE ◆</div>
+    <div class="inner-section-divider" style="margin-top:0;" id="sec-quests">◆ 2. DAILY ROUTINE SCHEDULE ◆</div>
     <div class="schedule-sub-header">[ DAILY ROUTINE SCHEDULE ]</div>
     <div class="schedule-date-sub" id="scheduleDate">SUNDAY 8 NOVEMBER</div>
 
@@ -1143,7 +1180,7 @@
     </div>
 
     <!-- 8. SHOP STORE (v5.7.0 — new section BELOW the main content) -->
-    <div class="inner-section-divider">◆ 8. SHOP STORE ◆</div>
+    <div class="inner-section-divider" id="sec-shop">◆ 8. SHOP STORE ◆</div>
     <div class="shop-gold-line">YOUR GOLD: <span id="shopGoldVal">0</span> Gold</div>
     <div class="shop-group-title">◆ CLOTHES ◆</div>
     <div class="shop-grid" id="shopClothesGrid"></div>
@@ -1151,8 +1188,15 @@
     <div class="shop-grid" id="shopWeaponsGrid"></div>
 
     <!-- 9. SKILLS WINDOW (v5.7.1 — renumbered: §9 EQUIPMENT removed, Skills is now §9) -->
-    <div class="inner-section-divider">◆ 9. SKILLS WINDOW ◆</div>
+    <div class="inner-section-divider" id="sec-skills">◆ 9. SKILLS WINDOW ◆</div>
     <div id="skillsGrid"></div>
+
+    <!-- v5.7.27: 10. SHADOW ARMY (boss, 2026-11-14) — his shadows awaken
+         as he levels up: Igris 30, Tank 45, Iron 50, Beru 80, Bellion 100.
+         Locked = dimmed, unlocked = ACTIVE. Same colors/design. -->
+    <div class="inner-section-divider">◆ 10. SHADOW ARMY ◆</div>
+    <div class="shadow-army-sub">ARISE — your shadows awaken as you level up.</div>
+    <div id="shadowArmyGrid"></div>
 
     <div class="system-arise-footer">
       <div class="arise-title">THE SYSTEM · ARISE</div>
@@ -1166,6 +1210,15 @@
     <img src="data:image/webp;base64,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" alt="Bottom Flame Border">
   </div>
 
+</div>
+
+<!-- v5.7.27: bottom navigation tabs (boss, 2026-11-14) — jump to a
+     section instead of scrolling the whole page. -->
+<div class="tabbar" id="tabBar">
+  <button data-tab="sec-status" onclick="goTab('sec-status')">STATUS</button>
+  <button data-tab="sec-quests" onclick="goTab('sec-quests')">QUESTS</button>
+  <button data-tab="sec-shop" onclick="goTab('sec-shop')">SHOP</button>
+  <button data-tab="sec-skills" onclick="goTab('sec-skills')">SKILLS</button>
 </div>
 
 <script>
@@ -1402,6 +1455,7 @@ var state = {
   statBonus:{str:0,int:0,faith:0,trade:0,disc:0,skill:0,vit:0,agi:0,per:0},
   unlocked:{}, claimedRewards:{},
   goalToggle:{push:false,sit:false,squat:false,run:false}, goalDayXp:0, // v5.6.6: §1 GOAL row toggles (±2 XP each, reset daily)
+  goalProgress:{push:0,sit:0,squat:0,run:0}, // v5.7.27: Saitama counters — push/sit/squat 0-100 reps, run 0-10 km (reset daily)
   gold:0, owned:{}, ownedOrder:[], equippedWeapon:null // v5.7.0: Gold balance + owned shop items (persist in soloLevelingSaveV4); v5.7.1: ownedOrder = purchase order (last-bought wins a shared slot, e.g. HANDS); v5.7.8: equippedWeapon = manually equipped weapon id (BUY -> EQUIP -> EQUIPPED)
 };
 var quests = BASE_QUESTS.slice();
@@ -1494,7 +1548,7 @@ function loadGame(){
       return;
     }
     var s = data.state;
-    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp","gold","owned","ownedOrder","equippedWeapon"];
+    var keys = ["level","xp","totalXp","hp","doneCount","missedCount","dayXp","streak","bestStreak","forged","perfectDay","questState","questDay","v48Healed","catDone","statBonus","unlocked","bonusAP","rewardLevel","claimedRewards","goalToggle","goalDayXp","goalProgress","gold","owned","ownedOrder","equippedWeapon"];
     keys.forEach(function(k){ if(s[k] !== undefined) state[k] = s[k]; });
     ensureOwnedOrder(); ensureEquippedWeapon(); // v5.7.1: rebuild purchase order for pre-v5.7.1 saves; v5.7.8: pre-v5.7.8 saves keep highest-rank owned weapon equipped
     if(data.quests && data.quests.length){
@@ -1525,6 +1579,7 @@ function resetDailyState(){
   state.questState={}; state.questDay={};
   state.doneCount=0; state.missedCount=0; state.dayXp=0;
   state.goalToggle={push:false,sit:false,squat:false,run:false}; state.goalDayXp=0; // v5.6.6: goal toggles reset each day (XP already banked stays)
+  state.goalProgress={push:0,sit:0,squat:0,run:0}; // v5.7.27: counters reset each day
   state.perfectDay=false;
   state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
 }
@@ -1663,16 +1718,53 @@ function currentQuestId(){
   }
   return null;
 }
+/* v5.7.27: §3 live values now show the Saitama COUNTERS (goalProgress)
+   — push/sit/squat 0-100, run 0-10km — so the boss can watch his
+   progress through the day. A finished quest still shows the full
+   target (100/100, 10/10km) even if he accepted without counting. */
 function saitamaProgress(){
   var ex = state.questState.saitamaEx==="done";
   var run = state.questState.saitamaRun==="done";
+  var gp = state.goalProgress||{push:0,sit:0,squat:0,run:0};
+  var pv = ex?100:Math.min(100, gp.push||0), sv = ex?100:Math.min(100, gp.sit||0), qv = ex?100:Math.min(100, gp.squat||0);
+  var rv = run?10:Math.min(10, gp.run||0);
   return [
-    {name:"Push-ups", val: ex?"100/100":"0/100", done:ex},
-    {name:"Sit-ups", val: ex?"100/100":"0/100", done:ex},
-    {name:"Squats", val: ex?"100/100":"0/100", done:ex},
-    {name:"Running", val: run?"10/10km":"0/10km", done:run}
+    {name:"Push-ups", val: pv+"/100", done: pv>=100},
+    {name:"Sit-ups", val: sv+"/100", done: sv>=100},
+    {name:"Squats", val: qv+"/100", done: qv>=100},
+    {name:"Running", val: rv+"/10km", done: rv>=10}
   ];
 }
+/* v5.7.27: Saitama counter buttons (+10/+25 reps, +3/+6 km, minus to undo).
+   Progress only — no XP until he taps ACCEPT on the quest itself. */
+function bumpGoal(kind, delta){
+  ensureFreshDay();
+  if(!state.goalProgress) state.goalProgress={push:0,sit:0,squat:0,run:0};
+  var max = (kind==="run") ? 10 : 100;
+  var v = (state.goalProgress[kind]||0) + delta;
+  if(v<0) v=0; if(v>max) v=max;
+  state.goalProgress[kind]=v;
+  saveGame(); renderAll();
+  var names={push:"Push-ups",sit:"Sit-ups",squat:"Squats",run:"Running"};
+  var unit = (kind==="run") ? (v+"/10km") : (v+"/100");
+  showSystemToast("["+(names[kind]||kind)+" "+unit+"]");
+}
+window.bumpGoal = bumpGoal;
+/* v5.7.27: spend one Available Point on a stat (+1 STR/INT/VIT/AGI).
+   Points come from level-ups (+5 each, claim the reward box). MP max
+   follows INT automatically (mpMax = 50 + 5*INT). */
+function spendPoint(key){
+  ensureFreshDay();
+  if(!state.bonusAP || state.bonusAP<=0){ showSystemToast("No Ability Points — level up to earn +5"); return; }
+  if(["str","int","vit","agi"].indexOf(key)===-1) return;
+  if(!state.statBonus) state.statBonus={};
+  state.bonusAP--;
+  state.statBonus[key]=(state.statBonus[key]||0)+1;
+  saveGame(); renderAll();
+  var nm={str:"STR",int:"INT",vit:"VIT",agi:"AGI"}[key];
+  showSystemToast("⬆ "+nm+" +1 · "+state.bonusAP+" Ability Points left");
+}
+window.spendPoint = spendPoint;
 
 /* ---------- Live hotspot toasts (§1 + §3 artwork) ----------
    The artwork images have baked-in numbers (Gemini's values) that
@@ -1754,6 +1846,17 @@ function updateMasks(){
 }
 
 /* ---------- Rendering ---------- */
+/* v5.7.27: one counter row — +10/+25 reps (or +3/+6 km for the run),
+   minus undoes one step. */
+function counterRowHtml(kind, label, val, max, dis, isKm){
+  var unit = isKm ? (val+"/"+max+"km") : (val+"/"+max);
+  var s1 = isKm ? 3 : 10, s2 = isKm ? 6 : 25;
+  var l1 = isKm ? "+3km" : "+10", l2 = isKm ? "+6km" : "+25", l3 = isKm ? "−3km" : "−10";
+  return '<div class="counter-row"><span>'+label+' <b>'+unit+'</b></span>' +
+    '<button class="counter-btn" data-bump="'+kind+'" data-delta="'+s1+'"'+dis+'>'+l1+'</button>' +
+    '<button class="counter-btn" data-bump="'+kind+'" data-delta="'+s2+'"'+dis+'>'+l2+'</button>' +
+    '<button class="counter-btn minus" data-bump="'+kind+'" data-delta="'+(-s1)+'"'+dis+'>'+l3+'</button></div>';
+}
 function renderSchedule(){
   var list = todayQuests();
   var cur = currentQuestId();
@@ -1766,13 +1869,29 @@ function renderSchedule(){
     row.setAttribute("data-id", q.id);
     var note = "";
     if(st==="done") note = '<div class="routine-state good">Done · +'+q.xp+' XP</div>';
-    if(st==="missed") note = '<div class="routine-state bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+xpLossFor(q.id)+' XP</div>';
+    if(st==="missed") note = '<div class="penalty-badge">⚠ PENALTY QUEST</div><div class="routine-state bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+xpLossFor(q.id)+' XP</div>';
+    /* v5.7.27: Saitama counters — track reps/km through the day (boss,
+       2026-11-14). Buttons disabled once the quest is decided. */
+    var counters = "";
+    if(q.id==="saitamaEx" || q.id==="saitamaRun"){
+      var gp = state.goalProgress||{push:0,sit:0,squat:0,run:0};
+      var dis = (st==="done"||st==="missed") ? " disabled" : "";
+      if(q.id==="saitamaEx"){
+        counters = '<div class="counter-panel">' +
+          counterRowHtml("push","Push-ups",gp.push||0,100,dis,false) +
+          counterRowHtml("sit","Sit-ups",gp.sit||0,100,dis,false) +
+          counterRowHtml("squat","Squats",gp.squat||0,100,dis,false) + '</div>';
+      } else {
+        counters = '<div class="counter-panel">' +
+          counterRowHtml("run","Running",gp.run||0,10,dis,true) + '</div>';
+      }
+    }
     row.innerHTML =
       '<div class="routine-info-col">' +
         '<div class="routine-time-title"><span class="routine-time-badge">'+fmt12(q.time)+'</span><span>'+esc(q.title)+'</span></div>' +
         '<div class="routine-desc">'+esc(q.desc)+'</div>' +
         '<div class="routine-rewards"><span class="reward-xp"'+(q.id.indexOf("forge")===0?' style="color:var(--gold);"':'')+'>+'+q.xp+' XP</span><span class="reward-attr">'+esc(q.label)+'</span></div>' +
-        note +
+        note + counters +
       '</div>' +
       '<div class="routine-buttons-col">' +
         '<button class="btn-accept-routine" data-act="done" data-id="'+q.id+'">ACCEPT</button>' +
@@ -1858,6 +1977,9 @@ function renderLiveStrip(){
   var sm={stStr:"str",stInt:"int",stFaith:"faith",stVit:"vit",stAgi:"agi",stPer:"per",stTrade:"trade",stDisc:"disc",stSkill:"skill"};
   Object.keys(sm).forEach(function(id){ var el=$(id); if(el) el.textContent = statVal(sm[id]); });
   var ap=$("apVal"); if(ap) ap.textContent = state.bonusAP||0;
+  /* v5.7.27: + buttons show only while he has points to spend. */
+  var hasPts = (state.bonusAP||0) > 0;
+  document.querySelectorAll(".stat-plus-btn").forEach(function(b){ b.style.display = hasPts ? "" : "none"; });
   var p = saitamaProgress();
   var gv={gvPush:p[0],gvSit:p[1],gvSquat:p[2],gvRun:p[3]};
   Object.keys(gv).forEach(function(id){ var el=$(id); if(el) el.textContent = "[" + gv[id].val + "]"; });
@@ -2124,6 +2246,31 @@ function renderEquipment(){
   ["head","neck","chest","hands","weapon","feet","ring"].forEach(function(k){ h += equipOverlayForSlot(k); });
   el.innerHTML = h;
 }
+/* ---------- v5.7.27: SHADOW ARMY (§10) ----------
+   Boss, 2026-11-14: his shadows awaken as he levels up — Igris 30,
+   Tank 45, Iron 50, Beru 80, Bellion 100. Locked = dimmed, unlocked =
+   ACTIVE. Same colors/design; display only, no combat mechanics. */
+var SHADOWS = [
+  {name:"IGRIS", title:"Blood-Red Commander", level:30, desc:"Elite knight swordsman — the first and most loyal shadow. His crimson blade never misses."},
+  {name:"TANK", title:"Giant Shadow Bear", level:45, desc:"A massive bear of darkness — crushes enemies with brute strength and guards the Monarch."},
+  {name:"IRON", title:"Orc Warrior", level:50, desc:"A towering orc with a giant axe — smashes through enemy lines without fear."},
+  {name:"BERU", title:"The Ant King", level:80, desc:"The Ant King — blinding speed and terrifying power. Heals the Monarch's wounds in battle."},
+  {name:"BELLION", title:"Grand Marshal", level:100, desc:"The strongest shadow — Grand Marshal of the army. He commands all shadows into battle."}
+];
+function renderShadowArmy(){
+  var el = $("shadowArmyGrid");
+  if(!el) return;
+  var h = "";
+  SHADOWS.forEach(function(s){
+    var unlocked = state.level >= s.level;
+    h += '<div class="shadow-card'+(unlocked?"":" locked")+'">' +
+      '<div class="shadow-name">'+esc(s.name)+'</div>' +
+      '<div class="shadow-title">'+esc(s.title)+'</div>' +
+      '<div class="shadow-desc">'+esc(s.desc)+'</div>' +
+      '<div class="shadow-state">'+(unlocked ? "✓ ACTIVE — ARISE" : "🔒 Unlocks at Lv "+s.level)+'</div></div>';
+  });
+  el.innerHTML = h;
+}
 function renderSkills(){
   var el = $("skillsGrid");
   if(!el) return;
@@ -2142,7 +2289,7 @@ function renderSkills(){
 function renderAll(){
   renderSchedule(); renderTitles(); renderProgress(); applyTheme(); renderLiveStrip();
   renderNow(); renderNotif(); renderReward(); renderLevelRewards(); updateMasks();
-  renderGold(); renderShop(); renderEquipment(); renderSkills(); // v5.7.0
+  renderGold(); renderShop(); renderEquipment(); renderSkills(); renderShadowArmy(); // v5.7.0 + v5.7.27
 }
 
 /* ---------- Achievements + level up ---------- */
@@ -2247,6 +2394,8 @@ function decideQuest(id, act){
   }
 }
 $("routineStack").addEventListener("click", function(e){
+  var bump = e.target.closest ? e.target.closest("button[data-bump]") : null;
+  if(bump){ bumpGoal(bump.getAttribute("data-bump"), parseInt(bump.getAttribute("data-delta"),10)||0); return; }
   var btn = e.target.closest ? e.target.closest("button[data-act]") : null;
   if(btn){ decideQuest(btn.getAttribute("data-id"), btn.getAttribute("data-act")); return; }
   var row = e.target.closest ? e.target.closest(".routine-card") : null;
@@ -2277,6 +2426,8 @@ function resetAllRoutines(){ resetDay(); }
 function resetDay(){
   state.questState={}; state.questDay={}; state.doneCount=0; state.missedCount=0; state.dayXp=0;
   state.streak=0; state.perfectDay=false; state.hp=100;
+  state.goalToggle={push:false,sit:false,squat:false,run:false}; state.goalDayXp=0; // v5.7.27: manual new day also resets goals + counters
+  state.goalProgress={push:0,sit:0,squat:0,run:0};
   state.catDone={str:0,int:0,faith:0,trade:0,disc:0,skill:0};
   var forged = quests.filter(function(q){ return q && q.id && q.id.indexOf("forge")===0; });
   quests = BASE_QUESTS.slice().concat(forged);
@@ -2348,6 +2499,38 @@ window.showQuestInfo = showQuestInfo;
 (function(){
   var b = $("stopAlarmBtn");
   if(b) b.addEventListener("click", function(){ stopAlarmBridge(); hideStopBar(); });
+})();
+
+/* ---------- v5.7.27: bottom navigation tabs ----------
+   Jump to a section instead of scrolling the whole page. The active
+   tab follows the scroll position. */
+function goTab(id){
+  var el = $(id); if(!el) return;
+  el.scrollIntoView({behavior:"smooth", block:"start"});
+  setActiveTab(id);
+}
+function setActiveTab(id){
+  document.querySelectorAll("#tabBar button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-tab")===id);
+  });
+}
+window.goTab = goTab;
+(function(){
+  var secs = ["sec-status","sec-quests","sec-shop","sec-skills"];
+  var ticking = false;
+  function onScroll(){
+    if(ticking) return; ticking = true;
+    requestAnimationFrame(function(){
+      ticking = false;
+      var y = window.scrollY + 140, cur = secs[0];
+      secs.forEach(function(id){
+        var el = $(id); if(el && el.offsetTop <= y) cur = id;
+      });
+      setActiveTab(cur);
+    });
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
 })();
 
 /* ---------- DASHBOARD button ---------- */
