@@ -2409,6 +2409,11 @@ function applyMissed(q){
 function stopAlarmBridge(){
   try{ if(hasBridge() && window.AndroidBridge.stopAlarmSound) window.AndroidBridge.stopAlarmSound(); }catch(e){}
 }
+// v5.7.30: record an ACCEPT/DECLINE in Java so the alarm for this item
+// does not ring later today (the receiver reads SharedPreferences).
+function recordDecisionBridge(id){
+  try{ if(hasBridge() && window.AndroidBridge.recordQuestDecision) window.AndroidBridge.recordQuestDecision(id); }catch(e){}
+}
 function hideStopBar(){ var bar=$("stopBar"); if(bar) bar.style.display="none"; }
 
 /* ---------- Quest actions (one-tap final) ---------- */
@@ -2420,6 +2425,7 @@ function decideQuest(id, act){
   if(state.questState[id]) return; // one tap only — ACCEPT/DECLINE is final for the day
   stopAlarmBridge();
   hideStopBar();
+  recordDecisionBridge(id); // v5.7.30: this item's alarm must not ring later today
   if(act==="done"){
     playSystemSound("accept");
     var lv = applyDone(q);
@@ -2454,6 +2460,7 @@ function acceptAllRoutines(){
     if(state.questState[q.id]) return;
     if(toMin(q.time) > nowMin) return; // only quests that already started
     if(applyDone(q)) leveled = true;
+    recordDecisionBridge(q.id); // v5.7.30: each accepted item's alarm must not ring later today
     count++;
   });
   if(count===0){ showSystemToast("No started quest left to accept."); return; }

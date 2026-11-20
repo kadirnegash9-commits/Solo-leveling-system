@@ -177,6 +177,15 @@ public class QuestReceiver extends BroadcastReceiver {
             int dow = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
             if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) return;
         }
+        // v5.7.30 (boss, 2026-11-20 — "not only quests, the whole
+        // plan"): he enters the app HIMSELF before an item's alarm
+        // time and accepts/declines it — then that item's alarm must
+        // NOT ring. The decision is recorded in SharedPreferences
+        // when it is made (MainActivity bridge), so the receiver can
+        // read it here without a WebView. The re-arm above already
+        // ran, so the chain is intact and the skip only silences
+        // today — tomorrow the item alarms again as normal.
+        if (id != null && wasDecidedToday(context, id)) return;
         notifyQuest(context, id == null ? "quest" : id, title);
         // English quest: speak a motivational phrase out loud (boss,
         // 2026-11-07). The Alarm Test button speaks too, so he can
@@ -805,6 +814,116 @@ public class QuestReceiver extends BroadcastReceiver {
     // can read it when an alarm fires.
     private static final String PREFS = "solo_leveling_prefs";
     private static final String KEY_SOUND = "alarm_sound_uri";
+
+    // v5.7.30 (boss, 2026-11-20): today's decided items — recorded
+    // in SharedPreferences when an ACCEPT/DECLINE lands (MainActivity
+    // bridge, from the web app's decideQuest), so the receiver can
+    // skip the alarm for an item he already handled himself before
+    // its alarm time. One JSON object {"date":"yyyy-MM-dd",
+    // "ids":[...]}, same shape as the goal board's pending state.
+    // Date-keyed, so tomorrow starts fresh with no reset needed.
+    private static final String KEY_DECISIONS = "quest_decisions_v1";
+
+    private static String todayKey() {
+        try {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd",
+                    java.util.Locale.US).format(new java.util.Date());
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** True when this id is one of the 23 alarm quests (the only ids
+     * that can be recorded as decided — test ids, stop alarms and
+     * message boards never are, so they always ring). */
+    public static boolean isQuestId(String id) {
+        if (id == null) return false;
+        for (String[] q : QUESTS) {
+            if (id.equals(q[0])) return true;
+        }
+        return false;
+    }
+
+    /** Record that this quest was ACCEPTED or DECLINED today (either
+     * counts — the item is handled, so its alarm must not ring).
+     * Deduped; a second call for the same quest today is a no-op. */
+    public static void recordQuestDecision(Context context, String questId) {
+        if (context == null || !isQuestId(questId)) return;
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            String today = todayKey();
+            String raw = prefs.getString(KEY_DECISIONS, null);
+            org.json.JSONObject obj;
+            org.json.JSONArray arr;
+            if (raw != null) {
+                obj = new org.json.JSONObject(raw);
+                if (!today.equals(obj.optString("date", ""))) {
+                    obj = new org.json.JSONObject();
+                    obj.put("date", today);
+                    arr = new org.json.JSONArray();
+                } else {
+                    arr = obj.optJSONArray("ids");
+                    if (arr == null) arr = new org.json.JSONArray();
+                }
+            } else {
+                obj = new org.json.JSONObject();
+                obj.put("date", today);
+                arr = new org.json.JSONArray();
+            }
+            for (int i = 0; i < arr.length(); i++) {
+                if (questId.equals(arr.optString(i))) return;
+            }
+            arr.put(questId);
+            obj.put("ids", arr);
+            prefs.edit().putString(KEY_DECISIONS, obj.toString()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    /** True when this quest was already ACCEPTED or DECLINED today —
+     * its alarm must not ring (v5.7.30). */
+    public static boolean wasDecidedToday(Context context, String questId) {
+        if (context == null || questId == null) return false;
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            String raw = prefs.getString(KEY_DECISIONS, null);
+            if (raw == null) return false;
+            org.json.JSONObject obj = new org.json.JSONObject(raw);
+            if (!todayKey().equals(obj.optString("date", ""))) return false;
+            org.json.JSONArray arr = obj.optJSONArray("ids");
+            if (arr == null) return false;
+            for (int i = 0; i < arr.length(); i++) {
+                if (questId.equals(arr.optString(i))) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /** Cancel this quest's pending alarm right now (belt-and-braces
+     * for the fire-time check above — scheduleAll re-arms on every
+     * app open / watchdog tick, so the cancel alone could never be
+     * trusted, but it shrinks the window where the alarm is armed
+     * after a decision). Finds the quest's code (100 + index in
+     * QUESTS) and cancels only if it exists (FLAG_NO_CREATE). */
+    public static void cancelQuestAlarm(Context context, String questId) {
+        if (context == null || !isQuestId(questId)) return;
+        try {
+            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (am == null) return;
+            int idx = -1;
+            for (int i = 0; i < QUESTS.length; i++) {
+                if (questId.equals(QUESTS[i][0])) { idx = i; break; }
+            }
+            if (idx < 0) return;
+            Intent intent = new Intent(context, QuestReceiver.class);
+            intent.setAction(ACTION_QUEST);
+            PendingIntent pi = PendingIntent.getBroadcast(context, 100 + idx, intent,
+                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+            if (pi != null) {
+                am.cancel(pi);
+                pi.cancel();
+            }
+        } catch (Exception ignored) {}
+    }
 
     public static Uri alarmSound(Context context) {
         try {

@@ -505,6 +505,19 @@ public class MainActivity extends Activity {
             QuestReceiver.dismissAlarm();
         }
 
+        // v5.7.30 (boss, 2026-11-20): the web app calls this when a
+        // quest is ACCEPTED or DECLINED (decideQuest / acceptAll) —
+        // record it so the alarm for that item does not ring later
+        // today, and cancel its pending alarm now. Either decision
+        // counts: the item is handled. Only real quest ids are
+        // recorded (QuestReceiver guards the list).
+        @JavascriptInterface
+        public void recordQuestDecision(final String id) {
+            if (id == null) return;
+            QuestReceiver.recordQuestDecision(MainActivity.this, id);
+            QuestReceiver.cancelQuestAlarm(MainActivity.this, id);
+        }
+
         // Alarm sound picker (boss, 2026-11-07): opens the phone's own
         // ringtone list (alarm sounds) — no audio files in the app.
         @JavascriptInterface
