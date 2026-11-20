@@ -1225,8 +1225,8 @@
 /* =========================================================================
    v5.5 LIVE-SAVE ENGINE — Solo Leveling System (main screen)
    Save format identical to v5.4.1 (soloLevelingSaveV4): the boss's
-   existing save loads untouched. BASE_QUESTS = the 23 quests of the
-   v5.7.29 daily routine (boss's own schedule, 2026-11-19).
+   existing save loads untouched. BASE_QUESTS = the 16 quests of the
+   daily routine (v5.7.29's 23, minus 7 deleted in v5.7.32).
    Maghrib 18:05 (boss, 2026-11-08); Isha 19:10. Top-level script (not
    an IIFE) so the page's inline onclick handlers can call it.
    ========================================================================= */
@@ -1295,6 +1295,8 @@ function showSystemToast(msg) {
    v5.7.29 REPLACES the 13-quest routine with the boss's own 23-item daily
    schedule (confirmed 2026-11-19 23:07 — REPLACE, Saturday = prayers +
    Active Rest only, phone away 9:30 PM, hard bedtime 10:00 PM).
+   v5.7.32 (boss 2026-11-20): 7 quests DELETED completely (alarm + quest
+   + display) — 16 quests remain; times of the other 16 unchanged.
    Days: no flag = every day; weekdaysOnly = Mon-Fri; days:"Sun,Tue,Thu"
    = those days only; saturdayOnly = Saturday only. Saturday shows only
    the 5 prayers + Active Rest (todayQuests keep-list below).
@@ -1309,20 +1311,13 @@ var BASE_QUESTS = [
   {id:"breakfast", time:"06:45", end:"07:30", title:"Shower, Breakfast & Prep", desc:"Leave for school by 7:30 AM sharp", xp:5, cat:"disc", label:"Discipline", weekdaysOnly:true},
   {id:"school", time:"07:30", end:"12:30", title:"School", desc:"Grade 9 · Focus on lessons · no Sat/Sun", xp:5, cat:"int", label:"Mind", weekdaysOnly:true},
   {id:"zuhr", time:"12:35", end:"13:00", title:"Zuhri Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
-  {id:"lunch", time:"13:00", end:"13:35", title:"Lunch & Short Power Rest", desc:"Eat lunch, short power rest", xp:5, cat:"disc", label:"Discipline"},
   {id:"deepstudy", time:"13:35", end:"14:35", title:"Deep Study", desc:"Deep study — focus", xp:5, cat:"int", label:"Mind"},
   {id:"notes", time:"14:35", end:"15:35", title:"Write My Notes", desc:"Write your notes", xp:5, cat:"int", label:"Mind"},
   {id:"asr", time:"15:35", end:"16:00", title:"Asri Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
   {id:"english", time:"16:20", end:"16:30", title:"English Language Learning", desc:"10 minutes — words + grammar", xp:5, cat:"int", label:"Mind"},
-  {id:"quran", time:"16:30", end:"17:00", title:"Quran Reading", desc:"Read Quran", xp:5, cat:"faith", label:"Faith"},
   {id:"pubg1", time:"17:00", end:"18:00", title:"PUBG Time - Part 1", desc:"PUBG — strict stop at 6:00 PM", xp:5, cat:"disc", label:"Discipline"},
   {id:"maghrib", time:"18:05", end:"18:25", title:"Maghrib Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
-  {id:"pubg2", time:"18:25", end:"18:55", title:"PUBG Time - Part 2", desc:"PUBG — strict stop at 6:55 PM", xp:5, cat:"disc", label:"Discipline"},
-  {id:"wudu", time:"18:55", end:"19:10", title:"Short Break & Wudu", desc:"Short break, make wudu", xp:5, cat:"disc", label:"Discipline"},
   {id:"isha", time:"19:10", end:"19:30", title:"Isha Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
-  {id:"dinner", time:"19:30", end:"20:15", title:"Dinner & Family Time", desc:"Dinner with family", xp:5, cat:"disc", label:"Discipline"},
-  {id:"journal", time:"20:15", end:"20:45", title:"Daily Journaling & Next-Day Planning", desc:"Journal + plan tomorrow", xp:5, cat:"int", label:"Mind"},
-  {id:"dhikr", time:"20:45", end:"21:15", title:"Quran/Dhikr & Prep Bag - Phone Away", desc:"Quran/Dhikr, prep bag, phone away", xp:5, cat:"faith", label:"Faith"},
   {id:"sleep", time:"21:30", end:"23:59", title:"Sleep", desc:"Phone away at 9:30 PM · Hard bedtime limit: 10:00 PM", xp:5, cat:"disc", label:"Discipline"}
 ];
 

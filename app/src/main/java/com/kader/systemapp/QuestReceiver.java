@@ -96,7 +96,8 @@ public class QuestReceiver extends BroadcastReceiver {
 
     // {id, HH:MM, title} — same order/times as the web quests
     // v5.7.29 (boss 2026-11-19): the 23-quest daily routine replaces
-    // the 13-quest list. Times match index.html BASE_QUESTS exactly.
+    // the 13-quest list. v5.7.32 (boss 2026-11-20): 7 quests deleted —
+    // 16 remain. Times match index.html BASE_QUESTS exactly.
     public static final String[][] QUESTS = {
             {"subhi", "05:00", "Subhi Prayer"},
             {"workout", "05:30", "Morning Workout - Push-ups, Squats & Resistance Bands"},
@@ -106,33 +107,26 @@ public class QuestReceiver extends BroadcastReceiver {
             {"breakfast", "06:45", "Shower, Breakfast & Prep"},
             {"school", "07:30", "School"},
             {"zuhr", "12:35", "Zuhri Prayer"},
-            {"lunch", "13:00", "Lunch & Short Power Rest"},
             {"deepstudy", "13:35", "Deep Study"},
             {"notes", "14:35", "Write My Notes"},
             {"asr", "15:35", "Asri Prayer"},
             {"english", "16:20", "English Language Learning"},
-            {"quran", "16:30", "Quran Reading"},
             {"pubg1", "17:00", "PUBG Time - Part 1"},
             {"maghrib", "18:05", "Maghrib Prayer"},
-            {"pubg2", "18:25", "PUBG Time - Part 2"},
-            {"wudu", "18:55", "Short Break & Wudu"},
             {"isha", "19:10", "Isha Prayer"},
-            {"dinner", "19:30", "Dinner & Family Time"},
-            {"journal", "20:15", "Daily Journaling & Next-Day Planning"},
-            {"dhikr", "20:45", "Quran/Dhikr & Prep Bag - Phone Away"},
             {"sleep", "21:30", "Sleep"}
     };
 
-    // v5.7.29: PUBG STOP alarms — real setAlarmClock alarms (reminder
-    // only, NO XP) that ring the board + sound at the end of each PUBG
-    // session so he stops on time. Codes 200/201 — outside the quest
-    // codes (100-122), the cancel sweep (123-131), the watchdog (900)
-    // and the test codes (997-999). The board shows the stop title
+    // v5.7.29: PUBG STOP alarm — real setAlarmClock alarm (reminder
+    // only, NO XP) that rings the board + sound at the end of the PUBG
+    // session so he stops on time. Code 200 only (the Part 2 stop alarm,
+    // code 201, was deleted with the Part 2 quest in v5.7.32) — outside
+    // the quest codes (100-115), the cancel sweep (116-131), the watchdog
+    // (900) and the test codes (997-999). The board shows the stop title
     // itself (habitIndexForQuest returns -1 -> title-only board), and
     // ACCEPT/DECLINE on it are no-ops (decideQuest ignores unknown ids).
     public static final String[][] STOP_ALARMS = {
-            {"pubgstop1", "18:00", "STOP PUBG — Part 1 is over! Put the phone down."},
-            {"pubgstop2", "18:55", "STOP PUBG — Part 2 is over! Put the phone down."}
+            {"pubgstop1", "18:00", "STOP PUBG — Part 1 is over! Put the phone down."}
     };
 
     @Override
@@ -359,7 +353,7 @@ public class QuestReceiver extends BroadcastReceiver {
                 || "activerest".equals(id);
     }
 
-    // v5.7.29 day rules (boss's 23-quest routine):
+    // v5.7.29 day rules (boss's routine — 16 quests since v5.7.32):
     // - workout (Morning Workout): Sun-Fri (not Saturday)
     // - run (Outdoor Running): Sun/Tue/Thu
     // - bandworkout (Home Resistance Band + Quran): Mon/Wed/Fri
@@ -439,10 +433,10 @@ public class QuestReceiver extends BroadcastReceiver {
             am.setAlarmClock(
                     new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
         }
-        // v5.7.29: arm the PUBG stop alarms (daily, reminder only).
-        // Same setAlarmClock mechanism as the quest alarms; codes
-        // 200/201 sit outside the quest codes (100-122) and the
-        // cancel sweep below (123-131), so the sweep never kills them.
+        // v5.7.29: arm the PUBG stop alarm (daily, reminder only).
+        // Same setAlarmClock mechanism as the quest alarms; code 200
+        // sits outside the quest codes (100-115) and the cancel sweep
+        // below (116-131), so the sweep never kills it.
         // scheduleAll runs on every delivery/app open/boot, so a stop
         // alarm that already fired is re-armed for tomorrow here.
         for (int i = 0; i < STOP_ALARMS.length; i++) {
@@ -469,10 +463,24 @@ public class QuestReceiver extends BroadcastReceiver {
             am.setAlarmClock(
                     new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
         }
+        // v5.7.32: the Part 2 stop alarm (code 201, 18:55) was deleted
+        // with the Part 2 quest — cancel any already-armed 201 left over
+        // from v5.7.29-31 so it can never fire again. FLAG_NO_CREATE:
+        // only an existing one is touched. (The quest-code sweep below
+        // cannot reach 201.)
+        Intent staleStop = new Intent(context, QuestReceiver.class);
+        staleStop.setAction(ACTION_QUEST);
+        PendingIntent staleStopPi = PendingIntent.getBroadcast(context, 201, staleStop,
+                PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+        if (staleStopPi != null) {
+            am.cancel(staleStopPi);
+            staleStopPi.cancel();
+        }
         // v5.7.16: NOW cancel stale codes only (100 + QUESTS.length ..
-        // 131 — leftovers from the old 16-quest list, v5.4.1). Codes
-        // 100..100+QUESTS.length-1 were just armed above and must NOT
-        // be touched. FLAG_NO_CREATE: only existing ones are touched.
+        // 131 — leftovers from longer lists, e.g. the v5.7.29-31
+        // 23-quest codes 116-122). Codes 100..100+QUESTS.length-1
+        // were just armed above and must NOT be touched. FLAG_NO_CREATE:
+        // only existing ones are touched.
         for (int code = 100 + QUESTS.length; code < 100 + 32; code++) {
             Intent old = new Intent(context, QuestReceiver.class);
             old.setAction(ACTION_QUEST);
@@ -833,7 +841,7 @@ public class QuestReceiver extends BroadcastReceiver {
         }
     }
 
-    /** True when this id is one of the 23 alarm quests (the only ids
+    /** True when this id is one of the 16 alarm quests (the only ids
      * that can be recorded as decided — test ids, stop alarms and
      * message boards never are, so they always ring). */
     public static boolean isQuestId(String id) {

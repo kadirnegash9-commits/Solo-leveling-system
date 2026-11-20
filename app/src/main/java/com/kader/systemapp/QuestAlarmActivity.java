@@ -219,8 +219,8 @@ public class QuestAlarmActivity extends Activity {
     // Gemini kaderHabitsList order (index_9): the triggered quest's task.
     // -1 = no habit for this quest — the board then typewrites the quest
     // title itself (see showAlarmBoard in alarm-board-v21.html).
-    // v5.7.29: re-pointed to the 23-quest routine. New quests with no
-    // matching habit (pubg1/pubg2/wudu/dinner + the PUBG stop alarms)
+    // v5.7.29: re-pointed to the routine (16 quests since v5.7.32).
+    // Quests with no matching habit (pubg1 + the PUBG stop alarm)
     // return -1 and get the title-only board.
     private static int habitIndexForQuest(String questId) {
         if (questId == null) return -1;
@@ -232,17 +232,12 @@ public class QuestAlarmActivity extends Activity {
         if ("breakfast".equals(questId)) return 4;
         if ("school".equals(questId)) return 5;
         if ("zuhr".equals(questId)) return 6;
-        if ("lunch".equals(questId)) return 6;
         if ("english".equals(questId)) return 7;
         if ("asr".equals(questId)) return 8;
-        if ("quran".equals(questId)) return 8;
         if ("notes".equals(questId)) return 10;
         if ("maghrib".equals(questId)) return 12;
         if ("deepstudy".equals(questId)) return 13;
         if ("isha".equals(questId)) return 14;
-        if ("dinner".equals(questId)) return 14;
-        if ("journal".equals(questId)) return 15;
-        if ("dhikr".equals(questId)) return 15;
         if ("sleep".equals(questId)) return 16;
         return -1;
     }
