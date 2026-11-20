@@ -44,13 +44,12 @@ import java.util.Locale;
  * watchdog re-arms any missing alarm, every delivery re-arms the
  * chain FIRST (even a skipped one), and MainActivity re-arms on
  * every foreground (onResume), not just onCreate.
- * Saturday rule (boss, confirmed 2026-11-07, updated 14:22, Fajr
- * added 14:36): on Saturday only prayer (fajr/zuhr/asr/maghrib/
- * isha) reminders fire — NO sport/gym, all other quests are
- * excused that day, their alarms move to Sunday.
- * Saitama rule (boss, confirmed 2026-11-07; times swapped 2026-11-08):
- * Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00 sport
- * quest; Mon/Wed/Fri gym only; Saturday: no Saitama.
+ * Saturday rule (boss, v5.7.29 2026-11-19): on Saturday only the 5
+ * prayers (subhi/zuhr/asr/maghrib/isha) + Active Rest reminders fire —
+ * all other quests are excused that day, their alarms move to Sunday.
+ * Day rules (boss, v5.7.29): Morning Workout Sun-Fri; Outdoor Running
+ * Sun/Tue/Thu; Home Resistance Band Workout + Quran Mon/Wed/Fri;
+ * Active Rest Saturday only; Shower/Breakfast + School Mon-Fri.
  * v5.7.20 (boss, 2026-11-11): the v5.7.19 middle fix is CONFIRMED
  * WORKING (his video shows the board in the middle with the v5.7.19
  * marker), but a REAL quest alarm (Asr 15:35) did NOT pop the board
@@ -96,20 +95,44 @@ public class QuestReceiver extends BroadcastReceiver {
     private static final long WATCHDOG_INTERVAL_MS = 30 * 60 * 1000;
 
     // {id, HH:MM, title} — same order/times as the web quests
+    // v5.7.29 (boss 2026-11-19): the 23-quest daily routine replaces
+    // the 13-quest list. Times match index.html BASE_QUESTS exactly.
     public static final String[][] QUESTS = {
-            {"fajr", "05:00", "Fajr Prayer"},
-            {"sport", "06:00", "Sport — Gym / Run"},
-            {"breakfast", "07:00", "Breakfast + Get Ready for School"},
-            {"school", "07:30", "School — Grade 9"},
-            {"zuhr", "12:35", "Zuhr Prayer + Lunch"},
-            {"english", "14:30", "English Lesson"},
-            {"asr", "15:35", "Asr Prayer + Quran"},
-            {"maghrib", "18:05", "Close Shop + Maghrib Prayer"},
-            {"isha", "19:10", "Isha Prayer + Dinner"},
-            {"study", "20:30", "Home Study"},
-            {"sleep", "22:15", "Sleep — Go to Bed on Time"},
-            {"saitamaRun", "06:00", "Saitama Daily Routine — Running 10km"},
-            {"saitamaEx", "05:30", "Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats"}
+            {"subhi", "05:00", "Subhi Prayer"},
+            {"workout", "05:30", "Morning Workout - Push-ups, Squats & Resistance Bands"},
+            {"run", "06:00", "Outdoor Running"},
+            {"bandworkout", "06:00", "Home Resistance Band Workout & Quran"},
+            {"activerest", "05:30", "Active Rest & Light Stretching"},
+            {"breakfast", "06:45", "Shower, Breakfast & Prep"},
+            {"school", "07:30", "School"},
+            {"zuhr", "12:35", "Zuhri Prayer"},
+            {"lunch", "13:00", "Lunch & Short Power Rest"},
+            {"deepstudy", "13:35", "Deep Study"},
+            {"notes", "14:35", "Write My Notes"},
+            {"asr", "15:35", "Asri Prayer"},
+            {"english", "16:00", "English Language Learning"},
+            {"quran", "16:30", "Quran Reading"},
+            {"pubg1", "17:00", "PUBG Time - Part 1"},
+            {"maghrib", "18:05", "Maghrib Prayer"},
+            {"pubg2", "18:25", "PUBG Time - Part 2"},
+            {"wudu", "18:55", "Short Break & Wudu"},
+            {"isha", "19:10", "Isha Prayer"},
+            {"dinner", "19:30", "Dinner & Family Time"},
+            {"journal", "20:15", "Daily Journaling & Next-Day Planning"},
+            {"dhikr", "20:45", "Quran/Dhikr & Prep Bag - Phone Away"},
+            {"sleep", "21:30", "Sleep"}
+    };
+
+    // v5.7.29: PUBG STOP alarms — real setAlarmClock alarms (reminder
+    // only, NO XP) that ring the board + sound at the end of each PUBG
+    // session so he stops on time. Codes 200/201 — outside the quest
+    // codes (100-122), the cancel sweep (123-131), the watchdog (900)
+    // and the test codes (997-999). The board shows the stop title
+    // itself (habitIndexForQuest returns -1 -> title-only board), and
+    // ACCEPT/DECLINE on it are no-ops (decideQuest ignores unknown ids).
+    public static final String[][] STOP_ALARMS = {
+            {"pubgstop1", "18:00", "STOP PUBG — Part 1 is over! Put the phone down."},
+            {"pubgstop2", "18:55", "STOP PUBG — Part 2 is over! Put the phone down."}
     };
 
     @Override
@@ -157,7 +180,7 @@ public class QuestReceiver extends BroadcastReceiver {
         notifyQuest(context, id == null ? "quest" : id, title);
         // English quest: speak a motivational phrase out loud (boss,
         // 2026-11-07). The Alarm Test button speaks too, so he can
-        // hear the voice today instead of waiting for 14:30.
+        // hear the voice today instead of waiting for 16:00.
         if ("english".equals(id) || "alarmtest".equals(id)) {
             speakMotivation(context, goAsync(), id);
         }
@@ -318,30 +341,39 @@ public class QuestReceiver extends BroadcastReceiver {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(when, showApp), pi);
     }
 
-    // Saturday: prayers ONLY, no sport/gym (boss, updated 2026-11-07
-    // 14:22 — "no running, no gym on Saturday"; Fajr added 14:36). All other
-    // quests are excused on Saturday — no alarm that day.
+    // Saturday: prayers ONLY + Active Rest (boss, v5.7.29 2026-11-19 —
+    // "Saturday = prayers + Active Rest only"). All other quests are
+    // excused on Saturday — no alarm that day.
     private static boolean isSaturdayAllowed(String id) {
-        return "fajr".equals(id) || "zuhr".equals(id) || "asr".equals(id)
-                || "maghrib".equals(id) || "isha".equals(id);
+        return "subhi".equals(id) || "zuhr".equals(id) || "asr".equals(id)
+                || "maghrib".equals(id) || "isha".equals(id)
+                || "activerest".equals(id);
     }
 
-    // Saitama rule (boss, 2026-11-07; times swapped 2026-11-08):
-    // Sun/Tue/Thu the 05:30 exercises + 06:00 run replace the 06:00
-    // sport quest; Mon/Wed/Fri gym only.
-    // Saturday: no Saitama (prayer + gym only, per the Saturday rule).
+    // v5.7.29 day rules (boss's 23-quest routine):
+    // - workout (Morning Workout): Sun-Fri (not Saturday)
+    // - run (Outdoor Running): Sun/Tue/Thu
+    // - bandworkout (Home Resistance Band + Quran): Mon/Wed/Fri
+    // - activerest: Saturday only
+    // - breakfast / school: Mon-Fri (no Sat/Sun)
+    // - everything else: every day (Saturday filtered above)
     private static boolean isAllowedOn(Calendar cal, String id) {
         int dow = cal.get(Calendar.DAY_OF_WEEK);
         if (dow == Calendar.SATURDAY) {
             return isSaturdayAllowed(id);
         }
-        boolean saitamaDay = dow == Calendar.SUNDAY || dow == Calendar.TUESDAY
-                || dow == Calendar.THURSDAY;
-        if ("saitamaRun".equals(id) || "saitamaEx".equals(id)) {
-            return saitamaDay;
+        if ("activerest".equals(id)) return false; // Saturday only
+        if ("workout".equals(id)) return true;     // Sun-Fri (Sat handled above)
+        if ("run".equals(id)) {
+            return dow == Calendar.SUNDAY || dow == Calendar.TUESDAY
+                    || dow == Calendar.THURSDAY;
         }
-        if ("sport".equals(id)) {
-            return !saitamaDay;
+        if ("bandworkout".equals(id)) {
+            return dow == Calendar.MONDAY || dow == Calendar.WEDNESDAY
+                    || dow == Calendar.FRIDAY;
+        }
+        if ("breakfast".equals(id) || "school".equals(id)) {
+            return dow != Calendar.SUNDAY; // Mon-Fri (Sat handled above)
         }
         return true;
     }
@@ -386,20 +418,42 @@ public class QuestReceiver extends BroadcastReceiver {
             Intent intent = new Intent(context, QuestReceiver.class);
             intent.setAction(ACTION_QUEST);
             intent.putExtra("quest_id", q[0]);
-            // Sunday (and Saturday) = no school: the 07:00 quest is just
-            // "Breakfast" — "Get Ready for School" only on school days
-            // (boss, 2026-11-08). The title is set from the day the alarm
-            // is armed FOR, so it is right when it fires.
             String title = q[2];
-            if ("breakfast".equals(q[0])) {
-                int dow = cal.get(Calendar.DAY_OF_WEEK);
-                if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) title = "Breakfast";
-            }
             intent.putExtra("quest_title", title);
             PendingIntent pi = PendingIntent.getBroadcast(context, 100 + i, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             // Real clock alarm: exact even in Doze, shows the alarm icon,
             // needs no exact-alarm permission. Tapping the icon opens the app.
+            PendingIntent showApp = PendingIntent.getActivity(context, 0,
+                    new Intent(context, MainActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            am.setAlarmClock(
+                    new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
+        }
+        // v5.7.29: arm the PUBG stop alarms (daily, reminder only).
+        // Same setAlarmClock mechanism as the quest alarms; codes
+        // 200/201 sit outside the quest codes (100-122) and the
+        // cancel sweep below (123-131), so the sweep never kills them.
+        // scheduleAll runs on every delivery/app open/boot, so a stop
+        // alarm that already fired is re-armed for tomorrow here.
+        for (int i = 0; i < STOP_ALARMS.length; i++) {
+            String[] s = STOP_ALARMS[i];
+            int hour = Integer.parseInt(s[1].substring(0, 2));
+            int minute = Integer.parseInt(s[1].substring(3, 5));
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, minute);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+            }
+            Intent intent = new Intent(context, QuestReceiver.class);
+            intent.setAction(ACTION_QUEST);
+            intent.putExtra("quest_id", s[0]);
+            intent.putExtra("quest_title", s[2]);
+            PendingIntent pi = PendingIntent.getBroadcast(context, 200 + i, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             PendingIntent showApp = PendingIntent.getActivity(context, 0,
                     new Intent(context, MainActivity.class),
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -506,11 +560,12 @@ public class QuestReceiver extends BroadcastReceiver {
         startAlarmLoop(context, tag, title);
     }
 
-    // v5.7.23: quests that open the GOAL notification — the two real
-    // Saitama quests plus the 1-minute goal test ("goaltest"), which
-    // is a preview of the same board.
+    // v5.7.29: quests that open the GOAL notification — the two real
+    // goal quests (Morning Workout 05:30, Outdoor Running 06:00) plus
+    // the 1-minute goal test ("goaltest"), which is a preview of the
+    // same board.
     private static boolean isGoalQuest(String questId) {
-        return "saitamaRun".equals(questId) || "saitamaEx".equals(questId)
+        return "workout".equals(questId) || "run".equals(questId)
                 || "goaltest".equals(questId);
     }
 
@@ -535,13 +590,13 @@ public class QuestReceiver extends BroadcastReceiver {
         // the notification tap uses 1, so nothing can clobber this
         // via FLAG_UPDATE_CURRENT. The loop keeps ringing (no stop
         // extra) until ACCEPT/DECLINE or a notification tap/swipe.
-        boolean saitama = isGoalQuest(questId);
+        boolean goal = isGoalQuest(questId); // v5.7.29: goal quests open the 4-goal board
         Intent open = new Intent(context, QuestAlarmActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         open.putExtra("quest_id", questId);
         open.putExtra("quest_title", title);
         open.putExtra("quest_time", questTimeFor(questId));
-        if (saitama) open.putExtra("show_quest_info", true);
+        if (goal) open.putExtra("show_quest_info", true);
         // v5.7.23: the goal test opens the board in TEST mode (preview).
         if ("goaltest".equals(questId)) open.putExtra("goal_test", true);
         // v5.7.25: the level-up test opens the level-up board in TEST mode.
@@ -550,14 +605,14 @@ public class QuestReceiver extends BroadcastReceiver {
             open.putExtra("levelup_test", true);
             open.putExtra("deed", "You done your Goal");
         }
-        PendingIntent fullScreen = PendingIntent.getActivity(context, saitama ? 6 : 5, open,
+        PendingIntent fullScreen = PendingIntent.getActivity(context, goal ? 6 : 5, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Tapping the notification dismisses the alarm: same screen, but
         // with an extra so MainActivity stops the looping sound.
         Intent tap = new Intent(context, MainActivity.class);
         tap.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         tap.putExtra("stop_alarm_loop", true);
-        if (saitama) tap.putExtra("show_quest_info", true);
+        if (goal) tap.putExtra("show_quest_info", true);
         PendingIntent tapPending = PendingIntent.getActivity(context, 1, tap,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Swiping the notification away also dismisses the alarm.

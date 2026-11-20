@@ -145,16 +145,16 @@ import org.json.JSONObject;
  * added; it is for the notification (alarm popup), NOT for the app
  * board — §3 Quest Info & Goals is untouched, and the OTHER
  * notification board (the task board, alarm-board-v21.html) stays
- * exactly as before. So: a Saitama alarm (saitamaEx 05:30,
- * saitamaRun 06:00) opens alarm-goal-board-v22.html; every other
- * quest opens the task board as before. The goal board's rows wire
- * to the app's own toggleGoal(kind) (±2 XP) and the Saitama quests
- * are decided through the existing quest-decision path (+10 XP,
- * +10 Gold, +2 HP) — both applied by MainActivity, which stays the
- * single writer of the app state. The goal board only READS the
- * shared localStorage to seed its rows; every tap is recorded in
- * SharedPreferences (pending toggles / decisions) so nothing is
- * lost if the board is closed with Back or the process dies.
+ * exactly as before. So: a goal alarm (workout 05:30, run 06:00)
+ * opens alarm-goal-board-v23.html; every other quest opens the task
+ * board as before. The goal board's rows wire to the app's own
+ * toggleGoal(kind) (±2 XP) and the goal quests are decided through
+ * the existing quest-decision path (+10 XP, +10 Gold, +2 HP) — both
+ * applied by MainActivity, which stays the single writer of the app
+ * state. The goal board only READS the shared localStorage to seed
+ * its rows; every tap is recorded in SharedPreferences (pending
+ * toggles / decisions) so nothing is lost if the board is closed
+ * with Back or the process dies.
  */
 public class QuestAlarmActivity extends Activity {
 
@@ -217,22 +217,32 @@ public class QuestAlarmActivity extends Activity {
     private static final String GOAL_PENDING_DECISIONS = "goal_pending_decisions";
 
     // Gemini kaderHabitsList order (index_9): the triggered quest's task.
-    // -1 = no habit for this quest (e.g. the 2-minute test alarm) — the
-    // board then typewrites the quest title itself (see showAlarmBoard).
+    // -1 = no habit for this quest — the board then typewrites the quest
+    // title itself (see showAlarmBoard in alarm-board-v21.html).
+    // v5.7.29: re-pointed to the 23-quest routine. New quests with no
+    // matching habit (pubg1/pubg2/wudu/dinner + the PUBG stop alarms)
+    // return -1 and get the title-only board.
     private static int habitIndexForQuest(String questId) {
         if (questId == null) return -1;
-        if ("fajr".equals(questId)) return 0;
-        if ("saitamaEx".equals(questId)) return 1;
-        if ("sport".equals(questId)) return 2;
-        if ("saitamaRun".equals(questId)) return 3;
+        if ("subhi".equals(questId)) return 0;
+        if ("workout".equals(questId)) return 1;
+        if ("bandworkout".equals(questId)) return 2;
+        if ("activerest".equals(questId)) return 2;
+        if ("run".equals(questId)) return 3;
         if ("breakfast".equals(questId)) return 4;
         if ("school".equals(questId)) return 5;
         if ("zuhr".equals(questId)) return 6;
+        if ("lunch".equals(questId)) return 6;
         if ("english".equals(questId)) return 7;
         if ("asr".equals(questId)) return 8;
+        if ("quran".equals(questId)) return 8;
+        if ("notes".equals(questId)) return 10;
         if ("maghrib".equals(questId)) return 12;
-        if ("study".equals(questId)) return 13;
+        if ("deepstudy".equals(questId)) return 13;
         if ("isha".equals(questId)) return 14;
+        if ("dinner".equals(questId)) return 14;
+        if ("journal".equals(questId)) return 15;
+        if ("dhikr".equals(questId)) return 15;
         if ("sleep".equals(questId)) return 16;
         return -1;
     }
@@ -264,14 +274,15 @@ public class QuestAlarmActivity extends Activity {
                 levelUpDeed = intent.getStringExtra("deed");
             }
         }
-        // v5.7.22: Saitama alarms open the separate GOAL notification;
+        // v5.7.22: goal quests open the separate GOAL notification;
         // message boards and every other quest keep the task board.
         // v5.7.23: the "goaltest" alarm opens the same goal board as a
         // preview (testMode — writes nothing).
         // v5.7.25: level-up mode opens the separate LEVEL-UP board, not
         // the goal board and not the task board.
+        // v5.7.29: goal quests are now Morning Workout + Outdoor Running.
         goalMode = !messageMode && !levelUpMode
-                && ("saitamaEx".equals(questId) || "saitamaRun".equals(questId)
+                && ("workout".equals(questId) || "run".equals(questId)
                 || "goaltest".equals(questId));
         // Show over the lock screen and turn the screen on, like a clock alarm.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -446,15 +457,15 @@ public class QuestAlarmActivity extends Activity {
             return;
         }
         // v5.7.22: goal mode opens the goal board with this alarm's
-        // quest id (saitamaEx / saitamaRun) — the board seeds its 4
-        // rows from the app state and shows itself.
-        // v5.7.23: the goal test opens the board for "saitamaEx" (the
+        // quest id (workout / run) — the board seeds its 4 rows from
+        // the app state and shows itself.
+        // v5.7.23: the goal test opens the board for "workout" (the
         // exercises are the triggered quest — push/sit/squat close
         // it) with testMode=true, so the preview writes no state.
-        // A real Saitama alarm passes its own id, testMode=false.
+        // A real goal alarm passes its own id, testMode=false.
         if (goalMode) {
-            final String qid = "goaltest".equals(questId) ? "saitamaEx"
-                    : (questId == null ? "saitamaEx" : questId);
+            final String qid = "goaltest".equals(questId) ? "workout"
+                    : (questId == null ? "workout" : questId);
             final String js;
             try {
                 js = "window.showGoalBoard(" + JSONObject.quote(qid)
@@ -583,7 +594,7 @@ public class QuestAlarmActivity extends Activity {
             appendPendingGoal(GOAL_PENDING_TOGGLES, "kinds", kind);
         }
 
-        // v5.7.22: goal board — a Saitama quest's goals are all done.
+        // v5.7.22: goal board — a goal quest's goals are all done.
         // Recorded once (deduped); MainActivity decides it through
         // the existing quest-decision path (+10 XP, +10 Gold, +2 HP).
         @JavascriptInterface
@@ -591,7 +602,7 @@ public class QuestAlarmActivity extends Activity {
             // v5.7.23: TEST mode writes nothing (second layer — the
             // board JS already skips the call in test mode).
             if (testMode) return;
-            if (!"saitamaEx".equals(qid) && !"saitamaRun".equals(qid)) return;
+            if (!"workout".equals(qid) && !"run".equals(qid)) return;
             appendPendingGoal(GOAL_PENDING_DECISIONS, "quests", qid);
         }
 

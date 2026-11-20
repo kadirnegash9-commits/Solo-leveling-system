@@ -346,12 +346,13 @@ const strengthGoalData = [
 ];
 // The app's §3 goal kinds, in the same order as the 4 rows.
 const GOAL_KINDS = ['push', 'sit', 'squat', 'run'];
-// The quest whose alarm opened this board ('saitamaEx' 05:30 or
-// 'saitamaRun' 06:00). Set by showGoalBoard, from Java.
+// The quest whose alarm opened this board ('workout' 05:30 or
+// 'run' 06:00). Set by showGoalBoard, from Java.
 // v5.7.23: testMode — true when opened by the "Goal Test (1 min)"
 // button. A preview: rows flip + sound, toast + close, but the
 // Java bridge is never called (no state is written).
-let triggeredQuest = 'saitamaEx';
+// v5.7.29: re-pointed from saitamaEx/saitamaRun to workout/run.
+let triggeredQuest = 'workout';
 let testMode = false;
 // Which quests this board has already recorded as complete (so a
 // quest is recorded once even if rows are tapped on/off/on again).
@@ -436,8 +437,8 @@ function toggleStrengthGoalItem(idx) {
   checkCompletions();
 }
 
-// After every tap: a Saitama quest is done when ITS goals are all
-// done — saitamaEx = push + sit + squat, saitamaRun = run. The
+// After every tap: a goal quest is done when ITS goals are all
+// done — workout = push + sit + squat, run = run. The
 // board closes (accept sound, alarm dismissed, MainActivity applies
 // the toggles + the quest decision) only when the TRIGGERED quest
 // is done, or when all 4 are done. A non-triggered quest completing
@@ -451,14 +452,14 @@ function checkCompletions() {
     exRecorded = true;
     // v5.7.23: TEST mode — never record a quest as complete.
     if (!testMode) {
-      try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('saitamaEx'); } catch (e) {}
+      try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('workout'); } catch (e) {}
     }
   }
   if (runDone && !runRecorded) {
     runRecorded = true;
     // v5.7.23: TEST mode — never record a quest as complete.
     if (!testMode) {
-      try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('saitamaRun'); } catch (e) {}
+      try { if (window.AndroidAlarm && AndroidAlarm.goalQuestComplete) AndroidAlarm.goalQuestComplete('run'); } catch (e) {}
     }
   }
   if (allDone) {
@@ -468,8 +469,8 @@ function checkCompletions() {
     setTimeout(function() { closeGoalBoard(true); }, 750);
     return;
   }
-  const triggeredDone = (triggeredQuest === 'saitamaEx' && exDone) ||
-                        (triggeredQuest === 'saitamaRun' && runDone);
+  const triggeredDone = (triggeredQuest === 'workout' && exDone) ||
+                        (triggeredQuest === 'run' && runDone);
   if (triggeredDone) {
     playGoalSound('accept');
     setTimeout(function() { closeGoalBoard(true); }, 500);
@@ -523,7 +524,7 @@ document.getElementById('goalNotifOverlay').addEventListener('click', (e) => {
 // real save) and no tap is ever recorded, so the test can never
 // complete his real goals or award XP.
 window.showGoalBoard = function(questId, isTest) {
-  triggeredQuest = (questId === 'saitamaRun') ? 'saitamaRun' : 'saitamaEx';
+  triggeredQuest = (questId === 'run') ? 'run' : 'workout';
   testMode = !!isTest;
   exRecorded = false;
   runRecorded = false;

@@ -1024,7 +1024,7 @@
     <div class="routine-cards-stack" id="routineStack">
     </div>
 
-    <div class="saturday-subtext">Saturday: Prayer only</div>
+    <div class="saturday-subtext">Saturday: Prayers + Active Rest only</div>
 
     <div class="sched-bulk-actions">
       <button class="btn-accept-all" onclick="acceptAllRoutines()">ACCEPT ALL</button>
@@ -1162,7 +1162,7 @@
         <button class="btn-notif-outline" id="alarmTestBtn">⏰ Alarm Test (2 min)</button>
         <!-- v5.7.23: Goal Test — pops the goal board in 1 minute as a
              preview (test mode: writes no state), so the boss can see
-             it now instead of waiting for the Thu 05:30 Saitama alarm. -->
+             it now instead of waiting for the 05:30 Morning Workout alarm. -->
         <button class="btn-notif-outline" id="goalTestBtn">🎯 Goal Test (1 min)</button>
         <!-- v5.7.25: Level Up Test — pops the level-up board in 1 minute as a
              preview (test mode: sample deed "You done your Goal", writes no
@@ -1225,8 +1225,8 @@
 /* =========================================================================
    v5.5 LIVE-SAVE ENGINE — Solo Leveling System (main screen)
    Save format identical to v5.4.1 (soloLevelingSaveV4): the boss's
-   existing save loads untouched. BASE_QUESTS = the 13 quests after the
-   v5.4.1 removals (the three removed quests stay out).
+   existing save loads untouched. BASE_QUESTS = the 23 quests of the
+   v5.7.29 daily routine (boss's own schedule, 2026-11-19).
    Maghrib 18:05 (boss, 2026-11-08); Isha 19:10. Top-level script (not
    an IIFE) so the page's inline onclick handlers can call it.
    ========================================================================= */
@@ -1291,21 +1291,39 @@ function showSystemToast(msg) {
   }
 }
 
-/* ---------- Quest + stat definitions (v5.4.1, Maghrib 18:05) ---------- */
+/* ---------- Quest + stat definitions (v5.7.29, boss 2026-11-19) ----------
+   v5.7.29 REPLACES the 13-quest routine with the boss's own 23-item daily
+   schedule (confirmed 2026-11-19 23:07 — REPLACE, Saturday = prayers +
+   Active Rest only, phone away 9:30 PM, hard bedtime 10:00 PM).
+   Days: no flag = every day; weekdaysOnly = Mon-Fri; days:"Sun,Tue,Thu"
+   = those days only; saturdayOnly = Saturday only. Saturday shows only
+   the 5 prayers + Active Rest (todayQuests keep-list below).
+   saitama = goal quest (opens the 4-goal board; counters in §2/§3):
+   Morning Workout (push/sit/squat) + Outdoor Running (km). */
 var BASE_QUESTS = [
-  {id:"fajr",   time:"05:00", end:"05:30", title:"Fajr Prayer", desc:"First prayer of the day, on time · exercises after Subhi", xp:5, cat:"faith", label:"Faith"},
-  {id:"sport",  time:"06:00", end:"07:00", title:"Sport — Gym / Run", desc:"Mon · Wed · Fri Gym", xp:10, cat:"str",   label:"Strength"},
-  {id:"saitamaRun", time:"06:00", end:"07:00", title:"Saitama Daily Routine — Running 10km", desc:"Sun · Tue · Thu · after exercises · 10km run", xp:10, cat:"str", label:"Strength", saitama:true},
-  {id:"saitamaEx", time:"05:30", end:"06:00", title:"Saitama Daily Routine — 100 Push-ups + 100 Sit-ups + 100 Squats", desc:"Sun · Tue · Thu · after Subhi prayer", xp:10, cat:"str", label:"Strength", saitama:true},
-  {id:"breakfast", time:"07:00", end:"07:30", title:"Breakfast + Get Ready for School", desc:"Eat breakfast, pack your bag", xp:5, cat:"disc", label:"Discipline"},
-  {id:"school", time:"07:30", end:"12:30", title:"School — Grade 9", desc:"Focus on lessons · no Sat/Sun", xp:5, cat:"int", label:"Mind", weekdaysOnly:true},
-  {id:"zuhr",   time:"12:35", end:"13:45", title:"Zuhr Prayer + Lunch", desc:"Prayer on time · lunch", xp:5, cat:"faith", label:"Faith"},
-  {id:"english",time:"14:30", end:"15:10", title:"English Lesson", desc:"40 minutes — words + grammar", xp:5, cat:"int", label:"Mind"},
-  {id:"asr",    time:"15:35", end:"15:55", title:"Asr Prayer + Quran", desc:"20 minutes of Quran reading", xp:5, cat:"faith", label:"Faith"},
-  {id:"maghrib",time:"18:05", end:"18:45", title:"Close Shop + Maghrib Prayer", desc:"Close Freedom Shop (Sunday shop is closed — Maghrib only)", xp:5, cat:"faith", label:"Faith"},
-  {id:"isha",   time:"19:10", end:"20:00", title:"Isha Prayer + Dinner", desc:"Last prayer of the day, on time", xp:5, cat:"faith", label:"Faith"},
-  {id:"study",  time:"20:30", end:"21:00", title:"Home Study", desc:"30 minutes — school study before sleep", xp:5, cat:"int", label:"Mind"},
-  {id:"sleep",  time:"22:15", end:"23:59", title:"Sleep — Go to Bed on Time", desc:"Sport tomorrow morning — turn off the phone and sleep", xp:5, cat:"disc", label:"Discipline"}
+  {id:"subhi", time:"05:00", end:"05:30", title:"Subhi Prayer", desc:"First prayer of the day, on time", xp:5, cat:"faith", label:"Faith"},
+  {id:"workout", time:"05:30", end:"06:00", title:"Morning Workout - Push-ups, Squats & Resistance Bands", desc:"Sun · Mon · Tue · Wed · Thu · Fri", xp:10, cat:"str", label:"Strength", saitama:true, days:"Sun,Mon,Tue,Wed,Thu,Fri"},
+  {id:"run", time:"06:00", end:"06:45", title:"Outdoor Running", desc:"Sun · Tue · Thu · 10km run", xp:10, cat:"str", label:"Strength", saitama:true, days:"Sun,Tue,Thu"},
+  {id:"bandworkout", time:"06:00", end:"06:45", title:"Home Resistance Band Workout & Quran", desc:"Mon · Wed · Fri · resistance bands + Quran", xp:10, cat:"str", label:"Strength", days:"Mon,Wed,Fri"},
+  {id:"activerest", time:"05:30", end:"06:30", title:"Active Rest & Light Stretching", desc:"Saturday only · light stretching", xp:5, cat:"str", label:"Strength", saturdayOnly:true},
+  {id:"breakfast", time:"06:45", end:"07:30", title:"Shower, Breakfast & Prep", desc:"Leave for school by 7:30 AM sharp", xp:5, cat:"disc", label:"Discipline", weekdaysOnly:true},
+  {id:"school", time:"07:30", end:"12:30", title:"School", desc:"Grade 9 · Focus on lessons · no Sat/Sun", xp:5, cat:"int", label:"Mind", weekdaysOnly:true},
+  {id:"zuhr", time:"12:35", end:"13:00", title:"Zuhri Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
+  {id:"lunch", time:"13:00", end:"13:35", title:"Lunch & Short Power Rest", desc:"Eat lunch, short power rest", xp:5, cat:"disc", label:"Discipline"},
+  {id:"deepstudy", time:"13:35", end:"14:35", title:"Deep Study", desc:"Deep study — focus", xp:5, cat:"int", label:"Mind"},
+  {id:"notes", time:"14:35", end:"15:35", title:"Write My Notes", desc:"Write your notes", xp:5, cat:"int", label:"Mind"},
+  {id:"asr", time:"15:35", end:"16:00", title:"Asri Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
+  {id:"english", time:"16:00", end:"16:30", title:"English Language Learning", desc:"30 minutes — words + grammar", xp:5, cat:"int", label:"Mind"},
+  {id:"quran", time:"16:30", end:"17:00", title:"Quran Reading", desc:"Read Quran", xp:5, cat:"faith", label:"Faith"},
+  {id:"pubg1", time:"17:00", end:"18:00", title:"PUBG Time - Part 1", desc:"PUBG — strict stop at 6:00 PM", xp:5, cat:"disc", label:"Discipline"},
+  {id:"maghrib", time:"18:05", end:"18:25", title:"Maghrib Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
+  {id:"pubg2", time:"18:25", end:"18:55", title:"PUBG Time - Part 2", desc:"PUBG — strict stop at 6:55 PM", xp:5, cat:"disc", label:"Discipline"},
+  {id:"wudu", time:"18:55", end:"19:10", title:"Short Break & Wudu", desc:"Short break, make wudu", xp:5, cat:"disc", label:"Discipline"},
+  {id:"isha", time:"19:10", end:"19:30", title:"Isha Prayer", desc:"Prayer on time", xp:5, cat:"faith", label:"Faith"},
+  {id:"dinner", time:"19:30", end:"20:15", title:"Dinner & Family Time", desc:"Dinner with family", xp:5, cat:"disc", label:"Discipline"},
+  {id:"journal", time:"20:15", end:"20:45", title:"Daily Journaling & Next-Day Planning", desc:"Journal + plan tomorrow", xp:5, cat:"int", label:"Mind"},
+  {id:"dhikr", time:"20:45", end:"21:15", title:"Quran/Dhikr & Prep Bag - Phone Away", desc:"Quran/Dhikr, prep bag, phone away", xp:5, cat:"faith", label:"Faith"},
+  {id:"sleep", time:"21:30", end:"23:59", title:"Sleep", desc:"Phone away at 9:30 PM · Hard bedtime limit: 10:00 PM", xp:5, cat:"disc", label:"Discipline"}
 ];
 
 var STATS = [
@@ -1333,7 +1351,7 @@ var ACH = [
   {id:"mind",   name:"Scholar", desc:"Complete 3 mind quests", test:function(s){return s.catDone.int>=3;}},
   {id:"faith",  name:"Faith Guardian", desc:"Complete 3 faith quests", test:function(s){return s.catDone.faith>=3;}},
   {id:"trader", name:"Market Hunter", desc:"Complete a Trading prep quest", test:function(s){return s.catDone.trade>=1;}},
-  {id:"early",  name:"Early Bird", desc:"Complete the 06:00 sport quest", test:function(s){return !!s.questState.sport && s.questState.sport==="done";}},
+  {id:"early",  name:"Early Bird", desc:"Complete a 06:00 workout quest", test:function(s){return s.questState.run==="done" || s.questState.bandworkout==="done";}}, // v5.7.29: re-pointed from the deleted "sport" quest to the new 06:00 quests (run / bandworkout)
   {id:"forge",  name:"Quest Forger", desc:"Forge your own quest in the Forge", test:function(s){return s.forged>=1;}},
   {id:"streak3",name:"Streak ×3", desc:"Complete 3 quests in a row without missing", test:function(s){return s.bestStreak>=3;}},
   {id:"streak6",name:"Streak ×6", desc:"Complete 6 quests in a row without missing", test:function(s){return s.bestStreak>=6;}},
@@ -1688,26 +1706,20 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function todayQuests(){
   var day = eatNow().day;
   var weekend = (day==="Sat"||day==="Sun");
+  /* v5.7.29: Saturday = 5 prayers + Active Rest only (boss 2026-11-19);
+     all other quests hidden — same keep-list mechanism as before. */
   if(day==="Sat"){
-    var keep = {fajr:1, zuhr:1, asr:1, maghrib:1, isha:1};
+    var keep = {subhi:1, zuhr:1, asr:1, maghrib:1, isha:1, activerest:1};
     return quests.filter(function(q){ return !!keep[q.id] || q.id.indexOf("forge")===0; });
   }
-  var saitamaDay = (day==="Sun"||day==="Tue"||day==="Thu");
+  /* v5.7.29: day rules live on each quest — weekdaysOnly (Mon-Fri),
+     days:"Sun,Tue,Thu" (those days only), saturdayOnly (never here). */
   var list = quests.filter(function(q){
     if(q.weekdaysOnly && weekend) return false;
-    if(q.saitama) return saitamaDay;
-    if(q.id==="sport") return !saitamaDay;
+    if(q.saturdayOnly) return false;
+    if(q.days && q.days.split(",").indexOf(day)===-1) return false;
     return true;
   });
-  if(weekend){
-    list = list.map(function(q){
-      if(q.id==="breakfast"){
-        var c = {}; for(var k in q) c[k] = q[k];
-        c.title = "Breakfast"; return c;
-      }
-      return q;
-    });
-  }
   return list;
 }
 function currentQuestId(){
@@ -1718,13 +1730,11 @@ function currentQuestId(){
   }
   return null;
 }
-/* v5.7.27: §3 live values now show the Saitama COUNTERS (goalProgress)
-   — push/sit/squat 0-100, run 0-10km — so the boss can watch his
-   progress through the day. A finished quest still shows the full
-   target (100/100, 10/10km) even if he accepted without counting. */
+/* v5.7.29: §3 live values follow the NEW quests — Morning Workout
+   (push/sit/squat 0-100) and Outdoor Running (0-10km). */
 function saitamaProgress(){
-  var ex = state.questState.saitamaEx==="done";
-  var run = state.questState.saitamaRun==="done";
+  var ex = state.questState.workout==="done";
+  var run = state.questState.run==="done";
   var gp = state.goalProgress||{push:0,sit:0,squat:0,run:0};
   var pv = ex?100:Math.min(100, gp.push||0), sv = ex?100:Math.min(100, gp.sit||0), qv = ex?100:Math.min(100, gp.squat||0);
   var rv = run?10:Math.min(10, gp.run||0);
@@ -1870,13 +1880,14 @@ function renderSchedule(){
     var note = "";
     if(st==="done") note = '<div class="routine-state good">Done · +'+xpFor(q)+' XP</div>';
     if(st==="missed") note = '<div class="penalty-badge">⚠ PENALTY QUEST</div><div class="routine-state bad">Missed · <span class="pen">Penalty</span> −10 HP · −'+xpLossFor(q.id)+' XP</div>';
-    /* v5.7.27: Saitama counters — track reps/km through the day (boss,
-       2026-11-14). Buttons disabled once the quest is decided. */
+    /* v5.7.29: workout counters — track reps/km through the day (boss,
+       2026-11-14). Buttons disabled once the quest is decided.
+       Re-pointed from saitamaEx/saitamaRun to workout/run. */
     var counters = "";
-    if(q.id==="saitamaEx" || q.id==="saitamaRun"){
+    if(q.id==="workout" || q.id==="run"){
       var gp = state.goalProgress||{push:0,sit:0,squat:0,run:0};
       var dis = (st==="done"||st==="missed") ? " disabled" : "";
-      if(q.id==="saitamaEx"){
+      if(q.id==="workout"){
         counters = '<div class="counter-panel">' +
           counterRowHtml("push","Push-ups",gp.push||0,100,dis,false) +
           counterRowHtml("sit","Sit-ups",gp.sit||0,100,dis,false) +
@@ -2017,7 +2028,7 @@ function renderNow(){
     var hh = Math.floor(diff/60), mm = diff%60;
     $("nowNext").innerHTML = "Next: <b>" + esc(next.title) + "</b> · " + fmt12(next.time) + " · in <span class='countdown'>" + (hh>0?hh+" hr ":"") + mm + " min</span>";
   } else {
-    $("nowNext").innerHTML = "No more quests today — <b>10:15 Sleep</b> closes the day.";
+    $("nowNext").innerHTML = "No more quests today — <b>9:30 PM Sleep</b> closes the day.";
   }
 }
 function hasBridge(){ return (typeof window.AndroidBridge !== "undefined") && window.AndroidBridge; }
@@ -2364,7 +2375,7 @@ function showLevelUpBoard(deed){
 }
 window.showLevelUpBoard = showLevelUpBoard;
 function xpLossFor(id){
-  return (id==="sport"||id==="saitamaRun"||id==="saitamaEx") ? 10 : 5;
+  return (id==="workout"||id==="run"||id==="bandworkout") ? 10 : 5; // v5.7.29: the 10-XP quests are the workouts + run (old: sport/saitamaRun/saitamaEx)
 }
 function applyDone(q){
   state.questState[q.id]="done";
