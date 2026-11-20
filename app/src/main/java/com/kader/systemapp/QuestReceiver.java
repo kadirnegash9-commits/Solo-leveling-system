@@ -110,7 +110,7 @@ public class QuestReceiver extends BroadcastReceiver {
             {"deepstudy", "13:35", "Deep Study"},
             {"notes", "14:35", "Write My Notes"},
             {"asr", "15:35", "Asri Prayer"},
-            {"english", "16:00", "English Language Learning"},
+            {"english", "16:20", "English Language Learning"},
             {"quran", "16:30", "Quran Reading"},
             {"pubg1", "17:00", "PUBG Time - Part 1"},
             {"maghrib", "18:05", "Maghrib Prayer"},
@@ -189,7 +189,7 @@ public class QuestReceiver extends BroadcastReceiver {
         notifyQuest(context, id == null ? "quest" : id, title);
         // English quest: speak a motivational phrase out loud (boss,
         // 2026-11-07). The Alarm Test button speaks too, so he can
-        // hear the voice today instead of waiting for 16:00.
+        // hear the voice today instead of waiting for 16:20.
         if ("english".equals(id) || "alarmtest".equals(id)) {
             speakMotivation(context, goAsync(), id);
         }
