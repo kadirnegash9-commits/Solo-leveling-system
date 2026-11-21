@@ -117,17 +117,15 @@ public class QuestReceiver extends BroadcastReceiver {
             {"sleep", "21:30", "Sleep"}
     };
 
-    // v5.7.29: PUBG STOP alarm — real setAlarmClock alarm (reminder
-    // only, NO XP) that rings the board + sound at the end of the PUBG
-    // session so he stops on time. Code 200 only (the Part 2 stop alarm,
-    // code 201, was deleted with the Part 2 quest in v5.7.32) — outside
-    // the quest codes (100-115), the cancel sweep (116-131), the watchdog
-    // (900) and the test codes (997-999). The board shows the stop title
-    // itself (habitIndexForQuest returns -1 -> title-only board), and
-    // ACCEPT/DECLINE on it are no-ops (decideQuest ignores unknown ids).
-    public static final String[][] STOP_ALARMS = {
-            {"pubgstop1", "18:00", "STOP PUBG — Part 1 is over! Put the phone down."}
-    };
+    // v5.7.33 (boss 2026-11-21): the PUBG STOP alarms are DELETED
+    // completely — the Part 1 stop alarm (code 200, 18:00) and the Part 2
+    // stop alarm (code 201, deleted in v5.7.32) are both gone, so the
+    // 6:00 PM stop board never rings again. The PUBG Part 1 QUEST
+    // itself (17:00, pubg1) is UNCHANGED — only the stop alarm is gone.
+    // Any already-armed 200/201 is cancelled in scheduleAll below
+    // (stale-cancel, FLAG_NO_CREATE), so it dies on first launch after
+    // install. The stop-board display path (habitIndexForQuest returns
+    // -1 -> title-only board) can no longer be reached by any alarm.
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -433,48 +431,27 @@ public class QuestReceiver extends BroadcastReceiver {
             am.setAlarmClock(
                     new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
         }
-        // v5.7.29: arm the PUBG stop alarm (daily, reminder only).
-        // Same setAlarmClock mechanism as the quest alarms; code 200
-        // sits outside the quest codes (100-115) and the cancel sweep
-        // below (116-131), so the sweep never kills it.
-        // scheduleAll runs on every delivery/app open/boot, so a stop
-        // alarm that already fired is re-armed for tomorrow here.
-        for (int i = 0; i < STOP_ALARMS.length; i++) {
-            String[] s = STOP_ALARMS[i];
-            int hour = Integer.parseInt(s[1].substring(0, 2));
-            int minute = Integer.parseInt(s[1].substring(3, 5));
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR_OF_DAY, hour);
-            cal.set(Calendar.MINUTE, minute);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
-                cal.add(Calendar.DAY_OF_YEAR, 1);
-            }
-            Intent intent = new Intent(context, QuestReceiver.class);
-            intent.setAction(ACTION_QUEST);
-            intent.putExtra("quest_id", s[0]);
-            intent.putExtra("quest_title", s[2]);
-            PendingIntent pi = PendingIntent.getBroadcast(context, 200 + i, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            PendingIntent showApp = PendingIntent.getActivity(context, 0,
-                    new Intent(context, MainActivity.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            am.setAlarmClock(
-                    new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), showApp), pi);
-        }
-        // v5.7.32: the Part 2 stop alarm (code 201, 18:55) was deleted
-        // with the Part 2 quest — cancel any already-armed 201 left over
-        // from v5.7.29-31 so it can never fire again. FLAG_NO_CREATE:
+        // v5.7.33: the PUBG stop alarms are DELETED — Part 1 (code 200,
+        // 18:00, deleted with this version) and Part 2 (code 201, 18:55,
+        // deleted in v5.7.32). Cancel any already-armed 200/201 left over
+        // from v5.7.29-32 so neither can ever fire again. FLAG_NO_CREATE:
         // only an existing one is touched. (The quest-code sweep below
-        // cannot reach 201.)
-        Intent staleStop = new Intent(context, QuestReceiver.class);
-        staleStop.setAction(ACTION_QUEST);
-        PendingIntent staleStopPi = PendingIntent.getBroadcast(context, 201, staleStop,
+        // cannot reach 200/201.)
+        Intent staleStop200 = new Intent(context, QuestReceiver.class);
+        staleStop200.setAction(ACTION_QUEST);
+        PendingIntent staleStopPi200 = PendingIntent.getBroadcast(context, 200, staleStop200,
                 PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
-        if (staleStopPi != null) {
-            am.cancel(staleStopPi);
-            staleStopPi.cancel();
+        if (staleStopPi200 != null) {
+            am.cancel(staleStopPi200);
+            staleStopPi200.cancel();
+        }
+        Intent staleStop201 = new Intent(context, QuestReceiver.class);
+        staleStop201.setAction(ACTION_QUEST);
+        PendingIntent staleStopPi201 = PendingIntent.getBroadcast(context, 201, staleStop201,
+                PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+        if (staleStopPi201 != null) {
+            am.cancel(staleStopPi201);
+            staleStopPi201.cancel();
         }
         // v5.7.16: NOW cancel stale codes only (100 + QUESTS.length ..
         // 131 — leftovers from longer lists, e.g. the v5.7.29-31
