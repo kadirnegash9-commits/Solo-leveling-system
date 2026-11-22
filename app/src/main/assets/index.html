@@ -1417,8 +1417,8 @@ function claimDueLevelRewards(queuePopup){
    Equipped items show ITEM PHOTO + name + stats; empty slots are dashed boxes (auto-equip).
    SHOP CUBES: clothes = Gemini white line icons (webp), weapons = REAL PHOTOS, no emoji — clothes first, then 8 weapons ranked.
    LEVEL FIX (boss 19:03): one-time migration in loadGame — saved Level 2 with
-   XP < 100 is a mistake (Level 1 needs XP >= 100). Correct level to 1, keep XP.
-   gainXp audited: level-up ONLY when xp >= level*100 (while loop) — correct. */
+   XP < 200 is a mistake (Level 1 needs XP >= 200; v5.7.34 fixed 200, was 100). Correct level to 1, keep XP.
+   gainXp audited: level-up ONLY when xp >= 200 (v5.7.34 fixed; was level*100) (while loop) — correct. */
 var SHOP_CLOTHES = [
   {id:"helmet",     name:"Crimson Knight's Helmet",       sub:"S-rank · Phys Dmg -20% · VIT +20 · STR +20", price:250, photo:"item-helmet.webp", slot:"head"},
   {id:"chestplate", name:"High-Rank Knight's Chestplate", sub:"Phys Dmg -7%",  price:500, photo:"item-chestplate.webp", slot:"chest"},
@@ -1486,11 +1486,11 @@ function saveGame(){
 }
 // v5.7.25: the v5.7.0 "one-time migration" fixMistakenLevelV570() is
 // DELETED (function + both calls below). It ran on EVERY loadGame()
-// and forced Level 2 + XP<100 back to Level 1 — but a legitimate fresh
-// Level 2 ALWAYS has XP<100 (the leftover after gainXp subtracts 100),
+// and forced Level 2 + XP<200 back to Level 1 — but a legitimate fresh
+// Level 2 ALWAYS has XP<200 (the leftover after gainXp subtracts 200),
 // so it reverted EVERY earned Level 2 on the next load. The boss earned
 // Level 2 twice (Nov 9, and today 97+10=107 XP) and lost it twice.
-// gainXp is audited correct (levels only when xp >= level*100), so no
+// gainXp is audited correct (levels only when xp >= 200; v5.7.34 fixed, was level*100), so no
 // migration is needed at all.
 // v5.7.25: restore the stolen Level 2 (one-time, idempotent). Proof he
 // reached Level 2: gainXp sets state.rewardLevel = state.level on every
@@ -1498,7 +1498,7 @@ function saveGame(){
 // state.totalXp counts all XP ever earned, net of declines. Either
 // signal is enough. XP untouched. Once level is 2 again, false.
 function restoreStolenLevelV5725(){
-  if(state.level===1 && ((state.rewardLevel||0)>=2 || (state.totalXp||0)>=100)){
+  if(state.level===1 && ((state.rewardLevel||0)>=2 || (state.totalXp||0)>=200)){ // v5.7.34: Level 2 now needs 200 total XP (was 100 under level*100)
     state.level=2; return true;
   }
   return false;
@@ -1655,7 +1655,7 @@ function ensureFreshDay(){
   renderAll();
 }
 
-function xpNeeded(level){ return level*100; }
+function xpNeeded(level){ return 200; } // v5.7.34: FIXED 200 XP per level-up at EVERY level (boss 2026-11-22: "huleem level sicamir 200 yihuun") — was level*100. All bar/level-up sites call this, so one change covers display + trigger.
 function rankFor(level){
   if(level>=60) return {r:"SS", t:"Shadow Monarch"};
   if(level>=30) return {r:"S+", t:"Wolf Assassin"};
