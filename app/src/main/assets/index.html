@@ -1142,6 +1142,17 @@
         <span id="alarmStatus">Rings like a clock alarm — sound + vibration on time.</span>
       </div>
 
+      <!-- v5.7.36 (boss, 2026-11-24): "Alarms armed" diagnostic — the
+           last time the alarm chain was re-armed (app open, boot,
+           update, watchdog, WorkManager 15-min tick, alarm delivery)
+           + the next alarm, so a future miss is diagnosable from a
+           screenshot. Filled by renderNotif() from the Java bridge. -->
+      <div class="notif-line">
+        <span>🛡️</span>
+        <span class="mini-check">✓</span>
+        <span id="alarmArmedStatus">Alarms armed ✓ · next alarm —</span>
+      </div>
+
       <!-- v5.7.21: board pop-up permission ("Display over other apps").
            The v5.7.20 direct launch is BLOCKED without it — an alarm
            then only shows a small notification and the board never
@@ -2056,6 +2067,21 @@ function renderNotif(){
     if(hasBridge() && window.AndroidBridge.alarmSoundName){
       var nm = window.AndroidBridge.alarmSoundName();
       var el = $("alarmSoundName"); if(el && nm) el.textContent = nm;
+    }
+  }catch(e){}
+  // v5.7.36: "Alarms armed ✓ · next alarm 1:35 PM · re-armed 6:42 PM" —
+  // last re-arm (WorkManager / watchdog / app open) + next alarm, so a
+  // future miss is diagnosable from a screenshot. renderNotif runs on
+  // every page load, so the line is fresh each time he opens the app.
+  try{
+    var aas = $("alarmArmedStatus");
+    if(aas){
+      if(hasBridge() && window.AndroidBridge.alarmStatus){
+        var s = window.AndroidBridge.alarmStatus();
+        if(s) aas.textContent = s;
+      } else {
+        aas.textContent = "Alarms work only in the app (APK) — not on the website.";
+      }
     }
   }catch(e){}
   // v5.7.21: board pop-up permission state ("Display over other

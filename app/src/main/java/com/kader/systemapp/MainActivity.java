@@ -117,6 +117,23 @@ public class MainActivity extends Activity {
         // Arm the daily quest reminders (QuestReceiver)
         QuestReceiver.scheduleAll(this);
 
+        // v5.7.36 (boss, 2026-11-24): WorkManager 15-min re-arm — the
+        // alarm chain dies on an app update or a HiOS kill/hibernation
+        // and never self-heals (Deep Study 13:35 missed Nov 23 + Nov 24,
+        // Isha 19:10 missed Nov 24), because HiOS often never delivers
+        // MY_PACKAGE_REPLACED and the watchdog dies too. WorkManager
+        // periodic work is restored by the system across app updates
+        // even if the app is never opened. KEEP: enqueue once, never
+        // replace — a second enqueue would only reset the 15-min clock.
+        try {
+            androidx.work.PeriodicWorkRequest rearmRequest =
+                    new androidx.work.PeriodicWorkRequest.Builder(
+                            AlarmRearmWorker.class, 15, java.util.concurrent.TimeUnit.MINUTES)
+                            .build();
+            androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                    "alarm-rearm", androidx.work.ExistingPeriodicWorkPolicy.KEEP, rearmRequest);
+        } catch (Exception ignored) {}
+
         // v4.7: HiOS can defer even setAlarmClock alarms while the app is
         // frozen in the background, until the user opens the phone — that
         // is the other way an alarm can arrive late. Ask ONCE to whitelist
@@ -544,6 +561,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String alarmSoundName() {
             return QuestReceiver.alarmSoundName(MainActivity.this);
+        }
+
+        // v5.7.36: §6 "Alarms armed" line — last re-arm + next alarm, so
+        // a future miss is diagnosable from a screenshot. The web app
+        // calls this from renderNotif() (same pattern as alarmSoundName).
+        @JavascriptInterface
+        public String alarmStatus() {
+            return QuestReceiver.alarmStatusLine(MainActivity.this);
         }
     }
 

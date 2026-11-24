@@ -384,6 +384,15 @@ public class QuestReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
+        // v5.7.36: stamp the re-arm time FIRST — every scheduleAll call
+        // (app open, boot, update, watchdog, WorkManager tick, alarm
+        // delivery) refreshes it, so the §6 "Alarms armed" line always
+        // shows how recently the chain was armed. A stale stamp on a
+        // screenshot after a missed alarm proves the chain was dead.
+        try {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .edit().putLong(KEY_LAST_REARM, System.currentTimeMillis()).apply();
+        } catch (Exception ignored) {}
         // v5.7.16 (2026-11-11): ARM FIRST, cancel stale codes AFTER.
         // v5.4.1-v5.7.15 cancelled EVERY old quest alarm first and then
         // re-armed — if the process was killed mid-way (exactly what an
@@ -800,6 +809,13 @@ public class QuestReceiver extends BroadcastReceiver {
     private static final String PREFS = "solo_leveling_prefs";
     private static final String KEY_SOUND = "alarm_sound_uri";
 
+    // v5.7.36 (boss, 2026-11-24): last re-arm timestamp — recorded in
+    // SharedPreferences on every scheduleAll() call (app open, boot,
+    // update, watchdog, WorkManager tick, alarm delivery), so the §6
+    // "Alarms armed" line can show WHEN the chain was last armed and a
+    // future miss is diagnosable from a screenshot.
+    private static final String KEY_LAST_REARM = "last_alarm_rearm_ms";
+
     // v5.7.30 (boss, 2026-11-20): today's decided items — recorded
     // in SharedPreferences when an ACCEPT/DECLINE lands (MainActivity
     // bridge, from the web app's decideQuest), so the receiver can
@@ -933,6 +949,71 @@ public class QuestReceiver extends BroadcastReceiver {
             }
         } catch (Exception ignored) {}
         return "Default alarm";
+    }
+
+    // v5.7.36: §6 "Alarms armed" diagnostic line — the next quest alarm
+    // after now (same day-rules + roll-forward as scheduleAll) and the
+    // last time the chain was re-armed, so a future miss is diagnosable
+    // from a screenshot ("Alarms armed ✓ · next alarm 1:35 PM ·
+    // re-armed 6:42 PM"). Times are 12-hour, like the rest of the app.
+    private static String fmt12Label(Calendar c) {
+        int h = c.get(Calendar.HOUR_OF_DAY);
+        int m = c.get(Calendar.MINUTE);
+        String ampm = h >= 12 ? "PM" : "AM";
+        int h12 = h % 12;
+        if (h12 == 0) h12 = 12;
+        return h12 + ":" + (m < 10 ? "0" + m : "" + m) + " " + ampm;
+    }
+
+    /** The next quest alarm after now, as "1:35 PM" — same day-rules
+     * and roll-forward as scheduleAll, so it always names a real
+     * armed alarm (today, else the next allowed day). */
+    public static String nextAlarmLabel() {
+        long best = Long.MAX_VALUE;
+        for (String[] q : QUESTS) {
+            int hour = Integer.parseInt(q[1].substring(0, 2));
+            int minute = Integer.parseInt(q[1].substring(3, 5));
+            Calendar cal = Calendar.getInstance();
+            while (!isAllowedOn(cal, q[0])) {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+            }
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, minute);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
+                do {
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                } while (!isAllowedOn(cal, q[0]));
+            }
+            if (cal.getTimeInMillis() < best) best = cal.getTimeInMillis();
+        }
+        if (best == Long.MAX_VALUE) return "";
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(best);
+        return fmt12Label(c);
+    }
+
+    /** When the alarm chain was last re-armed, as "6:42 PM" — or
+     * "never" when scheduleAll has never run on this install. */
+    public static String lastRearmLabel(Context context) {
+        try {
+            long ms = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .getLong(KEY_LAST_REARM, 0);
+            if (ms <= 0) return "never";
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(ms);
+            return fmt12Label(c);
+        } catch (Exception e) {
+            return "never";
+        }
+    }
+
+    /** One line for the §6 alarm box: "Alarms armed ✓ · next alarm
+     * 1:35 PM · re-armed 6:42 PM". */
+    public static String alarmStatusLine(Context context) {
+        return "Alarms armed ✓ · next alarm " + nextAlarmLabel()
+                + " · re-armed " + lastRearmLabel(context);
     }
 
     // Save the picked sound and rebuild the channel with it — a
