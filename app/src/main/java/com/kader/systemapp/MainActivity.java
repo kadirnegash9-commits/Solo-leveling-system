@@ -117,22 +117,16 @@ public class MainActivity extends Activity {
         // Arm the daily quest reminders (QuestReceiver)
         QuestReceiver.scheduleAll(this);
 
-        // v5.7.36 (boss, 2026-11-24): WorkManager 15-min re-arm — the
-        // alarm chain dies on an app update or a HiOS kill/hibernation
-        // and never self-heals (Deep Study 13:35 missed Nov 23 + Nov 24,
-        // Isha 19:10 missed Nov 24), because HiOS often never delivers
-        // MY_PACKAGE_REPLACED and the watchdog dies too. WorkManager
-        // periodic work is restored by the system across app updates
-        // even if the app is never opened. KEEP: enqueue once, never
-        // replace — a second enqueue would only reset the 15-min clock.
-        try {
-            androidx.work.PeriodicWorkRequest rearmRequest =
-                    new androidx.work.PeriodicWorkRequest.Builder(
-                            AlarmRearmWorker.class, 15, java.util.concurrent.TimeUnit.MINUTES)
-                            .build();
-            androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                    "alarm-rearm", androidx.work.ExistingPeriodicWorkPolicy.KEEP, rearmRequest);
-        } catch (Exception ignored) {}
+        // v5.7.36 (boss, 2026-11-24) + v5.7.37 (boss, 2026-11-27):
+        // WorkManager 15-min re-arm — the alarm chain dies on an app
+        // update or a HiOS kill/hibernation and never self-heals
+        // (Deep Study 13:35 missed Nov 23 + Nov 24, Isha 19:10 missed
+        // Nov 24; Nov 26 Deep Study / Notes / PUBG all missed while
+        // morning alarms rang). v5.7.37 enqueues from EVERY entry
+        // point (onCreate, onResume, boot, update, watchdog) via the
+        // shared AlarmRearmWorker.enqueueRearmWork helper — KEEP, so a
+        // second enqueue never resets the 15-min clock.
+        AlarmRearmWorker.enqueueRearmWork(this);
 
         // v4.7: HiOS can defer even setAlarmClock alarms while the app is
         // frozen in the background, until the user opens the phone — that
@@ -150,6 +144,10 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         QuestReceiver.scheduleAll(this);
+        // v5.7.37: re-enqueue the WorkManager re-arm on every
+        // foreground too — if HiOS dropped the periodic work, the
+        // next app open restores it (KEEP: never resets the clock).
+        AlarmRearmWorker.enqueueRearmWork(this);
         // v5.7.21: the board can only pop up on an alarm once
         // "Display over other apps" is granted (see below).
         askOverlayPermission();

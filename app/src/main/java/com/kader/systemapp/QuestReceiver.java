@@ -131,8 +131,12 @@ public class QuestReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent == null) return;
         // Phone restarted: re-arm all quest alarms, no notification.
+        // v5.7.37: also re-enqueue the WorkManager re-arm — a reboot
+        // can drop the periodic work, and boot is the earliest chance
+        // to restore it without any app open.
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             scheduleAll(context);
+            AlarmRearmWorker.enqueueRearmWork(context);
             return;
         }
         // v5.6.4: app updated — re-arm all quest alarms (and the
@@ -140,14 +144,22 @@ public class QuestReceiver extends BroadcastReceiver {
         // chain stays dead until the app is opened (this is how Fajr
         // 05:00 + Gym 06:00 were lost on Mon 2026-11-09 after 3
         // updates Sunday evening).
+        // v5.7.37: also re-enqueue the WorkManager re-arm here — HiOS
+        // often never delivers MY_PACKAGE_REPLACED at all, and when it
+        // does, the update may have dropped the periodic work too.
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) {
             scheduleAll(context);
+            AlarmRearmWorker.enqueueRearmWork(context);
             return;
         }
         // v5.6.4 watchdog: re-arm any missing quest alarm (scheduleAll
         // also re-arms the watchdog itself, so the check repeats).
+        // v5.7.37: also re-enqueue the WorkManager re-arm — the
+        // watchdog is the chain's own self-repair, so it restores the
+        // periodic work whenever it fires.
         if (ACTION_WATCHDOG.equals(intent.getAction())) {
             scheduleAll(context);
+            AlarmRearmWorker.enqueueRearmWork(context);
             return;
         }
         // Alarm notification swiped away: the alarm is dismissed — stop
