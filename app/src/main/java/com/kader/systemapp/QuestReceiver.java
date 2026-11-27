@@ -47,9 +47,10 @@ import java.util.Locale;
  * Saturday rule (boss, v5.7.29 2026-11-19): on Saturday only the 5
  * prayers (subhi/zuhr/asr/maghrib/isha) + Active Rest reminders fire —
  * all other quests are excused that day, their alarms move to Sunday.
- * Day rules (boss, v5.7.29): Morning Workout Sun-Fri; Outdoor Running
- * Sun/Tue/Thu; Home Resistance Band Workout + Quran Mon/Wed/Fri;
- * Active Rest Saturday only; Shower/Breakfast + School Mon-Fri.
+ * Day rules (boss, v5.7.29; v5.7.38 correction 2026-11-27 — boss confirmed
+ * "Awu tikikkil siraawu"): Morning Workout Sun/Tue/Thu ONLY (Saitama);
+ * Outdoor Running Sun/Tue/Thu; Home Resistance Band Workout + Quran
+ * Mon/Wed/Fri; Active Rest Saturday only; Shower/Breakfast + School Mon-Fri.
  * v5.7.20 (boss, 2026-11-11): the v5.7.19 middle fix is CONFIRMED
  * WORKING (his video shows the board in the middle with the v5.7.19
  * marker), but a REAL quest alarm (Asr 15:35) did NOT pop the board
@@ -364,7 +365,11 @@ public class QuestReceiver extends BroadcastReceiver {
     }
 
     // v5.7.29 day rules (boss's routine — 16 quests since v5.7.32):
-    // - workout (Morning Workout): Sun-Fri (not Saturday)
+    // v5.7.38 (boss 2026-11-27, confirmed "Awu tikikkil siraawu"):
+    // workout (Morning Workout, Saitama) is Sun/Tue/Thu ONLY — Fri
+    // Nov 27 the app wrongly showed it on a Resistance day, next to
+    // the 6:00 bandworkout. Mon/Wed/Fri = bandworkout only.
+    // - workout (Morning Workout): Sun/Tue/Thu
     // - run (Outdoor Running): Sun/Tue/Thu
     // - bandworkout (Home Resistance Band + Quran): Mon/Wed/Fri
     // - activerest: Saturday only
@@ -376,7 +381,10 @@ public class QuestReceiver extends BroadcastReceiver {
             return isSaturdayAllowed(id);
         }
         if ("activerest".equals(id)) return false; // Saturday only
-        if ("workout".equals(id)) return true;     // Sun-Fri (Sat handled above)
+        if ("workout".equals(id)) {                // v5.7.38: Sun/Tue/Thu only
+            return dow == Calendar.SUNDAY || dow == Calendar.TUESDAY
+                    || dow == Calendar.THURSDAY;
+        }
         if ("run".equals(id)) {
             return dow == Calendar.SUNDAY || dow == Calendar.TUESDAY
                     || dow == Calendar.THURSDAY;

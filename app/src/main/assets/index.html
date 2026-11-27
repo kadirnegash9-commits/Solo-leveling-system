@@ -1315,7 +1315,7 @@ function showSystemToast(msg) {
    Morning Workout (push/sit/squat) + Outdoor Running (km). */
 var BASE_QUESTS = [
   {id:"subhi", time:"05:00", end:"05:30", title:"Subhi Prayer", desc:"First prayer of the day, on time", xp:5, cat:"faith", label:"Faith"},
-  {id:"workout", time:"05:30", end:"06:00", title:"Morning Workout - Push-ups, Squats & Resistance Bands", desc:"Sun · Mon · Tue · Wed · Thu · Fri", xp:10, cat:"str", label:"Strength", saitama:true, days:"Sun,Mon,Tue,Wed,Thu,Fri"},
+  {id:"workout", time:"05:30", end:"06:00", title:"Morning Workout - Push-ups, Squats & Resistance Bands", desc:"Sun · Tue · Thu", xp:10, cat:"str", label:"Strength", saitama:true, days:"Sun,Tue,Thu"}, // v5.7.38 (boss 2026-11-27, confirmed): Saitama Sun/Tue/Thu ONLY — was Sun-Fri, wrongly showed on Resistance days (Fri Nov 27)
   {id:"run", time:"06:00", end:"06:45", title:"Outdoor Running", desc:"Sun · Tue · Thu · 10km run", xp:10, cat:"str", label:"Strength", saitama:true, days:"Sun,Tue,Thu"},
   {id:"bandworkout", time:"06:00", end:"06:45", title:"Home Resistance Band Workout & Quran", desc:"Mon · Wed · Fri · resistance bands + Quran", xp:10, cat:"str", label:"Strength", days:"Mon,Wed,Fri"},
   {id:"activerest", time:"05:30", end:"06:30", title:"Active Rest & Light Stretching", desc:"Saturday only · light stretching", xp:5, cat:"str", label:"Strength", saturdayOnly:true},
