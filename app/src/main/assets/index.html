@@ -1585,7 +1585,14 @@ function loadGame(){
       var merged = [];
       BASE_QUESTS.forEach(function(b){
         var q = byId[b.id];
-        if(q){ q.title = b.title; q.desc = b.desc; q.label = b.label; q.xp = b.xp; q.time = b.time; q.end = b.end; merged.push(q); }
+        // v5.7.39 (boss 2026-11-27): v5.7.38 changed workout days to Sun/Tue/Thu
+        // but the phone STILL showed it on Fri Nov 27 — the saved quest kept
+        // its OLD days ("Sun,Mon,Tue,Wed,Thu,Fri") because this merge only
+        // copied title/desc/label/xp/time/end. Day-rule fields MUST come from
+        // BASE too, and a stale flag BASE no longer has must be DELETED, so
+        // an old rule can never survive a future day change. cat is on every
+        // BASE quest, so it is always copied.
+        if(q){ q.title = b.title; q.desc = b.desc; q.label = b.label; q.xp = b.xp; q.time = b.time; q.end = b.end; q.cat = b.cat; if(b.days !== undefined) q.days = b.days; else delete q.days; if(b.weekdaysOnly !== undefined) q.weekdaysOnly = b.weekdaysOnly; else delete q.weekdaysOnly; if(b.saturdayOnly !== undefined) q.saturdayOnly = b.saturdayOnly; else delete q.saturdayOnly; if(b.saitama !== undefined) q.saitama = b.saitama; else delete q.saitama; merged.push(q); }
         else { merged.push(JSON.parse(JSON.stringify(b))); }
       });
       quests.forEach(function(q){ if(q && q.id && q.id.indexOf("forge")===0) merged.push(q); });

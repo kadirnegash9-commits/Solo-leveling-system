@@ -133,8 +133,8 @@ android {
         applicationId 'com.kader.systemapp'
         minSdk 24
         targetSdk 34
-        versionCode 89
-        versionName '5.7.38'
+        versionCode 90
+        versionName '5.7.39'
     }
 
     signingConfigs {
